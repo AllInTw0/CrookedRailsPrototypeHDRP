@@ -52,8 +52,9 @@ public class Train : MonoBehaviour
                     speed = 0;
             }
         }
-        
-        progress += speed * Time.deltaTime;
+
+        float distanceTravelled = speed * Time.deltaTime;
+        progress += distanceTravelled;
 
         if (progress < consistLength && speed < 0)
         {
@@ -65,7 +66,7 @@ public class Train : MonoBehaviour
         foreach (var railCar in consist)
         {
             railCarProgress -= railCar.frontLength;
-            railCar.UpdateProgress(railCarProgress);
+            railCar.UpdateRailCar(railCarProgress, distanceTravelled);
             railCarProgress -= railCar.backLength;
             railCarProgress -= couplerLength;
         }

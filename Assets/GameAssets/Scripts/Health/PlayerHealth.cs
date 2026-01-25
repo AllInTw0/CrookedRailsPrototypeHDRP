@@ -24,6 +24,7 @@ public class PlayerHealth : Health
     {
         active = this;
         isAlive = true;
+        AddHealthToGlobalList();
     }
 
     private void Update()

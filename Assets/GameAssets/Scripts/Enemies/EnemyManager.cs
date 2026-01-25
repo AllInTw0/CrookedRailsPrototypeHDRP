@@ -27,16 +27,27 @@ public class EnemyManager : MonoBehaviour
     [Header("Spawning Interval")] 
     [SerializeField]
     private float spawnCoolDown;
-    
+    [Header("Enemy Code Refrences")]
+    [SerializeField]
+    public LayerMask groundLayer;
+    [SerializeField]
+    public float pathFindingTriggerMovedDistance = 0.35f;
+
     //Run Time
-    private List<EnemyBehaviour> enemyList = new List<EnemyBehaviour>();
-    
+    private List<Enemy> enemyList = new List<Enemy>();
+    public List<Health>[] healthTypeArray;
+
     private float spawnCoolDownTime;
     private int j;
 
-    private void Start()
+    private void Awake()
     {
         active = this;
+        healthTypeArray = new List<Health>[System.Enum.GetValues(typeof(HealthType)).Length];
+        for (int i = 0; i < healthTypeArray.Length; i++)
+        {
+            healthTypeArray[i] = new List<Health>();
+        }
         j = enemyCount_Debug;
         InvokeRepeating(nameof(UpdateEnemyBehaviour),0f,behaviourRefreshRate);
     }
@@ -53,7 +64,7 @@ public class EnemyManager : MonoBehaviour
     {
         if (j > 0)
         {
-            enemyList.Add(Instantiate(enemyPrefab, new Vector3(Random.Range(-3f,3f),Random.Range(0f,6f),Random.Range(-3f,3f)), Quaternion.identity).transform.GetComponent<EnemyBehaviour>());
+            enemyList.Add(Instantiate(enemyPrefab, new Vector3(Random.Range(-3f,3f),Random.Range(0f,6f),Random.Range(-3f,3f)), Quaternion.identity).transform.GetComponent<Enemy>());
             j--;
         }
 
@@ -64,7 +75,7 @@ public class EnemyManager : MonoBehaviour
 
         if (enemyList.Count < targetEnemyCount_Debug && j <= 0)
         {
-            enemyList.Add(Instantiate(enemyPrefab, new Vector3(Random.Range(-3f,3f),Random.Range(0f,6f),Random.Range(-3f,3f)), Quaternion.identity).transform.GetComponent<EnemyBehaviour>());
+            enemyList.Add(Instantiate(enemyPrefab, new Vector3(Random.Range(-3f,3f),Random.Range(0f,6f),Random.Range(-3f,3f)), Quaternion.identity).transform.GetComponent<Enemy>());
         }
         
         //Spawning
@@ -102,12 +113,12 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
-    public void RemoveEnemy(EnemyBehaviour enemy)
+    public void RemoveEnemy(Enemy enemy)
     {
         enemyList.Remove(enemy);
     }
 
-    public EnemyBehaviour[] GetEnemies()
+    public Enemy[] GetEnemies()
     {
         return enemyList.ToArray();
     }
@@ -115,6 +126,6 @@ public class EnemyManager : MonoBehaviour
     public void SpawnEnemy(GameObject prefab, Vector3 position, Quaternion rotation)
     {
         GameObject enemy = Instantiate(enemyPrefab, position, rotation);
-        enemyList.Add(enemy.transform.GetComponent<EnemyBehaviour>());
+        enemyList.Add(enemy.transform.GetComponent<Enemy>());
     }
 }

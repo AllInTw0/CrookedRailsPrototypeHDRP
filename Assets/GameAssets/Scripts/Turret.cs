@@ -36,7 +36,7 @@ public class Turret : MonoBehaviour
     //Run time
     private bool active;
     private float coolDown;
-    private EnemyBehaviour target;
+    private Enemy target;
 
     private void Update()
     {
@@ -48,7 +48,7 @@ public class Turret : MonoBehaviour
         //Rotate
         Quaternion targetRot;
         if(target != null)
-            targetRot = Quaternion.LookRotation(target.center.position - transform.position);
+            targetRot = Quaternion.LookRotation(target.centerTransform.position - transform.position);
         else
             targetRot = transform.rotation;
         
@@ -58,7 +58,7 @@ public class Turret : MonoBehaviour
         coolDown -= Time.deltaTime;
         if (target != null)
         {
-            if (coolDown <= 0 && Vector3.Angle(rotateTransform.forward, (target.center.position - transform.position).normalized) <= maxAngle)
+            if (coolDown <= 0 && Vector3.Angle(rotateTransform.forward, (target.centerTransform.position - transform.position).normalized) <= maxAngle)
             {
                 BulletManager.active.ShootBullets(bulletSpawnTransform.position, bulletSpawnTransform.forward, 1, damage, 0f);
                 SoundManager.active.PlayAtPos(bulletSpawnTransform.position, shootSound);
@@ -67,17 +67,17 @@ public class Turret : MonoBehaviour
         }
     }
 
-    private EnemyBehaviour GetClosestVisibleEnemy()
+    private Enemy GetClosestVisibleEnemy()
     {
         float currentMinDistance = float.PositiveInfinity;
-        EnemyBehaviour currentClosest = null;
-        foreach (EnemyBehaviour enemy in EnemyManager.active.GetEnemies())
+        Enemy currentClosest = null;
+        foreach (Enemy enemy in EnemyManager.active.GetEnemies())
         {
-            float distance = Vector3.Distance(transform.position, enemy.center.position);
+            float distance = Vector3.Distance(transform.position, enemy.centerTransform.position);
             if (distance < currentMinDistance)
             {
                 //Check if visible
-                if (Physics.Raycast(transform.position, enemy.center.position - transform.position, out RaycastHit hit, range))
+                if (Physics.Raycast(transform.position, enemy.centerTransform.position - transform.position, out RaycastHit hit, range))
                 {
                     //Debug.Log(hit.transform);
                     if (hit.transform == enemy.transform)

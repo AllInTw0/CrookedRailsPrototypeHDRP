@@ -29,7 +29,7 @@ public class PlayerInventory : MonoBehaviour
         // 1 if no tool is equipped
         selectIndex += (int)InputManager.active.scrollAction.ReadValue<float>();
         UpdateSelectIndexInterval();
-        Debug.Log("Current selectIndex: "+selectIndex);
+        //Debug.Log("Current selectIndex: "+selectIndex);
         
         //Dropping Items
         if (InputManager.active.dropAction.triggered && (PlayerInventory.active.items.Count > 0 || PlayerInventory.active.tool != null))

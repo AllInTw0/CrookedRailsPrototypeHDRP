@@ -1,0 +1,24 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+[CreateAssetMenu(fileName = "EnemySO", menuName = "ScriptableObjects/EnemySO", order = 1)]
+public class EnemySO : ScriptableObject
+{
+    [System.Serializable]
+    public class HealthWeightParams
+    {
+        public HealthType healthType;
+        public float importanceWeight;
+    }
+
+    [Header("Speed")]
+    public float speed = 1f;
+    public float rotationSpeed = 1f;
+
+    [Header("Sight")]
+    public List<HealthWeightParams> HealthWeightParamsList = new List<HealthWeightParams>();
+    public float sightDistance = 5f;
+
+    [Header("Misc")]
+    public float gravityForce = 10f;
+}

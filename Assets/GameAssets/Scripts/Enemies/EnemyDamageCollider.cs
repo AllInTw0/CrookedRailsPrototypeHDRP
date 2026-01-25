@@ -6,7 +6,7 @@ using UnityEngine;
 public class EnemyDamageCollider : MonoBehaviour
 {
     [SerializeField] 
-    private EnemyBehaviour enemyBehaviour;
+    private Enemy enemyBehaviour;
     [SerializeField] 
     private float coolDown = 0.2f;
     [SerializeField] 

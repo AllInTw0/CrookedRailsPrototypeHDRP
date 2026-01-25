@@ -4,7 +4,7 @@ public class EnemyHealth : Health
 {
     [Header("Enemy")]
     [SerializeField] 
-    private EnemyBehaviour behaviour;
+    private Enemy behaviour;
     [SerializeField] 
     private float destroyDelay;
 

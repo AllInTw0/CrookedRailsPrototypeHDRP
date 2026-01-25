@@ -157,7 +157,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d717c5d8b6493a43bb0ed6a08bd55ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDamageCollider
-  enemyBehaviour: {fileID: 337134051213969076}
+  enemyBehaviour: {fileID: 0}
   coolDown: 0.6
   freezeTime: 0.4
   attackDelay: 0.225
@@ -264,8 +264,9 @@ GameObject:
   - component: {fileID: 1560277106313700146}
   - component: {fileID: 7477618007067767545}
   - component: {fileID: 4171352187836740491}
-  - component: {fileID: 337134051213969076}
   - component: {fileID: 7106498880292165457}
+  - component: {fileID: 2535033255997809392}
+  - component: {fileID: -5811559044544727051}
   m_Layer: 11
   m_Name: Enemy
   m_TagString: Untagged
@@ -342,26 +343,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!114 &337134051213969076
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6631932380828592750}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 35f805ed920d24a4cbaf00e32e66d7a8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyBehaviour
-  speed: 2
-  rotationSpeed: 3.5
-  gravityForce: 10
-  navTriggerMovedDistance: 0.25
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 1
-  center: {fileID: 172228222760864834}
 --- !u!114 &7106498880292165457
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -374,10 +355,46 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 425724faff24b0540864d35df4f01d67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
+  healthType: 3
   health: 25
   maxHealth: 25
-  behaviour: {fileID: 337134051213969076}
+  audioOnDamageTaken: 
+  behaviour: {fileID: 2535033255997809392}
   destroyDelay: 0.25
+--- !u!114 &2535033255997809392
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6631932380828592750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 913c63a61ff2c014aae2c50b1adec2fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GroundEnemy
+  enemyInfo: {fileID: 11400000, guid: fb00dc0c533df4d4a9b006ca29b43a84, type: 2}
+  centerTransform: {fileID: 172228222760864834}
+  health: {fileID: 7106498880292165457}
+  currentNavigationType: 0
+  currentTargetType: 0
+  transformPos: {x: 0, y: 0, z: 0}
+--- !u!208 &-5811559044544727051
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6631932380828592750}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.5, y: 1.25, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 0
+  m_Center: {x: 0, y: 1, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!1 &8292637951860041145
 GameObject:
   m_ObjectHideFlags: 0

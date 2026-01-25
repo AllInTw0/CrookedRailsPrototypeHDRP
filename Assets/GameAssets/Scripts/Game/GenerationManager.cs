@@ -81,7 +81,7 @@ public class GenerationManager : MonoBehaviour
         currentGeneratedDistance += TrackManager.active.CreateTrackSection(lastPoint, nextPoint).length;
         lastPoint = nextPoint;
         
-        //navMeshSurface.BuildNavMesh();
+        navMeshSurface.BuildNavMesh();
     }
     private void GenerateStart()
     {

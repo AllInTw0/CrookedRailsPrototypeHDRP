@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class RailCar : MonoBehaviour
@@ -7,18 +8,17 @@ public class RailCar : MonoBehaviour
     public float frontLength = 5f;
     public float backLength = 5f;
     public float wheelLength = 2f;
-    
+    public List<RunningGear> railCarRunningGearList;
+
     //Run Time
     [NonSerialized]
     public TrackSection currentFrontSection;
-    public void UpdateProgress(float value)
+    public void UpdateRailCar(float progress, float distanceTravelled)
     {
-        TrackManager.active.GetTrackPositionFromProgress(value + wheelLength*0.5f, out TrackSection sectionFront, out Vector3 posFront);
-        TrackManager.active.GetTrackPositionFromProgress(value - wheelLength*0.5f, out TrackSection sectionBack, out Vector3 posBack);
-        
-        currentFrontSection = sectionFront;
-        
-        transform.position = (posFront + posBack) * 0.5f;
-        transform.LookAt(posFront);
+        foreach (RunningGear runningGear in railCarRunningGearList)
+        {
+            currentFrontSection = runningGear.UpdateRunningGearPosition(progress);
+            runningGear.UpdateRunningGearRotation(distanceTravelled);
+        }
     }
 }

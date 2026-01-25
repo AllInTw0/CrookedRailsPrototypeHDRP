@@ -36,7 +36,7 @@ public class MovingPlatformManager : MonoBehaviour
 
     private void LateUpdate()
     {
-        Debug.Log("Entries: " + entries.Count);
+        //Debug.Log("Entries: " + entries.Count);
         foreach (var entry in entries)
         {
             //Position

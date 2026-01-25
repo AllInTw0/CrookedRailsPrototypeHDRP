@@ -89,6 +89,23 @@ public class TrackManager : MonoBehaviour
             position = Vector3.zero;
         }
     }
+    public void GetTrackPositionAndDirVectorFromProgress(float progress, out TrackSection section, out Vector3 position, out Vector3 dir)
+    {
+        GetTrackSectionFromProgress(progress, out TrackSection _section, out float trackSectionProgress);
+        section = _section;
+
+        if (section != null)
+        {
+            position = GetPathPosition(section.path, trackSectionProgress);
+            dir = GetPathDirectionVector(section, trackSectionProgress);
+        }
+        else
+        {
+            Debug.LogWarning("Couldn't Get Track Section, Pos And Dir: " + progress);
+            position = Vector3.zero;
+            dir = Vector3.forward;
+        }
+    }
     public void GetTrackSectionFromProgress(float progress, out TrackSection section, out float trackSectionProgress)
     {
         for (int i = 0; i < trackSectionList.Count; i++)
@@ -117,14 +134,14 @@ public class TrackManager : MonoBehaviour
     {
         for (int i = 1; i < path.Count; i++)
         {
-            if (path[i].distance >= progress)
+            if (path[i].distance >= progress || i == path.Count - 1)
             {
                 float time = (progress - path[i - 1].distance) / (path[i].distance - path[i - 1].distance);
                 return Vector3.Lerp(path[i - 1].position, path[i].position, time);
             }
         }
 
-        Debug.LogWarning("Couldn't Get Path Pos." + path + ", " + progress);
+        Debug.LogWarning("Couldn't Get Path Pos. " + path[^1].distance + " , " + progress);
         return Vector3.zero;
     }
     public static Vector3 GetPathDirectionVector(TrackSection section, float progress)

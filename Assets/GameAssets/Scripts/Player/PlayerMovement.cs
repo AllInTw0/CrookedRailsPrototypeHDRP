@@ -49,6 +49,13 @@ public class PlayerMovement : MonoBehaviour
     private LayerMask groundLayer;
     [SerializeField]
     private float gravityForce = 1f;
+    [Header("Step Detection")]
+    [SerializeField]
+    private float stepCheckLow;
+    [SerializeField]
+    private float stepCheckHigh;
+    [SerializeField]
+    private float stepCheckDistance;
     [Header("FootSteps")]
     [SerializeField]
     private float footStepDistance = 1f;
@@ -197,11 +204,11 @@ public class PlayerMovement : MonoBehaviour
             return;
         
         //Gravity
-        rb.AddForce(-groundNormal * gravityForce);
+        rb.AddForce(grounded ? -groundNormal * gravityForce * 0.15f : Vector3.down * gravityForce);
         
         //Movement
         Vector2 mag = FindVelRelativeToLook();
-        float xMag= mag.x, zMag = mag.y;
+        float xMag = mag.x, zMag = mag.y;
         
         Debug.DrawLine(transform.position + Vector3.up,transform.position + Vector3.up + new Vector3(xMag,0,zMag), Color.cyan);
         Debug.DrawLine(transform.position + Vector3.up,transform.position + Vector3.up + rb.linearVelocity, Color.green);
@@ -212,10 +219,12 @@ public class PlayerMovement : MonoBehaviour
         if (moveInput.y < 0 && zMag < -targetSpeed) moveInput.y  = 0;
         
         Vector3 targetVector = ((orientation.forward * moveInput.y) + (orientation.right * moveInput.x)).normalized;
-        Debug.DrawLine(transform.position + Vector3.up,transform.position + Vector3.up + Vector3.ProjectOnPlane(targetVector * acceleration,groundNormal), Color.red);
+        Vector3 projectedVector = Vector3.ProjectOnPlane(targetVector, groundNormal).normalized;
+
+        Debug.DrawLine(transform.position + Vector3.up, transform.position + Vector3.up + projectedVector * acceleration, grounded ? Color.beige : Color.red);
         
         
-        rb.AddForce(Vector3.ProjectOnPlane(targetVector * ((targetSpeed / walkingSpeed) * acceleration),groundNormal));
+        rb.AddForce(projectedVector * ((targetSpeed / walkingSpeed) * acceleration));
 
         if (grounded)
         {
@@ -243,8 +252,23 @@ public class PlayerMovement : MonoBehaviour
             //Counter movement
             if (moveInput != Vector2.zero && angleBetweenDirections > 90f)
             {
-                rb.AddForce(Vector3.ProjectOnPlane(targetVector * ((targetSpeed / walkingSpeed) * acceleration),groundNormal));
+                rb.AddForce(projectedVector * ((targetSpeed / walkingSpeed) * acceleration));
             }
+        }
+
+        //Step detection
+        if ((moveInput.x > 0 || moveInput.y > 0 ) && rb.linearVelocity.y < 0.1f)
+        {
+            if (Physics.Raycast(transform.position + new Vector3(0, stepCheckHigh, 0), projectedVector, stepCheckDistance, groundLayer) == false) 
+            {
+                if (Physics.Raycast(transform.position + new Vector3(0, stepCheckLow, 0), projectedVector, out RaycastHit hit, stepCheckDistance, groundLayer))
+                {
+                    transform.position += projectedVector * hit.distance + new Vector3(0, stepCheckHigh, 0);
+                    Debug.Log("Preformed step!");
+                }
+            }
+            Debug.DrawRay(transform.position + new Vector3(0,stepCheckLow,0), projectedVector.normalized * stepCheckDistance, Color.red);
+            Debug.DrawRay(transform.position + new Vector3(0, stepCheckHigh, 0), projectedVector.normalized * stepCheckDistance, Color.red);
         }
     }
     
@@ -273,7 +297,7 @@ public class PlayerMovement : MonoBehaviour
 
             if (groundAngle <= maxAngle)
             {
-                if(grounded == false)
+                if(grounded == false && rb.linearVelocity.y < -0.25f)
                     SoundManager.active.PlayAtPos(transform.position,"Land");
                 grounded = true;
                 
