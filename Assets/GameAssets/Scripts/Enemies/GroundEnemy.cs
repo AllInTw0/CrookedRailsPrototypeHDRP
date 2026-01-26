@@ -5,7 +5,7 @@ public class GroundEnemy : Enemy
 {
 
     //Behaviour
-    enum State
+    public enum State
     {
         Idle,
         Attacking,
@@ -30,12 +30,25 @@ public class GroundEnemy : Enemy
         switch (state)
         {
             case State.Idle:
+                //Pack handling
+                if(IsInPack() == false)
+                {
+                    foreach (EnemyPack pack in EnemyManager.active.activePackList)
+                    {
+                        float distance = Vector3.Distance(transformPos, pack.centerPos);
+                        if(distance <= pack.affectRadius)
+                        {
+                            SetTarget(pack, GetRandomOffset(pack.sizeRadius), 1f);
+                        }
+                    }
+                }
+
                 //Check for nearby targets
                 if (CheckForTargets(enemyInfo.sightDistance, out Health closestHealth))
                 {
-                    state = State.Attacking;
-                    SetTarget(closestHealth.transform, 1f);
-                    timmer = 0f;
+                    if (IsInPack()) targetPack.AngerPack(closestHealth.transform);
+                    else Anger(closestHealth.transform,5f);
+
                 }
                 else
                 {
@@ -46,11 +59,11 @@ public class GroundEnemy : Enemy
                     }
                     if (timmer <= 0)
                     {
-                        SetTarget(GetRandomPosition(4f), 1f);
-                        timmer = Random.Range(3f, 6f);
+                        if (IsInPack()) SetTarget(targetPack, GetRandomOffset(targetPack.sizeRadius), 1f);
+                        else SetTarget(GetRandomPosition(4f), 1f);
+                        timmer = Random.Range(1.5f, 6f);
                     }
                 }
-                
 
                 break;
             case State.Attacking:
@@ -58,8 +71,18 @@ public class GroundEnemy : Enemy
                 if (CheckForTargets(enemyInfo.sightDistance, out Health closestHealth1))
                 {
                     SetTarget(closestHealth1.transform, 1f);
+                    timmer = 5f;
                 }
-                break;
+                else
+                {
+                    timmer -= EnemyManager.active.behaviourRefreshRate;
+                    if(timmer <= 0)
+                    {
+                        state = State.Idle;
+
+                    }
+                }
+                    break;
             default:
                 break;
         }
@@ -71,8 +94,7 @@ public class GroundEnemy : Enemy
         int safety = 5;
         while (safety > 0)
         {
-            Vector2 randomDir = Random.insideUnitCircle * radius;
-            Vector3 samplePos = transformPos + new Vector3(randomDir.x, 0, randomDir.y);
+            Vector3 samplePos = transformPos + GetRandomOffset(radius);
 
             if (NavMesh.SamplePosition(samplePos,out NavMeshHit hit, radius, NavMesh.AllAreas))
             {
@@ -83,8 +105,12 @@ public class GroundEnemy : Enemy
         }
 
         Debug.LogWarning("Exeeded safety while loop limit");
-        Vector2 randomDir1 = Random.insideUnitCircle * radius;
-        return transformPos + new Vector3(randomDir1.x, 0, randomDir1.y);
+        return transformPos + GetRandomOffset(radius);
+    }
+    public Vector3 GetRandomOffset(float radius = 4f)
+    {
+        Vector2 randomDir = Random.insideUnitCircle * radius;
+        return new Vector3(randomDir.x, 0, randomDir.y);
     }
     public bool CheckForTargets(float maxDistance, out Health closestHealth)
     {
@@ -110,5 +136,19 @@ public class GroundEnemy : Enemy
         if (closestHealth)
             return true;
         return false;
+    }
+    public void Anger(Transform target, float intrestTime)
+    {
+        state = State.Attacking;
+        SetTarget(target, 1f);
+        timmer = intrestTime;
+    }
+    public void SetState(State state)
+    {
+        this.state = state;
+    }
+    public State GetState()
+    {
+        return state;
     }
 }

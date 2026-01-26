@@ -5,15 +5,13 @@ public class TrailingTruck : RunningGear
     [Header("LeadTruck")]
     public Transform traillingTruckTransform;
 
-    public override TrackSection UpdateRunningGearPosition(float progress)
+    public override void UpdateRunningGearPosition(float sectionProgress, TrackSection section)
     {
-        TrackManager.active.GetTrackPositionFromProgress(progress + wheelOffset, out TrackSection section, out Vector3 pos);
+        TrackManager.active.GetTrackPositionFromProgress(sectionProgress + wheelOffset, section, out Vector3 pos);
 
         Vector3 targetPos = NearestPointOnLine(traillingTruckTransform.position, traillingTruckTransform.position + traillingTruckTransform.right, pos);
         Vector3 localPos = traillingTruckTransform.parent.InverseTransformPoint(targetPos);
         traillingTruckTransform.localPosition = new Vector3(localPos.x, traillingTruckTransform.localPosition.y, traillingTruckTransform.localPosition.z);
-
-        return section;
     }
 
     public Vector3 NearestPointOnLine(Vector3 start, Vector3 end, Vector3 point)

@@ -19,6 +19,8 @@ public class TrackSection
     public Point pointA;
     public Point pointB;
     public List<PathPoint> path;
+    public TrackSection nextSection;
+    public TrackSection previousSection;
     public float length
     {
         get
@@ -40,6 +42,24 @@ public class TrackSection
     {
         associatedObjects.Add(obj);
     }
+    public void SetNextSection(TrackSection section)
+    {
+        nextSection = section;
+        section.previousSection = this;
+    }
+    public void SetPreviousSection(TrackSection section)
+    {
+        previousSection = section;
+        section.nextSection = this;
+    }
+    public TrackSection GetNextSection()
+    {
+        return nextSection;
+    }
+    public TrackSection GetPreviousSection()
+    {
+        return previousSection;
+    }
 }
 public class TrackManager : MonoBehaviour
 {
@@ -56,6 +76,8 @@ public class TrackManager : MonoBehaviour
     //Track Section Functions
     public TrackSection CreateTrackSection(Point pointA,Point pointB)
     {
+        //Dose not automaticlly find next/previous sections
+
         //Spline.DEBUG_DrawPointGizmos(pointA,60f);
         //Spline.DEBUG_DrawPointGizmos(pointB,60f);
         
@@ -74,53 +96,68 @@ public class TrackManager : MonoBehaviour
         return section;
     }
     //Functions with trackSectionList
-    public void GetTrackPositionFromProgress(float progress, out TrackSection section, out Vector3 position)
+    public void GetTrackPositionFromProgress(float sectionProgress, TrackSection section, out Vector3 position)
     {
-        GetTrackSectionFromProgress(progress, out TrackSection _section, out float trackSectionProgress);
-        section = _section;
-        
-        if (section != null)
+        if (GetTrackSectionFromProgress(sectionProgress, section, out TrackSection newSection, out float newSectionProgress))
         {
-            position = GetPathPosition(section.path, trackSectionProgress);
+            position = GetPathPosition(newSection.path, newSectionProgress);
         }
         else
         {
-            Debug.LogWarning("Couldn't Get Track Section And Pos: " + progress);
-            position = Vector3.zero;
+            Debug.LogWarning("End of track");
+            position = GetPathPosition(newSection.path, newSectionProgress);
         }
     }
-    public void GetTrackPositionAndDirVectorFromProgress(float progress, out TrackSection section, out Vector3 position, out Vector3 dir)
+    public void GetTrackPositionAndDirVectorFromProgress(float sectionProgress, TrackSection section, out Vector3 position, out Vector3 dir)
     {
-        GetTrackSectionFromProgress(progress, out TrackSection _section, out float trackSectionProgress);
-        section = _section;
+        if (GetTrackSectionFromProgress(sectionProgress, section, out TrackSection newSection, out float newSectionProgress))
+        {
+            position = GetPathPosition(newSection.path, newSectionProgress);
+            dir = GetPathDirectionVector(newSection, newSectionProgress);
+        }
+        else
+        {
+            Debug.LogWarning("End of track");
+            position = GetPathPosition(newSection.path, newSectionProgress);
+            dir = GetPathDirectionVector(newSection, newSectionProgress);
+        }
+    }
+    public bool GetTrackSectionFromProgress(float sectionProgress, TrackSection section, out TrackSection newSection, out float newSectionProgress)
+    {
+        newSection = section;
+        newSectionProgress = sectionProgress;
 
-        if (section != null)
-        {
-            position = GetPathPosition(section.path, trackSectionProgress);
-            dir = GetPathDirectionVector(section, trackSectionProgress);
-        }
-        else
-        {
-            Debug.LogWarning("Couldn't Get Track Section, Pos And Dir: " + progress);
-            position = Vector3.zero;
-            dir = Vector3.forward;
-        }
-    }
-    public void GetTrackSectionFromProgress(float progress, out TrackSection section, out float trackSectionProgress)
-    {
-        for (int i = 0; i < trackSectionList.Count; i++)
-        {
-            progress -= trackSectionList[i].length;
-            if (progress <= 0f)
+        while (newSectionProgress > newSection.length)
+        {    
+            TrackSection nextSection = newSection.GetNextSection();
+            if(nextSection != null)
             {
-                section = trackSectionList[i];
-                trackSectionProgress = progress + trackSectionList[i].length;
-                return;
+                newSectionProgress -= newSection.length;
+                newSection = nextSection;
+            }
+            else
+            {
+                newSectionProgress = Mathf.Clamp(newSectionProgress, 0f, newSection.length);
+                return false;
             }
         }
-        Debug.LogWarning("Couldn't Get Track Section: " + progress);
-        section = null;
-        trackSectionProgress = 0f;
+
+        while (newSectionProgress < 0)
+        {
+            TrackSection previousSection = newSection.GetPreviousSection();
+            if (previousSection != null)
+            {
+                newSectionProgress = previousSection.length + newSectionProgress;
+                newSection = previousSection;
+            }
+            else
+            {
+                newSectionProgress = Mathf.Clamp(newSectionProgress, 0f, newSection.length);
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public TrackSection RemoveAtIndexAndReturn(int index = 0)

@@ -11,13 +11,13 @@ public class RailCar : MonoBehaviour
     public List<RunningGear> railCarRunningGearList;
 
     //Run Time
-    [NonSerialized]
-    public TrackSection currentFrontSection;
-    public void UpdateRailCar(float progress, float distanceTravelled)
+    //[NonSerialized]
+    //public TrackSection currentFrontSection;
+    public void UpdateRailCar(float sectionProgress, TrackSection trackSection, float distanceTravelled)
     {
         foreach (RunningGear runningGear in railCarRunningGearList)
         {
-            currentFrontSection = runningGear.UpdateRunningGearPosition(progress);
+            runningGear.UpdateRunningGearPosition(sectionProgress, trackSection);
             runningGear.UpdateRunningGearRotation(distanceTravelled);
         }
     }

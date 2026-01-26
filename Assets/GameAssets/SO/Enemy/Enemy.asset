@@ -19,5 +19,5 @@ MonoBehaviour:
     importanceWeight: 2
   - healthType: 2
     importanceWeight: 0.5
-  sightDistance: 20
+  sightDistance: 35
   gravityForce: 10

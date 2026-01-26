@@ -19,12 +19,17 @@ public class GenerationManager : MonoBehaviour
     [SerializeField]
     private float stationSpawnDistance = 1500f;
     [SerializeField]
-    private float minRot = -45f,maxRot = 45f;
+    private Vector2 angleClampMinMax;
+    [SerializeField]
+    private Vector2 randomRotationMinMax;
     [SerializeField] 
     private NavMeshSurface navMeshSurface;
+
     //Run Time
     private float currentGeneratedDistance = 0f;
+    private float lastAngle;
     private Point lastPoint;
+    private TrackSection lastSection;
     private void Start()
     {
         active = this;
@@ -34,7 +39,7 @@ public class GenerationManager : MonoBehaviour
     private void Update()
     {
         int sectionsAhead = 0;
-        TrackSection trainSection = playerTrain.GetFrontMostTrackSection();
+        TrackSection trainSection = playerTrain.GetFrontTrackSection();
         for (int i = TrackManager.active.trackSectionList.Count-1; i >= 0; i--)
         {
             if (TrackManager.active.trackSectionList[i] == trainSection)
@@ -64,7 +69,7 @@ public class GenerationManager : MonoBehaviour
                 Destroy(obj);
             }
             
-            playerTrain.OffsetProgress(-section.length);
+            //playerTrain.OffsetProgress(-section.length);
             
             GameStateManager.isStartingLocationSpawned = false;
         }
@@ -72,13 +77,20 @@ public class GenerationManager : MonoBehaviour
 
     private void GenerateNextSection()
     {
+        //Pick random dir
+        lastAngle = Random.Range(Mathf.Max(angleClampMinMax.x, lastAngle - randomRotationMinMax.x), Mathf.Min(angleClampMinMax.y, lastAngle + randomRotationMinMax.x));
+        Vector3 dir = Quaternion.AngleAxis(lastAngle, Vector3.up) * Vector3.forward * (sectionLength *0.5f);
+
         Vector3 forwardPos = lastPoint.handleForward;
-        Vector3 dir = Quaternion.AngleAxis(Random.Range(minRot, maxRot), Vector3.up) * Vector3.forward * (sectionLength *0.5f);
-        
         Point nextPoint = Spline.CreatePoint(forwardPos + dir, forwardPos, false);
         
         Spline.DEBUG_DrawPointGizmos(nextPoint);
-        currentGeneratedDistance += TrackManager.active.CreateTrackSection(lastPoint, nextPoint).length;
+
+        TrackSection generatedSection = TrackManager.active.CreateTrackSection(lastPoint, nextPoint);
+        currentGeneratedDistance += generatedSection.length;
+
+        lastSection.SetNextSection(generatedSection);
+        lastSection = generatedSection;
         lastPoint = nextPoint;
         
         navMeshSurface.BuildNavMesh();
@@ -88,11 +100,16 @@ public class GenerationManager : MonoBehaviour
         GameStateManager.isStartingLocationSpawned = true;
         
         Point pointA = Spline.CreatePoint(Vector3.zero, Vector3.forward);
-        Point pointB = Spline.CreatePoint(Vector3.forward * sectionLength, Vector3.forward * (sectionLength *1.5f));
-        currentGeneratedDistance += TrackManager.active.CreateTrackSection(pointA, pointB).length;
+        Point pointB = Spline.CreatePoint(Vector3.forward * (playerTrain.GetConsistLenght() + 5f), Vector3.forward * ((playerTrain.GetConsistLenght() + 5f) * 1.5f));
+
+        TrackSection section = TrackManager.active.CreateTrackSection(pointA, pointB);
+        currentGeneratedDistance += section.length;     
+
+        playerTrain.Initialize(playerTrain.GetConsistLenght() + 2.5f, section);
 
         lastPoint = pointB;
-        
+        lastSection = section;
+
         Spline.DEBUG_DrawPointGizmos(pointA);
         Spline.DEBUG_DrawPointGizmos(pointB);
     }

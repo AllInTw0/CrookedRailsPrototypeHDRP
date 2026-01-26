@@ -22,15 +22,17 @@ public class Enemy : MonoBehaviour
     public enum TargetType
     {
         Position,
-        Transform
+        Transform,
+        Pack
     }
 
     [HideInInspector] public NavigationType currentNavigationType;
     public bool IsNavigatingByPath(){return currentNavigationType == NavigationType.Path;}
 
-    [HideInInspector]public TargetType currentTargetType;
+    [HideInInspector] public TargetType currentTargetType;
     private Vector3 targetPosition;
     private Transform targetTransform;
+    [HideInInspector] public EnemyPack targetPack;
     private float targetDistance = 5f;
 
     //Path
@@ -175,10 +177,18 @@ public class Enemy : MonoBehaviour
                 return targetPosition;
             case TargetType.Transform:
                 return targetTransform.position;
+            case TargetType.Pack:
+                return targetPack.centerPos + targetPosition; // + offset
         }
+    }
+    public bool IsInPack()
+    {
+        return currentTargetType == TargetType.Pack;
     }
     public void SetTarget(Vector3 pos, float targetDistance = 1f)
     {
+        if (IsInPack()) LeavePack();
+
         currentTargetType = TargetType.Position;
         targetPosition = pos;
         currentNavigationType = NavigationType.StraightLine;
@@ -186,10 +196,28 @@ public class Enemy : MonoBehaviour
     }
     public void SetTarget(Transform transform, float targetDistance = 1f)
     {
+        if (IsInPack()) LeavePack();
+
         currentTargetType = TargetType.Transform;
         targetTransform = transform;
         currentNavigationType = NavigationType.StraightLine;
         this.targetDistance = targetDistance;
+    }
+    public void SetTarget(EnemyPack pack, Vector3 offset, float targetDistance = 1f)
+    {
+        if (IsInPack()) LeavePack();
+        pack.AddEnemy(this);
+
+        currentTargetType = TargetType.Pack;
+        targetPack = pack;
+        targetPosition = offset;
+        currentNavigationType = NavigationType.StraightLine;
+        this.targetDistance = targetDistance;
+    }
+    public void LeavePack()
+    {
+        targetPack.RemoveEnemy(this);
+        targetPack = null;
     }
     public void Freeze()
     {

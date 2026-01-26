@@ -6,6 +6,7 @@ public class RunningGear : MonoBehaviour
     public Transform railCarTransform;
     public float wheelOffset;
     [Header("Wheels")]
+    public Animator wheelAnimator;
     public List<Transform> wheelTransformList;
     public float wheelRadius;
     [HideInInspector]
@@ -20,19 +21,21 @@ public class RunningGear : MonoBehaviour
             wheelTransform.localRotation = Quaternion.Euler(Random.Range(0f,360f), 0, 0);
         }
     }
-    public virtual TrackSection UpdateRunningGearPosition(float progress)
+    public virtual void UpdateRunningGearPosition(float sectionProgress, TrackSection section)
     {
-        TrackManager.active.GetTrackPositionFromProgress(progress + wheelOffset, out TrackSection sectionFront, out Vector3 posFront);
-        TrackManager.active.GetTrackPositionFromProgress(progress - wheelOffset, out TrackSection sectionBack, out Vector3 posBack);
+        TrackManager.active.GetTrackPositionFromProgress(sectionProgress + wheelOffset, section, out Vector3 posFront);
+        TrackManager.active.GetTrackPositionFromProgress(sectionProgress - wheelOffset, section, out Vector3 posBack);
 
         railCarTransform.position = (posFront + posBack) * 0.5f;
         railCarTransform.LookAt(posFront);
-
-        return sectionFront;
     }
 
     public virtual void UpdateRunningGearRotation(float distanceTravelled)
     {
+        if(wheelAnimator != null)
+        {
+            wheelAnimator.speed = (distanceTravelled / Time.deltaTime) / wheelCircumference;
+        }
         foreach (Transform wheelTransform in wheelTransformList)
         {
             wheelTransform.localRotation *= Quaternion.Euler((distanceTravelled / wheelCircumference) * 360f, 0, 0);
