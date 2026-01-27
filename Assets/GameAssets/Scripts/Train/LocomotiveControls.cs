@@ -20,7 +20,7 @@ public class LocomotiveControls : MonoBehaviour
     [SerializeField] 
     private float maxAcceleration;
     [SerializeField] 
-    private float locoBreakDeceleration;
+    public float locoBreakDeceleration;
     
     //Run Time
     private int throttleNotch;
@@ -63,5 +63,18 @@ public class LocomotiveControls : MonoBehaviour
             else
                 train.SetAcceleration(reverserNotch == 0 ? maxAcceleration : -maxAcceleration);
         }
+    }
+
+    public void Break()
+    {
+        throttle.currentNotch = 0;
+        throttleNotch = 0;
+
+        locoBreaks.currentNotch = 1;
+        locoBreaksNotch = 1;
+
+        train.SetMaxSpeed(0f);
+        train.SetAcceleration(0f);
+        train.SetDeceleration(locoBreakDeceleration);
     }
 }

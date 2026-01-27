@@ -14,6 +14,18 @@ public class PathPoint
         this.distance = distance;
     }
 }
+public enum AutoStopType
+{
+    Front,
+    TenderHatch
+}
+public class AutoStop
+{
+    public float distance;
+    public bool lockControlls;
+    public AutoStopType stopType;
+    public bool ignore;
+}
 public class TrackSection
 {
     public Point pointA;
@@ -21,6 +33,9 @@ public class TrackSection
     public List<PathPoint> path;
     public TrackSection nextSection;
     public TrackSection previousSection;
+
+    public AutoStop autoStop;
+
     public float length
     {
         get
@@ -59,6 +74,13 @@ public class TrackSection
     public TrackSection GetPreviousSection()
     {
         return previousSection;
+    }
+    public void SetAutoStop(float distance, AutoStopType type = AutoStopType.Front, bool lockControlls = false)
+    {
+        autoStop = new AutoStop();
+        autoStop.distance = distance;
+        autoStop.lockControlls = lockControlls;
+        autoStop.stopType = type;
     }
 }
 public class TrackManager : MonoBehaviour
@@ -159,7 +181,47 @@ public class TrackManager : MonoBehaviour
 
         return true;
     }
+    public bool GetNearestAutoStop(float sectionProgress, TrackSection trackSection, int maxTrackSectionCheck, out AutoStop nearestAutoStop, out float distanceToAutoStop)
+    {
+        nearestAutoStop = null;
+        distanceToAutoStop = 0f;
 
+        for (int i = 0; i < maxTrackSectionCheck; i++)
+        {
+            if (trackSection == null)
+                return false;
+
+            if(i == 0)
+            {
+                if(trackSection.autoStop != null &&  trackSection.autoStop.ignore == false && trackSection.autoStop.distance >= sectionProgress)
+                {
+                    nearestAutoStop = trackSection.autoStop;
+                    distanceToAutoStop = trackSection.autoStop.distance - sectionProgress;
+                    return true;
+                }
+                else
+                {
+                    distanceToAutoStop = trackSection.length - sectionProgress;
+                    trackSection = trackSection.GetNextSection(); 
+                }
+            }
+            else
+            {
+                if (trackSection.autoStop != null && trackSection.autoStop.ignore == false)
+                {
+                    nearestAutoStop = trackSection.autoStop;
+                    distanceToAutoStop += trackSection.autoStop.distance;
+                    return true;
+                }
+                else
+                {
+                    distanceToAutoStop += trackSection.length;
+                    trackSection = trackSection.GetNextSection();     
+                }
+            }
+        }
+        return false;
+    }
     public TrackSection RemoveAtIndexAndReturn(int index = 0)
     {
         TrackSection section = trackSectionList[index];

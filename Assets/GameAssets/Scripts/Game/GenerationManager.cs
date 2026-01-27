@@ -24,6 +24,9 @@ public class GenerationManager : MonoBehaviour
     private Vector2 randomRotationMinMax;
     [SerializeField] 
     private NavMeshSurface navMeshSurface;
+    [Header("Temp")]
+    [SerializeField]
+    private StructureSO waterTowerTemp;
 
     //Run Time
     private float currentGeneratedDistance = 0f;
@@ -87,6 +90,10 @@ public class GenerationManager : MonoBehaviour
         Spline.DEBUG_DrawPointGizmos(nextPoint);
 
         TrackSection generatedSection = TrackManager.active.CreateTrackSection(lastPoint, nextPoint);
+        if(TrackManager.active.trackSectionList.Count == 3)
+        {
+            SpawnStructureNearTrack(generatedSection.length - 0.1f, generatedSection, waterTowerTemp);
+        }
         currentGeneratedDistance += generatedSection.length;
 
         lastSection.SetNextSection(generatedSection);
@@ -94,6 +101,22 @@ public class GenerationManager : MonoBehaviour
         lastPoint = nextPoint;
         
         navMeshSurface.BuildNavMesh();
+    }
+    private void SpawnStructureNearTrack(float sectionProgress, TrackSection section, StructureSO structureInfo)
+    {
+        TrackManager.active.GetTrackPositionAndDirVectorFromProgress(sectionProgress, section, out Vector3 position, out Vector3 dir);
+
+        GameObject structure = Instantiate(structureInfo.structurePrefab);
+        
+        structure.transform.position = position;
+        structure.transform.LookAt(position + dir);
+
+        if (structureInfo.addAutoStop)
+        {
+            section.SetAutoStop(sectionProgress, structureInfo.stopType, false);
+        }
+
+        section.AddObject(structure); //Adds it for deletion when track section is deleted
     }
     private void GenerateStart()
     {

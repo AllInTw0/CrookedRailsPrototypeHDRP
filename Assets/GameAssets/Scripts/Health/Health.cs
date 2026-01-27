@@ -27,7 +27,7 @@ public class Health : MonoBehaviour
     {
         if (health == 0)
             return 0;
-        
+
         if(audioOnDamageTaken != "")
             SoundManager.active.PlayAtPos(transform.position,audioOnDamageTaken);
         
