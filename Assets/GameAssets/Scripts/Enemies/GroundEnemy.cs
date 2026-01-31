@@ -25,7 +25,6 @@ public class GroundEnemy : Enemy
     {
         bool targetReached = CheckDistanceBehavour();
         //Debug.Log(targetReached);
-        Debug.DrawLine(transformPos, GetTargetPosition(), targetReached ? Color.green : Color.red, EnemyManager.active.behaviourRefreshRate);
 
         switch (state)
         {

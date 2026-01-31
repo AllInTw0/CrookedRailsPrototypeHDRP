@@ -17,13 +17,20 @@ public class GenerationManager : MonoBehaviour
     [SerializeField]
     private int generatedSectionsBehindPlayer = 2;
     [SerializeField]
-    private float stationSpawnDistance = 1500f;
-    [SerializeField]
     private Vector2 angleClampMinMax;
     [SerializeField]
     private Vector2 randomRotationMinMax;
     [SerializeField] 
     private NavMeshSurface navMeshSurface;
+    [Header("Stations")]
+    [SerializeField]
+    private float stationSpawnDistance = 1500f;
+    [SerializeField]
+    private float stationSpeedTrackDistance = 200f;
+    [SerializeField]
+    private StructureSO stationSO;
+    [SerializeField]
+    private StructureSO preStationSO;
     [Header("Temp")]
     [SerializeField]
     private StructureSO waterTowerTemp;
@@ -33,14 +40,25 @@ public class GenerationManager : MonoBehaviour
     private float lastAngle;
     private Point lastPoint;
     private TrackSection lastSection;
+    private bool generateNavMesh;
+    //Station stuff
+    private bool stationGenerated;
+    private float distanceLeftTillNextStation;
     private void Start()
     {
         active = this;
+        distanceLeftTillNextStation = stationSpawnDistance;
         GenerateStart();
     }
 
     private void Update()
     {
+        if (generateNavMesh)
+        {
+            generateNavMesh = false;
+            navMeshSurface.BuildNavMesh();
+        }
+
         int sectionsAhead = 0;
         TrackSection trainSection = playerTrain.GetFrontTrackSection();
         for (int i = TrackManager.active.trackSectionList.Count-1; i >= 0; i--)
@@ -58,7 +76,7 @@ public class GenerationManager : MonoBehaviour
             sectionsBehind++;
         }
 
-        if (sectionsAhead < generatedSectionsAheadOfPlayer)
+        if (stationGenerated == false && sectionsAhead < generatedSectionsAheadOfPlayer)
         {
             GenerateNextSection();
         }
@@ -80,27 +98,37 @@ public class GenerationManager : MonoBehaviour
 
     private void GenerateNextSection()
     {
-        //Pick random dir
-        lastAngle = Random.Range(Mathf.Max(angleClampMinMax.x, lastAngle - randomRotationMinMax.x), Mathf.Min(angleClampMinMax.y, lastAngle + randomRotationMinMax.x));
-        Vector3 dir = Quaternion.AngleAxis(lastAngle, Vector3.up) * Vector3.forward * (sectionLength *0.5f);
-
-        Vector3 forwardPos = lastPoint.handleForward;
-        Point nextPoint = Spline.CreatePoint(forwardPos + dir, forwardPos, false);
-        
-        Spline.DEBUG_DrawPointGizmos(nextPoint);
-
-        TrackSection generatedSection = TrackManager.active.CreateTrackSection(lastPoint, nextPoint);
-        if(TrackManager.active.trackSectionList.Count == 3)
+        if (distanceLeftTillNextStation > 0f)
         {
-            SpawnStructureNearTrack(generatedSection.length - 0.1f, generatedSection, waterTowerTemp);
-        }
-        currentGeneratedDistance += generatedSection.length;
+            //Pick random dir
+            lastAngle = Random.Range(Mathf.Max(angleClampMinMax.x, lastAngle - randomRotationMinMax.x), Mathf.Min(angleClampMinMax.y, lastAngle + randomRotationMinMax.x));
+            Vector3 dir = Quaternion.AngleAxis(lastAngle, Vector3.up) * Vector3.forward * (sectionLength * 0.5f);
 
-        lastSection.SetNextSection(generatedSection);
-        lastSection = generatedSection;
-        lastPoint = nextPoint;
-        
-        navMeshSurface.BuildNavMesh();
+            Vector3 forwardPos = lastPoint.handleForward;
+            Point nextPoint = Spline.CreatePoint(forwardPos + dir, forwardPos, false);
+
+            Spline.DEBUG_DrawPointGizmos(nextPoint);
+
+            TrackSection generatedSection = TrackManager.active.CreateTrackSection(lastPoint, nextPoint);
+            if (TrackManager.active.trackSectionList.Count == 3)
+            {
+                //SpawnStructureNearTrack(generatedSection.length - 0.1f, generatedSection, waterTowerTemp);
+            }
+            distanceLeftTillNextStation -= generatedSection.length;
+            Debug.Log("Distance Left: " + distanceLeftTillNextStation);
+
+            currentGeneratedDistance += generatedSection.length;
+
+            lastSection.SetNextSection(generatedSection);
+            lastSection = generatedSection;
+            lastPoint = nextPoint;
+        }
+        else
+        {
+            GenerateStation();
+        }
+
+        generateNavMesh = true;
     }
     private void SpawnStructureNearTrack(float sectionProgress, TrackSection section, StructureSO structureInfo)
     {
@@ -113,10 +141,16 @@ public class GenerationManager : MonoBehaviour
 
         if (structureInfo.addAutoStop)
         {
-            section.SetAutoStop(sectionProgress, structureInfo.stopType, false);
+            section.SetAutoStop(sectionProgress, structureInfo.stopType);
         }
 
         section.AddObject(structure); //Adds it for deletion when track section is deleted
+
+        //Initialize structure generation
+        if(structure.TryGetComponent(out StructureMaster structureMaster))
+        {
+            structureMaster.Generate();
+        }
     }
     private void GenerateStart()
     {
@@ -135,5 +169,41 @@ public class GenerationManager : MonoBehaviour
 
         Spline.DEBUG_DrawPointGizmos(pointA);
         Spline.DEBUG_DrawPointGizmos(pointB);
+    }
+    private void GenerateStation()
+    {
+        //Pre Station Track
+        TrackSection generatedSection = GenerateStraightSection(playerTrain.GetConsistLenght() + 5f);
+        SpawnStructureNearTrack(generatedSection.length, generatedSection, preStationSO);
+        //generatedSection.SetAutoStop(generatedSection.length - 2.5f,AutoStopType.Front,true);
+
+        //Speed Track Enter
+        generatedSection = GenerateStraightSection(stationSpeedTrackDistance);
+
+        //Station Track
+        generatedSection = GenerateStraightSection(playerTrain.GetConsistLenght() + 10f);
+        SpawnStructureNearTrack(generatedSection.length - 2, generatedSection, stationSO);
+        //generatedSection.SetAutoStop(generatedSection.length - 5f, AutoStopType.Front, true);
+
+        //Speed Track Exit
+        generatedSection = GenerateStraightSection(stationSpeedTrackDistance);
+
+        stationGenerated = true;
+    }
+    private TrackSection GenerateStraightSection(float distance, float handleLength = 10f)
+    {
+        Vector3 forward = (lastPoint.handleForward - lastPoint.position).normalized;
+        Point nextPoint = Spline.CreatePoint(lastPoint.position + forward * (distance), lastPoint.position + forward * (distance + handleLength), true);
+
+        Spline.DEBUG_DrawPointGizmos(nextPoint);
+
+        TrackSection generatedSection = TrackManager.active.CreateTrackSection(lastPoint, nextPoint);
+        currentGeneratedDistance += generatedSection.length;
+
+        lastSection.SetNextSection(generatedSection);
+        lastSection = generatedSection;
+        lastPoint = nextPoint;
+
+        return generatedSection;
     }
 }

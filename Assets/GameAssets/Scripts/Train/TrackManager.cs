@@ -17,12 +17,12 @@ public class PathPoint
 public enum AutoStopType
 {
     Front,
-    TenderHatch
+    TenderHatch,
+    Supersonic
 }
 public class AutoStop
 {
     public float distance;
-    public bool lockControlls;
     public AutoStopType stopType;
     public bool ignore;
 }
@@ -75,11 +75,10 @@ public class TrackSection
     {
         return previousSection;
     }
-    public void SetAutoStop(float distance, AutoStopType type = AutoStopType.Front, bool lockControlls = false)
+    public void SetAutoStop(float distance, AutoStopType type = AutoStopType.Front)
     {
         autoStop = new AutoStop();
         autoStop.distance = distance;
-        autoStop.lockControlls = lockControlls;
         autoStop.stopType = type;
     }
 }

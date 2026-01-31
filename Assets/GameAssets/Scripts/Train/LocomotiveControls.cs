@@ -26,8 +26,19 @@ public class LocomotiveControls : MonoBehaviour
     private int throttleNotch;
     private int reverserNotch;
     private int locoBreaksNotch;
+
+    private bool locked;
     private void Update()
     {
+        if (locked)
+        {
+            throttle.currentNotch = throttleNotch;
+            locoBreaks.currentNotch = locoBreaksNotch;
+            reverser.currentNotch = reverserNotch;
+            return;
+        }
+
+
         if (throttleNotch != throttle.currentNotch)
         {
             throttleNotch = throttle.currentNotch;
@@ -76,5 +87,13 @@ public class LocomotiveControls : MonoBehaviour
         train.SetMaxSpeed(0f);
         train.SetAcceleration(0f);
         train.SetDeceleration(locoBreakDeceleration);
+    }
+
+    public void LockControlls()
+    {
+        locked = true;
+        Break();
+        reverser.currentNotch = 0;
+        reverserNotch = 0;
     }
 }

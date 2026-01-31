@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1973478150675759637
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4493945968919543139}
+  - component: {fileID: 9169853839881829932}
+  m_Layer: 0
+  m_Name: PreStationBuilding
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4493945968919543139
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1973478150675759637}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 9.70963, y: 0, z: -1.95296}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9169853839881829932
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1973478150675759637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88d4596069082554f8cff4583fd0ec42, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RepeatingPrefabSpawner
+  repeatingPrefabList:
+  - prefab: {fileID: 2427708792801347432, guid: ae4e56f3fb4a9f3489f4339fc931360f, type: 3}
+    prefabLength: 10
+    offset: 0
+    randomlyFlipRotation: 1
+  - prefab: {fileID: 5116431673193853970, guid: e204f4ebc6ee2da4b993118a9126788b, type: 3}
+    prefabLength: 10
+    offset: 0
+    randomlyFlipRotation: 1
+  - prefab: {fileID: 5949688875452566884, guid: 4c204b7ac0cb9a243b33a591b54da97e, type: 3}
+    prefabLength: 10
+    offset: 0
+    randomlyFlipRotation: 1
+  - prefab: {fileID: 8918868316344199459, guid: e0f6e32870849ec459fd09d507d500d2, type: 3}
+    prefabLength: 10
+    offset: 0
+    randomlyFlipRotation: 1
+  - prefab: {fileID: 4595007484075486468, guid: dd0b5bf58eadc664984c14db239f6b8b, type: 3}
+    prefabLength: 10
+    offset: 0
+    randomlyFlipRotation: 1
+  endPrefabList:
+  - prefab: {fileID: 5696203136410669033, guid: 2e29a9c4e20d5af498cf3570328daeba, type: 3}
+    prefabLength: 0
+    offset: 0
+    randomlyFlipRotation: 0
+  lengthType: 1
+  lengthIfNotProvided: 60

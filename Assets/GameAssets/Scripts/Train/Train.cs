@@ -5,7 +5,11 @@ using UnityEngine.UIElements;
 
 public class Train : MonoBehaviour
 {
+    public static Train playerTrain;
+
     //Variables
+    [SerializeField]
+    private bool isPlayerTrain;
     [SerializeField]
     private List<RailCar> consist = new List<RailCar>();
     [SerializeField] 
@@ -29,6 +33,9 @@ public class Train : MonoBehaviour
     private float maxAutoStopOffset;
     private void Start()
     {
+        if (isPlayerTrain)
+            playerTrain = this;
+
         RecalculateConsistLength();
 
         foreach (AutoStopType type in Enum.GetValues(typeof(AutoStopType)))
@@ -49,7 +56,7 @@ public class Train : MonoBehaviour
 
         //Handle AutoStops
         TrackManager.active.GetTrackSectionFromProgress(sectionProgress - maxAutoStopOffset, frontTrackSection, out TrackSection newSection, out float newSectionProgress);
-        if (TrackManager.active.GetNearestAutoStop(newSectionProgress, newSection, 5, out AutoStop nearestAutoStop, out float distanceToAutoStop))
+        if (TrackManager.active.GetNearestAutoStop(newSectionProgress, newSection, 3, out AutoStop nearestAutoStop, out float distanceToAutoStop))
         {
             float distanceToStop = (speed * speed) / (2 * controlls.locoBreakDeceleration); //v^2 - v0^2 = 2as
 
@@ -57,11 +64,18 @@ public class Train : MonoBehaviour
             float autoStopOffset = GetAutoStopTypeOffset(nearestAutoStop.stopType);
             distanceToAutoStop -= maxAutoStopOffset - autoStopOffset;
 
-            Debug.Log("Distance to stop: " + distanceToStop + ", distance: " + distanceToAutoStop);
+            //Debug.Log("Distance to stop: " + distanceToStop + ", distance: " + distanceToAutoStop);
             if(distanceToAutoStop <= distanceToStop)
             {
                 Debug.Log("Engaging breaks! Detected autostop");
-                controlls.Break();
+                if (nearestAutoStop.stopType == AutoStopType.Supersonic)
+                {
+                    controlls.LockControlls();
+                }
+                else
+                {
+                    controlls.Break();
+                }
                 nearestAutoStop.ignore = true;
             }
         }
@@ -175,9 +189,13 @@ public class Train : MonoBehaviour
     {
         return controlls.locoBreakDeceleration;
     }
+    public float GetSpeed()
+    {
+        return speed;
+    }
     public float GetAutoStopTypeOffset(AutoStopType type)
     {
-        if (type == AutoStopType.Front)
+        if (type == AutoStopType.Front || type == AutoStopType.Supersonic)
             return 0f;
         else if(type == AutoStopType.TenderHatch)
         {

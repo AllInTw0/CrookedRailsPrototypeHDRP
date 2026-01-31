@@ -76,7 +76,7 @@ public class Enemy : MonoBehaviour
             if (navPath.corners.Length > 2) // (If the path is equal or less than 2 that means it's just a straight line)
             {
                 //Update the target nav point
-                if (navPath.corners.Length > pathIndex + 1 && Vector3.Distance(transformPos, navPath.corners[1]) < 0.2f)
+                if (navPath.corners.Length > pathIndex + 1 && Vector3.Distance(transformPos, navPath.corners[pathIndex]) < 0.2f)
                     pathIndex++;
             }
             else
@@ -104,20 +104,20 @@ public class Enemy : MonoBehaviour
     public void UpdateNavigationBehavour()
     {
         //Make sure nav is off if we are near the target
-        if (IsNavigatingByPath() && distanceFromTarget < 2f)
-        {
-            currentNavigationType = NavigationType.StraightLine;
-        }
+        //if (IsNavigatingByPath() && distanceFromTarget < 1f)
+        //{
+        //    currentNavigationType = NavigationType.StraightLine;
+        //}
         //Turn on nav if we have stopped
-        else if (IsNavigatingByPath() == false && distanceFromTarget > 2f && Vector3.Distance(previousPosition, transformPos) < EnemyManager.active.pathFindingTriggerMovedDistance)
+        if (IsNavigatingByPath() == false && Vector3.Distance(previousPosition, transformPos) < EnemyManager.active.pathFindingTriggerMovedDistance)
         {
             currentNavigationType = NavigationType.Path;
         }
 
         //Calculate Nav Path
-        if (IsNavigatingByPath())
+        if (IsNavigatingByPath() && NavMesh.SamplePosition(transformPos,out NavMeshHit hitStart, 10f, NavMesh.AllAreas) && NavMesh.SamplePosition(GetTargetPosition(), out NavMeshHit hitEnd, 10f, NavMesh.AllAreas))
         {
-            NavMesh.CalculatePath(transformPos, GetTargetPosition(), NavMesh.AllAreas, navPath);
+            NavMesh.CalculatePath(hitStart.position, hitEnd.position, NavMesh.AllAreas, navPath);
             pathIndex = 1;
         }
 
@@ -191,7 +191,7 @@ public class Enemy : MonoBehaviour
 
         currentTargetType = TargetType.Position;
         targetPosition = pos;
-        currentNavigationType = NavigationType.StraightLine;
+        //currentNavigationType = NavigationType.StraightLine;
         this.targetDistance = targetDistance;
     }
     public void SetTarget(Transform transform, float targetDistance = 1f)
@@ -200,7 +200,7 @@ public class Enemy : MonoBehaviour
 
         currentTargetType = TargetType.Transform;
         targetTransform = transform;
-        currentNavigationType = NavigationType.StraightLine;
+        //currentNavigationType = NavigationType.StraightLine;
         this.targetDistance = targetDistance;
     }
     public void SetTarget(EnemyPack pack, Vector3 offset, float targetDistance = 1f)
@@ -211,7 +211,7 @@ public class Enemy : MonoBehaviour
         currentTargetType = TargetType.Pack;
         targetPack = pack;
         targetPosition = offset;
-        currentNavigationType = NavigationType.StraightLine;
+        //currentNavigationType = NavigationType.StraightLine;
         this.targetDistance = targetDistance;
     }
     public void LeavePack()
@@ -226,5 +226,16 @@ public class Enemy : MonoBehaviour
     public void UnFreeze()
     {
         rb.constraints = RigidbodyConstraints.FreezeRotation;
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = IsNavigatingByPath() ? Color.green : Color.red;
+        Gizmos.DrawLine(transformPos, GetTargetPosition());
+        if (IsNavigatingByPath() && navPath.corners.Length > pathIndex)
+        {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawLine(transformPos, navPath.corners[pathIndex]);
+        }
     }
 }
