@@ -21,12 +21,12 @@ public class TrainDoor : Door
 
         float distanceToTrain = Vector3.Distance(transform.position,trainPos);
 
-        Debug.DrawRay(trainPos, Vector3.up, Color.blueViolet);
+        //Debug.DrawRay(trainPos, Vector3.up, Color.blueViolet);
 
         float trainSpeed = Train.playerTrain.GetSpeed();
         float trainTime = distanceToTrain / trainSpeed;
 
-        Debug.Log(trainTime + ", " + timeToOpen);
+        //Debug.Log(trainTime + ", " + timeToOpen);
         if(trainTime <= timeToOpen)
         {
             Open();

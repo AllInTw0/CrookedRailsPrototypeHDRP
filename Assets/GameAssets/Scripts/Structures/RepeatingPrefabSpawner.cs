@@ -22,7 +22,8 @@ public class RepeatingPrefabSpawner : StructureGenerator
     private LengthType lengthType;
     [SerializeField]
     private float lengthIfNotProvided = 20f;
-
+    [SerializeField]
+    private float providedLengthOffset = 10f;
     //RunTime
     private bool spawned = false;
 
@@ -42,7 +43,7 @@ public class RepeatingPrefabSpawner : StructureGenerator
         //Get Length
         float length = lengthIfNotProvided;
         if (structureMaster != null && lengthType != LengthType.None)
-            length = structureMaster.GetLength(lengthType);
+            length = structureMaster.GetLength(lengthType) + providedLengthOffset;
 
         Vector3 dir = -transform.forward;
         Vector3 pos = transform.position;
@@ -52,7 +53,6 @@ public class RepeatingPrefabSpawner : StructureGenerator
             Transform copy = Instantiate(prefabEntry.prefab,transform).transform;
 
             copy.transform.position = pos + dir * distance;
-
 
             if (rotationReversed)
             {

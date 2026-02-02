@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
@@ -175,7 +176,7 @@ public class GenerationManager : MonoBehaviour
         //Pre Station Track
         TrackSection generatedSection = GenerateStraightSection(playerTrain.GetConsistLenght() + 5f);
         SpawnStructureNearTrack(generatedSection.length, generatedSection, preStationSO);
-        //generatedSection.SetAutoStop(generatedSection.length - 2.5f,AutoStopType.Front,true);
+        //generatedSection.SetAutoStop(generatedSection.length - 2.5f,AutoStopType.Front);
 
         //Speed Track Enter
         generatedSection = GenerateStraightSection(stationSpeedTrackDistance);
@@ -183,10 +184,11 @@ public class GenerationManager : MonoBehaviour
         //Station Track
         generatedSection = GenerateStraightSection(playerTrain.GetConsistLenght() + 10f);
         SpawnStructureNearTrack(generatedSection.length - 2, generatedSection, stationSO);
-        //generatedSection.SetAutoStop(generatedSection.length - 5f, AutoStopType.Front, true);
+        //generatedSection.SetAutoStop(generatedSection.length - 5f, AutoStopType.Front);
 
         //Speed Track Exit
         generatedSection = GenerateStraightSection(stationSpeedTrackDistance);
+        generatedSection.SetAutoStop(generatedSection.length - 1f, AutoStopType.Front);
 
         stationGenerated = true;
     }

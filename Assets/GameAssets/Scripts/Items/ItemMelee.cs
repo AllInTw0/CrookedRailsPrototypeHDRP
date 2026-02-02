@@ -22,7 +22,7 @@ public class ItemMelee : Item
     {
         if(PlayerInventory.active.tool == this && coolDown <= 0f)
         {
-            if (InputManager.active.attackAction.IsPressed())
+            if (InputManager.attackAction.IsPressed())
             {
                 BeginSwing();
             }

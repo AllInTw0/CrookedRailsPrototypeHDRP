@@ -55,10 +55,14 @@ public class Door : MonoBehaviour
 
     public void Open()
     {
+        if (open == false)
+            SoundManager.active.PlayAtPos(transform.position, "Door - Sliding");
         open = true;
     }
     public void Close()
     {
+        if (open == true)
+            SoundManager.active.PlayAtPos(transform.position, "Door - Sliding");
         open = false;
     }
     public void Toggle()

@@ -38,7 +38,7 @@ public class PlayerInteract : MonoBehaviour
         Raycast();
 
         //Interact Handling
-        if (holdingInteractLastFrame == false && InputManager.active.interactAction.IsPressed() && currentInteractable != null)
+        if (holdingInteractLastFrame == false && InputManager.interactAction.IsPressed() && currentInteractable != null)
         {
             //Began To Hold Interact
             Debug.Log("Began Interact");
@@ -65,7 +65,7 @@ public class PlayerInteract : MonoBehaviour
         }
         
         if (currentInteractable != null)
-            holdingInteractLastFrame = InputManager.active.interactAction.IsPressed();
+            holdingInteractLastFrame = InputManager.interactAction.IsPressed();
         else
             holdingInteractLastFrame = false;
         
@@ -74,7 +74,7 @@ public class PlayerInteract : MonoBehaviour
             finishedInteracting = false;
             timeHoldingInteract = 0;
             InteractIcon.active.SetProgress(0f);
-            InteractIcon.active.animator.SetBool("Interacting",false);
+            if(InteractIcon.active.animator.isActiveAndEnabled) InteractIcon.active.animator.SetBool("Interacting",false);
         }
     }
 
@@ -118,8 +118,8 @@ public class PlayerInteract : MonoBehaviour
     {
         currentTarget = null;
         currentInteractable = null;
+        if (InteractIcon.active.animator.isActiveAndEnabled) InteractIcon.active.animator.SetBool("Interacting", false);
         InteractIcon.active.Disable();
-        InteractIcon.active.animator.SetBool("Interacting",false);
         
         holdingInteractLastFrame = false;
     }

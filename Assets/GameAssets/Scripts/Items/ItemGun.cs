@@ -34,11 +34,11 @@ public class ItemGun : Item
         
        if(PlayerInventory.active.tool == this && coolDown <= 0f)
        {
-           if ((InputManager.active.attackAction.IsPressed() && clip > 0) ||(InputManager.active.attackAction.triggered && clip == 0))
+           if ((InputManager.attackAction.IsPressed() && clip > 0) ||(InputManager.attackAction.triggered && clip == 0))
            {
                Shoot();
            }
-           else if (InputManager.active.reloadAction.triggered)
+           else if (InputManager.reloadAction.triggered)
            {
                Reload();
            }

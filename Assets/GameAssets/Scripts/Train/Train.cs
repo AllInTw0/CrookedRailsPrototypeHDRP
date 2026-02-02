@@ -31,6 +31,7 @@ public class Train : MonoBehaviour
     private float consistLength;
 
     private float maxAutoStopOffset;
+    private bool activeSupersonic;
     private void Start()
     {
         if (isPlayerTrain)
@@ -48,6 +49,7 @@ public class Train : MonoBehaviour
 
     private void Update()
     {
+        //Debug.Log(deceleration);
         if(frontTrackSection == null)
         {
             Debug.LogWarning("No track section assigned!");
@@ -56,21 +58,27 @@ public class Train : MonoBehaviour
 
         //Handle AutoStops
         TrackManager.active.GetTrackSectionFromProgress(sectionProgress - maxAutoStopOffset, frontTrackSection, out TrackSection newSection, out float newSectionProgress);
-        if (TrackManager.active.GetNearestAutoStop(newSectionProgress, newSection, 3, out AutoStop nearestAutoStop, out float distanceToAutoStop))
+        if (deceleration == 0f && TrackManager.active.GetNearestAutoStop(newSectionProgress, newSection, 3, out AutoStop nearestAutoStop, out float distanceToAutoStop))
         {
-            float distanceToStop = (speed * speed) / (2 * controlls.locoBreakDeceleration); //v^2 - v0^2 = 2as
+            TrackManager.active.GetTrackPositionFromProgress(newSectionProgress, newSection, out Vector3 pos1);
+            TrackManager.active.GetTrackPositionFromProgress(newSectionProgress + distanceToAutoStop, newSection, out Vector3 pos2);
+            Debug.DrawLine(pos1 + Vector3.up, pos2 + Vector3.up, Color.violetRed);
+
+            float distanceToStop = (speed * speed) / (2 * controlls.GetDeceleration()); //v^2 - v0^2 = 2as
 
             //Handle diffrent types of autostop type distances
             float autoStopOffset = GetAutoStopTypeOffset(nearestAutoStop.stopType);
             distanceToAutoStop -= maxAutoStopOffset - autoStopOffset;
 
             //Debug.Log("Distance to stop: " + distanceToStop + ", distance: " + distanceToAutoStop);
+
             if(distanceToAutoStop <= distanceToStop)
             {
                 Debug.Log("Engaging breaks! Detected autostop");
                 if (nearestAutoStop.stopType == AutoStopType.Supersonic)
                 {
                     controlls.LockControlls();
+                    activeSupersonic = true;
                 }
                 else
                 {
@@ -79,10 +87,17 @@ public class Train : MonoBehaviour
                 nearestAutoStop.ignore = true;
             }
         }
-
+        if(activeSupersonic && Mathf.Abs(speed) < 0.01f)
+        {
+            activeSupersonic = false;
+            controlls.ActivateSupersonic();
+        }
         //update Speed    
-        if(Mathf.Abs(speed) < Mathf.Abs(maxSpeed) || (speed > 0 && acceleration < 0) || (speed < 0 && acceleration > 0))
+        if (Mathf.Abs(speed) < Mathf.Abs(maxSpeed) || (speed > 0 && acceleration < 0) || (speed < 0 && acceleration > 0))
+        {
             speed += acceleration * Time.deltaTime;
+            speed = Mathf.Clamp(speed , -maxSpeed, maxSpeed);
+        }
         
         if (deceleration > 0f)
         {

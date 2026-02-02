@@ -101,7 +101,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        if (InputManager.active.debugCamAction.triggered)
+        if (InputManager.debugCamAction.triggered)
         {
             if(noclip)
                 DisableNoclip();
@@ -124,7 +124,7 @@ public class PlayerMovement : MonoBehaviour
             //Normal Movement
             
             //Crouching 
-            if (crouched == false && InputManager.active.crouchAction.IsPressed())
+            if (crouched == false && InputManager.crouchAction.IsPressed())
             {
                 crouched = true;
                 playerCollider.height = colliderCrouchHeight;
@@ -134,7 +134,7 @@ public class PlayerMovement : MonoBehaviour
                 //if (grounded == false)
                 //rb.position += new Vector3(0, cameraStandingHeight - cameraCrouchHeight, 0);
             }
-            else if (crouched && InputManager.active.crouchAction.IsPressed() == false)
+            else if (crouched && InputManager.crouchAction.IsPressed() == false)
             {
                 crouched = false;
                 playerCollider.height = colliderStandingHeight;
@@ -146,12 +146,12 @@ public class PlayerMovement : MonoBehaviour
             }
 
             //Setting target speed
-            targetSpeed = (InputManager.active.sprintAction.IsPressed() && stamina > 0f) ? sprintingSpeed : walkingSpeed;
+            targetSpeed = (InputManager.sprintAction.IsPressed() && stamina > 0f) ? sprintingSpeed : walkingSpeed;
             if (crouched)
                 targetSpeed = crouchingSpeed;
             
             //Calculating Stamina
-            if (InputManager.active.sprintAction.IsPressed() == false)
+            if (InputManager.sprintAction.IsPressed() == false)
             {
                 //Not Sprinting
                 staminaGainDelayTime += Time.deltaTime;
@@ -175,7 +175,7 @@ public class PlayerMovement : MonoBehaviour
 
             //Jumping
             jumpTimer -= Time.deltaTime;
-            if (InputManager.active.jumpAction.IsPressed() && grounded && jumpTimer <= 0f)
+            if (InputManager.jumpAction.IsPressed() && grounded && jumpTimer <= 0f)
             {
                 rb.AddForce(0f, crouched ? jumpForce * 0.5f : jumpForce, 0f);
                 grounded = false;

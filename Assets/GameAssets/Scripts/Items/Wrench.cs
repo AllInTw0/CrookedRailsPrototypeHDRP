@@ -14,7 +14,7 @@ public class Wrench : ItemMelee
     private bool attack2Released;
     private void Update()
     {
-        if (InputManager.active.attack2Action.IsPressed())
+        if (InputManager.attack2Action.IsPressed())
         {
             if (attack2Released)
             {
@@ -40,7 +40,7 @@ public class Wrench : ItemMelee
                 hologram.transform.rotation = Quaternion.Euler(0, PlayerCamera.active.player.eulerAngles.y, 0);
 
 
-                if (canBuild && InputManager.active.attackAction.triggered)
+                if (canBuild && InputManager.attackAction.triggered)
                 {
                     hologram.SetMaterialTo(hologram.defaultMat);
                     hologram.Activate();

@@ -7,7 +7,7 @@ public class InputManager : MonoBehaviour
     //New Input Package
     private InputAction moveAction;
     [NonSerialized]
-    public InputAction jumpAction,sprintAction,crouchAction,interactAction,scrollAction,dropAction,attackAction,attack2Action,reloadAction,debugCamAction;
+    public static InputAction jumpAction,sprintAction,crouchAction,interactAction,scrollAction,dropAction,attackAction,attack2Action,reloadAction,debugCamAction,confirmAction, altAction;
     
     private Vector2 _moveInput;
     public Vector2 moveInput {
@@ -39,8 +39,10 @@ public class InputManager : MonoBehaviour
         attack2Action = InputSystem.actions.FindAction("Attack2");
         reloadAction = InputSystem.actions.FindAction("Reload");
         debugCamAction = InputSystem.actions.FindAction("DebugCam");
+        confirmAction = InputSystem.actions.FindAction("Confirm");
+        altAction = InputSystem.actions.FindAction("Alt");
     }
-    private void FixedUpdate()
+    private void LateUpdate()
     {
         nextFrameMoveInput = true;
     }

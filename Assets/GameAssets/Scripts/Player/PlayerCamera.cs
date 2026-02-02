@@ -24,7 +24,7 @@ public class PlayerCamera : MonoBehaviour
     private Camera camera;
 
     private bool inThirdPerson;
-    
+
     //New Input Package
     private InputAction lookAction;
     private void Start()
@@ -38,6 +38,9 @@ public class PlayerCamera : MonoBehaviour
     }
     private void Update()
     {
+        if (InputManager.altAction.WasPerformedThisFrame())
+            Cursor.lockState = Cursor.lockState == CursorLockMode.Locked ? CursorLockMode.None : CursorLockMode.Locked;
+
         //First Person
         if (Cursor.lockState == CursorLockMode.Locked)
         {

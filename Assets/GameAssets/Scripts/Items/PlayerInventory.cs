@@ -27,12 +27,12 @@ public class PlayerInventory : MonoBehaviour
         //index range is 0/1 to items.Count
         // 0 if tool is equipped
         // 1 if no tool is equipped
-        selectIndex += (int)InputManager.active.scrollAction.ReadValue<float>();
+        selectIndex += (int)InputManager.scrollAction.ReadValue<float>();
         UpdateSelectIndexInterval();
         //Debug.Log("Current selectIndex: "+selectIndex);
         
         //Dropping Items
-        if (InputManager.active.dropAction.triggered && (PlayerInventory.active.items.Count > 0 || PlayerInventory.active.tool != null))
+        if (InputManager.dropAction.triggered && (PlayerInventory.active.items.Count > 0 || PlayerInventory.active.tool != null))
         {
             if (selectIndex == 0)
                 UnEquipTool();
