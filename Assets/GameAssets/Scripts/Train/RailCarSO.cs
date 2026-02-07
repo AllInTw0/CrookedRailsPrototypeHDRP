@@ -1,0 +1,19 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+[CreateAssetMenu(fileName = "RailCarSO", menuName = "ScriptableObjects/RailCarSO", order = 2)]
+public class RailCarSO : ScriptableObject
+{
+    public string railCarName;
+
+    [Header("HaulingJobParams")]
+    public int minLevel;
+    public int maxLevel;
+    public string GetName()
+    {
+        if (railCarName == "")
+            return this.name;
+        else
+            return railCarName;
+    }
+}

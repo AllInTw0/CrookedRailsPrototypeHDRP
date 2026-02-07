@@ -6,13 +6,14 @@ using UnityEngine;
 public enum OverrideType
 {
     Text,
+    HaulingJobEntry,
 }
 public class Override
 {
     public string targetName;
     public OverrideType overrideType;
     public string stringOverride;
-
+    public List<HaulingJobManager.HaulingJobEntry> haulingJobEntryListOverride;
     public Override(string targetName, OverrideType overrideType, string stringOverride = "")
     {
         this.targetName = targetName;
@@ -29,12 +30,14 @@ public class PaperRenderer : MonoBehaviour
     {
         public string name;
         public Transform objectRefrence;
+        public Transform objectRefrence2;
     }
     [Serializable]
     public class Paper
     {
         public string name;
         public GameObject paperObject;
+        public Vector2Int renderResolution;
         public Vector2Int paperResolution;
         public List<OverrideEntry> overrideEntryList;   
         public OverrideEntry FindOverrideEntry(string name)
@@ -80,6 +83,28 @@ public class PaperRenderer : MonoBehaviour
             {
                 if (overrideInfo.overrideType == OverrideType.Text)
                     overrideEntry.objectRefrence.GetComponent<TMP_Text>().text = overrideInfo.stringOverride;
+                if (overrideInfo.overrideType == OverrideType.HaulingJobEntry)
+                {
+                    while (overrideEntry.objectRefrence.childCount > 0)
+                    {
+                        DestroyImmediate(overrideEntry.objectRefrence.GetChild(0).gameObject);
+                    }
+
+                    float listHeight = 6.5f; //Hard coded is bad but whatever
+                    float heigth = Mathf.Clamp(listHeight / overrideInfo.haulingJobEntryListOverride.Count, 0f, 1f);
+
+                    foreach (HaulingJobManager.HaulingJobEntry entry in overrideInfo.haulingJobEntryListOverride)
+                    {
+                        Transform copy = Instantiate(overrideEntry.objectRefrence2);
+                        copy.SetParent(overrideEntry.objectRefrence);
+                        ((RectTransform)copy).localPosition = Vector3.zero;
+                        ((RectTransform)copy).sizeDelta = new Vector2(((RectTransform)copy).sizeDelta.x, heigth);
+
+                        copy.Find("Cargo").GetComponent<TMP_Text>().text = entry.cargo.cargoName;
+                        copy.Find("Weight").GetComponent<TMP_Text>().text = entry.weight + "t";
+                        copy.Find("Pay").GetComponent<TMP_Text>().text = entry.pay + "$";
+                    }
+                }
             }
             else
             {
@@ -90,7 +115,7 @@ public class PaperRenderer : MonoBehaviour
         //Render
         paper.paperObject.SetActive(true);
 
-        RenderTexture renderTexture = new RenderTexture(paper.paperResolution.x, paper.paperResolution.y,16);
+        RenderTexture renderTexture = new RenderTexture(paper.renderResolution.x, paper.renderResolution.y,16);
         //renderTexture.Create();
 
         renderCamera.targetTexture = renderTexture;
@@ -99,7 +124,7 @@ public class PaperRenderer : MonoBehaviour
         renderCamera.Render();
 
         Texture2D texture = new Texture2D(paper.paperResolution.x, paper.paperResolution.y);
-        texture.ReadPixels(new Rect(0, 0, paper.paperResolution.x, paper.paperResolution.y), 0, 0);
+        texture.ReadPixels(new Rect(0, 0, paper.renderResolution.x, paper.renderResolution.y), 0, 0);
         texture.Apply();
 
         paper.paperObject.SetActive(false);
