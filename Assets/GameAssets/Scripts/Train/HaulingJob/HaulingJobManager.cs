@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class HaulingJobManager : MonoBehaviour
 {
+    public static HaulingJobManager active;
     public class HaulingJobEntry
     {
         public CargoSO cargo;
@@ -12,12 +13,18 @@ public class HaulingJobManager : MonoBehaviour
         public float pay;
     }
 
+
     [SerializeField]
     private List<CargoSO> haulingCargoInfoList = new List<CargoSO>();
 
     [Header("Temp")]
     public float maxCargoDangerLevel; public float targetDangerLevel; public float mixedLevel; public int maxCargoCount; public int currentLevel;
     public PaperRenderer paperRenderer;
+
+    private void Awake()
+    {
+        active = this;
+    }
     public List<HaulingJobEntry> GenerateHaulingJob(float maxCargoDangerLevel, float targetDangerLevel, float mixedLevel, int maxCargoCount, int currentLevel)
     {
         //Pick first cargo

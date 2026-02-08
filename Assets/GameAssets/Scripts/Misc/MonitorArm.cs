@@ -1,27 +1,33 @@
 using UnityEngine;
+using UnityEngine.Events;
 
-public class MonitorArm : MonoBehaviour
+public class MonitorArm : AnimationPlayer
 {
-    [SerializeField]
-    private Animator animator;
-    [SerializeField]
-    private string defaultAnimName = "startPose1";
     [Header("Light")]
     [SerializeField]
     private Light monitorLight;
     [SerializeField]
     private float turnOnOffTime;
-    [Header("Debug")]
+    [Header("Button")]
     [SerializeField]
-    public string animName = "move1";
+    private AnimationPlayer buttonAnimationPlayer;
     [SerializeField]
-    public float speed = 1f;
+    private EventInteractable buttonInteractable;
+    [Header("Light")]
+    [SerializeField]
+    public Printer printer;
+
+    public UnityEvent onInteract;
 
     private float time;
     private bool lightOn;
+
+    private bool monitorEnabled;
+
     private void Start()
     {
-        PlayAniamtion(defaultAnimName, 1f);
+        if (buttonInteractable != null) buttonInteractable.interactEvent.AddListener(() => { onInteract.Invoke(); });
+        DisableButton();
     }
     private void Update()
     {
@@ -49,13 +55,33 @@ public class MonitorArm : MonoBehaviour
         time = turnOnOffTime;
         lightOn = false;
     }
-    public void PlayAniamtion(string name, float speed)
+    public void EnableButton()
     {
-        if(speed >= 0)
-            animator.Play(animName, 0, 0f);
-        else
-            animator.Play(animName, 0, 1f);
+        if (buttonAnimationPlayer != null) buttonAnimationPlayer.PlayAniamtion(buttonAnimationPlayer.animName, 1f);
+        if (buttonInteractable != null) buttonInteractable.gameObject.SetActive(true);
+    }
+    public void DisableButton()
+    {
+        if (buttonAnimationPlayer != null) buttonAnimationPlayer.PlayAniamtion(buttonAnimationPlayer.animName, -1f);
+        if (buttonInteractable != null) buttonInteractable.gameObject.SetActive(false);
+    }
 
-        animator.SetFloat("speed", speed);
+    public void EnableMonitor()
+    {
+        if (monitorEnabled == true) return;
+
+        TurnOnLight();
+        PlayAniamtion(animName, 1f);
+        EnableButton();
+        monitorEnabled = true;
+    }
+    public void DisableMonitor()
+    {
+        if (monitorEnabled == false) return;
+
+        TurnOffLight();
+        PlayAniamtion(animName, -1f);
+        DisableButton();
+        monitorEnabled = false;
     }
 }

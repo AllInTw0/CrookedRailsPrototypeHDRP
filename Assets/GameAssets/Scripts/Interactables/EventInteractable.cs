@@ -4,7 +4,7 @@ public class EventInteractable : Interactable
 {
     [Header("Event")]
     [SerializeField]
-    private UnityEvent interactEvent;
+    public UnityEvent interactEvent;
     public override bool Interact()
     {
         interactEvent.Invoke();
