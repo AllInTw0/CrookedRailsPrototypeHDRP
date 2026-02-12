@@ -39,7 +39,15 @@ public class StructureMaster : MonoBehaviour
         if (lengthType == LengthType.PlayerTrainLength)
             return Train.playerTrain.GetConsistLenght();
         else if(lengthType == LengthType.MaxChosenTrainLength)
-            return Train.playerTrain.GetConsistLenght();
+        {
+            float maxLength = 0f;
+            for (int i = 0; i < HaulingJobManager.generatedHaulingJobList.Count; i++)
+            {
+                float l = HaulingJobManager.generatedHaulingJobList[i].GetConsistLength() + Train.playerTrain.CalculateConsistLength(true);
+                if (l > maxLength) maxLength = l;
+            }
+            return maxLength;
+        }
 
         Debug.LogWarning("Couldnt get length");
         return 0f;

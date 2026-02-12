@@ -13,7 +13,7 @@ public class Train : MonoBehaviour
     [SerializeField]
     private List<RailCar> consist = new List<RailCar>();
     [SerializeField] 
-    private float couplerLength;
+    public float couplerLength;
     [SerializeField]
     private LocomotiveControls controlls;
 
@@ -177,12 +177,22 @@ public class Train : MonoBehaviour
     }
     private void RecalculateConsistLength()
     {
+        consistLength = CalculateConsistLength(false);
+    }
+    public float CalculateConsistLength(bool onlyPlayerRailCars = false)
+    {
         float length = 0f;
-        foreach (var railCar in consist)
+        foreach (RailCar railCar in consist)
         {
-            length += railCar.frontLength + railCar.backLength + couplerLength;
+            if(onlyPlayerRailCars)
+            {
+                if(railCar.isPlayerRailCar)
+                    length += railCar.frontLength + railCar.backLength + couplerLength;
+            }
+            else
+                length += railCar.frontLength + railCar.backLength + couplerLength;
         }
-        consistLength = length - couplerLength;
+        return length > 0 ? length - couplerLength : 0;
     }
     public float GetConsistLenght()
     {
@@ -226,5 +236,54 @@ public class Train : MonoBehaviour
             }
         }
         return 0f;
+    }
+
+    public List<CargoInfo> GetConsistCargoInfo()
+    {
+        List<CargoInfo> cargoInfoList = new List<CargoInfo>();
+
+        foreach (RailCar railCar in consist)
+        {
+            cargoInfoList.Add(railCar.GetCargoInfo());
+        }
+
+        return cargoInfoList;
+    }
+    public RailCar AddRailCar(RailCarSO railCarInfo, int index)
+    {
+        RailCar railCarCopy = Instantiate(railCarInfo.prefab,transform).GetComponent<RailCar>();
+        List<RailCar> listFront = new List<RailCar>();
+        List<RailCar> listBack = new List<RailCar>();
+
+        for (int i = 0; i < consist.Count; i++)
+        {
+            if (i < index)
+                listFront.Add(consist[i]);
+            else
+                listBack.Add(consist[i]);
+        }
+
+        consist = listFront;
+        consist.Add(railCarCopy);
+        consist.AddRange(listBack);
+
+        RecalculateConsistLength();
+
+        return railCarCopy;
+    }
+
+    public void RemoveNonPlayerRailCars()
+    {
+        for (int i = 0; i < consist.Count; i++)
+        {
+            if (consist[i].isPlayerRailCar == false)
+            {
+                Destroy(consist[i].gameObject);
+                consist.RemoveAt(i);
+                i--;
+            }
+        }
+
+        Debug.Log("Removed NonPlayer RailCars");
     }
 }

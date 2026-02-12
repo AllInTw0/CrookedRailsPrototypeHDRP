@@ -18,11 +18,11 @@ public class HaulingJobManagerEditor : Editor
 
         if (GUILayout.Button("Generate Hauling Job"))
         {
-            var list = haulingJobManager.GenerateHaulingJob(haulingJobManager.maxCargoDangerLevel, haulingJobManager.targetDangerLevel, haulingJobManager.mixedLevel, haulingJobManager.maxCargoCount, haulingJobManager.currentLevel);
+            HaulingJob haulingJob = haulingJobManager.GenerateHaulingJob(haulingJobManager.maxCargoDangerLevel, haulingJobManager.targetDangerLevel, haulingJobManager.mixedLevel, haulingJobManager.maxCargoCount, haulingJobManager.currentLevel);
 
             //Render Paper Test
             Override newOverride = new Override("HaulingJob", OverrideType.HaulingJobEntry);
-            newOverride.haulingJobEntryListOverride = list;
+            newOverride.haulingJobOverride = haulingJob;
 
             Texture2D texture = haulingJobManager.paperRenderer.RenderPaper("HaulingJob", new List<Override>() { newOverride });
             AssetDatabase.CreateAsset(texture, "Assets/GameAssets/PaperTest.asset");

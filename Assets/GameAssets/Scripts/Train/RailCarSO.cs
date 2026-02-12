@@ -6,6 +6,10 @@ public class RailCarSO : ScriptableObject
 {
     public string railCarName;
 
+    [Header("Visual")]
+    public GameObject prefab;
+    public Sprite icon;
+
     [Header("HaulingJobParams")]
     public int minLevel;
     public int maxLevel;

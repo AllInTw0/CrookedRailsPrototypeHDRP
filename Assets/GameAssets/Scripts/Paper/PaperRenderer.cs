@@ -1,19 +1,24 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public enum OverrideType
 {
     Text,
     HaulingJobEntry,
+    HaulReceipt,
 }
 public class Override
 {
     public string targetName;
     public OverrideType overrideType;
     public string stringOverride;
-    public List<HaulingJobManager.HaulingJobEntry> haulingJobEntryListOverride;
+    public HaulingJob haulingJobOverride;
+    public List<CargoInfo> cargoListOverride;
     public Override(string targetName, OverrideType overrideType, string stringOverride = "")
     {
         this.targetName = targetName;
@@ -75,6 +80,7 @@ public class PaperRenderer : MonoBehaviour
             return null;
         }
 
+        List<GameObject> destroyList = new List<GameObject>();
         //Handle overrides
         foreach (Override overrideInfo in overrideList)
         {
@@ -85,15 +91,11 @@ public class PaperRenderer : MonoBehaviour
                     overrideEntry.objectRefrence.GetComponent<TMP_Text>().text = overrideInfo.stringOverride;
                 if (overrideInfo.overrideType == OverrideType.HaulingJobEntry)
                 {
-                    while (overrideEntry.objectRefrence.childCount > 0)
-                    {
-                        DestroyImmediate(overrideEntry.objectRefrence.GetChild(0).gameObject);
-                    }
-
                     float listHeight = 6.5f; //Hard coded is bad but whatever
-                    float heigth = Mathf.Clamp(listHeight / overrideInfo.haulingJobEntryListOverride.Count, 0f, 1f);
+                    float heigth = Mathf.Clamp(listHeight / overrideInfo.haulingJobOverride.haulingJobEntryList.Count, 0f, 1f);
 
-                    foreach (HaulingJobManager.HaulingJobEntry entry in overrideInfo.haulingJobEntryListOverride)
+                    float sum = 0f;
+                    foreach (HaulingJobEntry entry in overrideInfo.haulingJobOverride.haulingJobEntryList)
                     {
                         Transform copy = Instantiate(overrideEntry.objectRefrence2);
                         copy.SetParent(overrideEntry.objectRefrence);
@@ -103,6 +105,59 @@ public class PaperRenderer : MonoBehaviour
                         copy.Find("Cargo").GetComponent<TMP_Text>().text = entry.cargo.cargoName;
                         copy.Find("Weight").GetComponent<TMP_Text>().text = entry.weight + "t";
                         copy.Find("Pay").GetComponent<TMP_Text>().text = entry.pay + "$";
+                        sum += entry.pay;
+
+                        if (entry.railCar.icon != null)
+                            copy.Find("Icon").GetComponent<Image>().sprite = entry.railCar.icon;
+                    }
+
+                    OverrideEntry infoOverride = paper.FindOverrideEntry("Info");
+                    infoOverride.objectRefrence.GetComponent<TMP_Text>().text = "Dist.: " + overrideInfo.haulingJobOverride.distance + "m, Sum: " + sum + "$";
+
+                    for (int i = 0; i < overrideEntry.objectRefrence.childCount; i++)
+                    {
+                        destroyList.Add(overrideEntry.objectRefrence.GetChild(i).gameObject);
+                    }
+                }
+                if (overrideInfo.overrideType == OverrideType.HaulReceipt)
+                {
+                    float listHeight = 6.5f; //Hard coded is bad but whatever
+                    float heigth = Mathf.Clamp(listHeight / overrideInfo.cargoListOverride.Count, 0f, 1f);
+
+                    float sum = 0f;
+                    foreach (CargoInfo cargoInfo in overrideInfo.cargoListOverride)
+                    {
+                        Transform copy = Instantiate(overrideEntry.objectRefrence2);
+                        copy.SetParent(overrideEntry.objectRefrence);
+                        ((RectTransform)copy).localPosition = Vector3.zero;
+                        ((RectTransform)copy).sizeDelta = new Vector2(((RectTransform)copy).sizeDelta.x, heigth);
+
+                        if (cargoInfo.cargoInfo != null)
+                            copy.Find("CargoHealth").GetComponent<TMP_Text>().text = Mathf.Round((cargoInfo.cargoHealth.health / cargoInfo.cargoHealth.maxHealth) * 100f) + "%";
+                        else
+                            copy.Find("CargoHealth").GetComponent<TMP_Text>().text = "-";
+
+                        copy.Find("RailCarHealth").GetComponent<TMP_Text>().text = Mathf.Round((cargoInfo.railCarHealth.health / cargoInfo.railCarHealth.maxHealth) * 100f) + "%";
+
+                        if (cargoInfo.GetValueSum() != 0)
+                        {
+                            copy.Find("Pay").GetComponent<TMP_Text>().text = cargoInfo.GetValueSum() + "$(<color=red>-" + cargoInfo.GetExpensesSum() + "$</color>)";
+                            sum += cargoInfo.GetPaySum();
+                        }
+                        else
+                            copy.Find("Pay").GetComponent<TMP_Text>().text = "-";
+
+                        if (cargoInfo.railCarRefrence.railCarSO.icon != null)
+                            copy.Find("Icon").GetComponent<Image>().sprite = cargoInfo.railCarRefrence.railCarSO.icon;
+
+                        
+                    }
+                    OverrideEntry sumOverride = paper.FindOverrideEntry("Sum");
+                    sumOverride.objectRefrence.GetComponent<TMP_Text>().text = "Sum: " + sum + "$";
+
+                    for (int i = 0; i < overrideEntry.objectRefrence.childCount; i++)
+                    {
+                        destroyList.Add(overrideEntry.objectRefrence.GetChild(i).gameObject);
                     }
                 }
             }
@@ -128,6 +183,12 @@ public class PaperRenderer : MonoBehaviour
         texture.Apply();
 
         paper.paperObject.SetActive(false);
+
+        for (int i = 0; i < destroyList.Count; i++)
+        {
+            destroyList[i].SetActive(false);
+            Destroy(destroyList[i]);
+        }
 
         return texture;
     }

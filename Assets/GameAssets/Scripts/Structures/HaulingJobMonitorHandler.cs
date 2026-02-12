@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class HaulingJobMonitorHandler : MonoBehaviour
@@ -18,17 +19,6 @@ public class HaulingJobMonitorHandler : MonoBehaviour
     private List<MonitorArm> monitorArmList;
 
     private State currentState = State.Welcome;
-
-    private List<List<HaulingJobManager.HaulingJobEntry>> haulingJobList;
-    private List<Texture2D> haullingJobRenders;
-    private void Start()
-    {
-        haulingJobList = new List<List<HaulingJobManager.HaulingJobEntry>>();  
-        for (int i = 0; i < monitorArmList.Count; i++)
-        {
-            haulingJobList.Add(HaulingJobManager.active.GenerateHaulingJob(i * 0.5f, i * 1f, 0.4f, 8 - i * 2, 1));
-        }
-    }
 
     public void PlayerEntered()
     {
@@ -64,30 +54,42 @@ public class HaulingJobMonitorHandler : MonoBehaviour
                 break;
             case State.Stats:
                 mainMonitorArm.EnableMonitor();
-                mainMonitorArm.printer.AddNotification(PaperRenderer.active.RenderPaper("HaulReciept", new List<Override>()), float.MaxValue);
+
+                Override newOverride = new Override("HaulReceipt", OverrideType.HaulReceipt);
+                newOverride.cargoListOverride = Train.playerTrain.GetConsistCargoInfo();
+
+                mainMonitorArm.printer.AddNotification(PaperRenderer.active.RenderPaper("HaulReceipt", new List<Override>() { newOverride }), float.MaxValue);
                 mainMonitorArm.onInteract.AddListener(() => {
                     currentState = State.ChooseHaullingJob;
                     ResetMonitors();
                     Debug.Log("Reciept");
+                    float sum = 0f;
+                    List<CargoInfo> cargoList = Train.playerTrain.GetConsistCargoInfo();
+                    for (int i = 0; i < cargoList.Count; i++)
+                    {
+                        if(cargoList[i].GetValueSum() != 0)
+                            sum += cargoList[i].GetPaySum();
+                    }
+
+                    Override newOverride = new Override("Sum", OverrideType.Text);
+                    newOverride.stringOverride = sum + "$";
+
+                    MiniPrinter.active.AddNotification(PaperRenderer.active.RenderPaper("Receipt", new List<Override>() { newOverride }));
+
+                    Train.playerTrain.RemoveNonPlayerRailCars();
+
                     SetupMonitors();
                 });
                 break;
             case State.ChooseHaullingJob:
-                if(haullingJobRenders == null)
-                {
-                    haullingJobRenders = new List<Texture2D>();
-                    for (int i = 0; i < monitorArmList.Count; i++)
-                    {
-                        Override newOverride = new Override("HaulingJob", OverrideType.HaulingJobEntry);
-                        newOverride.haulingJobEntryListOverride = haulingJobList[i];
-
-                        haullingJobRenders.Add(PaperRenderer.active.RenderPaper("HaulingJob", new List<Override>() { newOverride }));
-                    }
-                }
                 for (int i = 0; i < monitorArmList.Count; i++)
                 {
                     monitorArmList[i].EnableMonitor();
-                    monitorArmList[i].printer.AddNotification(haullingJobRenders[i], float.MaxValue);
+
+                    Override newOverride1 = new Override("HaulingJob", OverrideType.HaulingJobEntry);
+                    newOverride1.haulingJobOverride = HaulingJobManager.generatedHaulingJobList[i];
+
+                    monitorArmList[i].printer.AddNotification(PaperRenderer.active.RenderPaper("HaulingJob", new List<Override>() { newOverride1 }), float.MaxValue);
 
                     int index = i;
                     monitorArmList[i].onInteract.AddListener(() =>
@@ -103,6 +105,8 @@ public class HaulingJobMonitorHandler : MonoBehaviour
                             }
                         }
                         ResetMonitors();
+
+                        LoadHaulingJob(HaulingJobManager.generatedHaulingJobList[index]);
                     });
                 }
                 break;
@@ -120,6 +124,15 @@ public class HaulingJobMonitorHandler : MonoBehaviour
 
             if (currentState == State.HaullingJobChosen)
                 monitor.DisableButton();
+        }
+    }
+    public void LoadHaulingJob(HaulingJob haulingJob)
+    {
+        foreach (HaulingJobEntry haulingJobEntry in haulingJob.haulingJobEntryList)
+        {
+            RailCar railCar = Train.playerTrain.AddRailCar(haulingJobEntry.railCar, 2); // 2 because 0-locomotive, 1-tender
+
+            railCar.SetCargo(haulingJobEntry.cargo, haulingJobEntry.pay * 0.6f, haulingJobEntry.pay * 0.4f);
         }
     }
 }

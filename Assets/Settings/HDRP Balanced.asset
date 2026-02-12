@@ -41,11 +41,11 @@ MonoBehaviour:
     maximumWaterDecalCount: 48
     waterScriptInteractionsMode: 0
     waterFullCPUSimulation: 0
-    supportComputeThickness: 0
-    computeThicknessResolution: 1
+    supportComputeThickness: 1
+    computeThicknessResolution: 2
     computeThicknessLayerMask:
       serializedVersion: 2
-      m_Bits: 0
+      m_Bits: 262144
     supportDistortion: 1
     supportTransparentBackface: 1
     supportTransparentDepthPrepass: 1
@@ -307,9 +307,9 @@ MonoBehaviour:
       - 1
       Fog_ControlMode: 000000000000000000000000
       Fog_Budget:
-      - 0.166
-      - 0.333
-      - 0.666
+      - 0.125
+      - 0.25
+      - 0.5
       Fog_DepthRatio:
       - 0.5
       - 0.5

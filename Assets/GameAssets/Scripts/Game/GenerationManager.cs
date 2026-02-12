@@ -173,6 +173,9 @@ public class GenerationManager : MonoBehaviour
     }
     private void GenerateStation()
     {
+        //Generate new hauling jobs
+        HaulingJobManager.active.GenerateNewHaulingJobList(3);
+
         //Pre Station Track
         TrackSection generatedSection = GenerateStraightSection(playerTrain.GetConsistLenght() + 5f);
         SpawnStructureNearTrack(generatedSection.length, generatedSection, preStationSO);

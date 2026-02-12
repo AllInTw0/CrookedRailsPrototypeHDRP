@@ -1,18 +1,37 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
+public class HaulingJob
+{
+    public List<HaulingJobEntry> haulingJobEntryList;
+    public float distance;
+    public float GetConsistLength()
+    {
+        float sum = 0f;
+        for (int i = 0; i < haulingJobEntryList.Count; i++)
+        {
+            RailCar prefabScript = haulingJobEntryList[i].railCar.prefab.GetComponent<RailCar>();
+            sum += prefabScript.frontLength + prefabScript.backLength;
+            if (i != haulingJobEntryList.Count - 1)
+                sum += Train.playerTrain.couplerLength;
+        }
+        return sum;
+    }
+}
+public class HaulingJobEntry
+{
+    public CargoSO cargo;
+    public RailCarSO railCar;
+
+    public float weight;
+    public float pay;
+}
 public class HaulingJobManager : MonoBehaviour
 {
     public static HaulingJobManager active;
-    public class HaulingJobEntry
-    {
-        public CargoSO cargo;
-        public RailCarSO railCar;
 
-        public float weight;
-        public float pay;
-    }
-
+    public static List<HaulingJob> generatedHaulingJobList = new List<HaulingJob>();
 
     [SerializeField]
     private List<CargoSO> haulingCargoInfoList = new List<CargoSO>();
@@ -24,8 +43,21 @@ public class HaulingJobManager : MonoBehaviour
     private void Awake()
     {
         active = this;
+        GenerateNewHaulingJobList(3);
     }
-    public List<HaulingJobEntry> GenerateHaulingJob(float maxCargoDangerLevel, float targetDangerLevel, float mixedLevel, int maxCargoCount, int currentLevel)
+    public void GenerateNewHaulingJobList(int count)
+    {
+        List<HaulingJob> haulingJobList = new List<HaulingJob>();
+
+        for (int i = 0; i < count; i++)
+        {
+            haulingJobList.Add(GenerateHaulingJob(i * 0.5f, i * 1f, 0.4f, 8 - i * 2, 1));
+        }
+
+        generatedHaulingJobList = haulingJobList;
+
+    }
+    public HaulingJob GenerateHaulingJob(float maxCargoDangerLevel, float targetDangerLevel, float mixedLevel, int maxCargoCount, int currentLevel)
     {
         //Pick first cargo
         CargoSO firstCargo;
@@ -92,7 +124,12 @@ public class HaulingJobManager : MonoBehaviour
         }
         Debug.Log(debugString);
 
-        return haulingJobEntryList;
+        HaulingJob haulingJob = new HaulingJob();
+        haulingJob.haulingJobEntryList = haulingJobEntryList;
+
+        haulingJob.distance = Random.Range(1250, 2500);
+
+        return haulingJob;
         
     }
 
