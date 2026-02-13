@@ -13,7 +13,7 @@ public class MonitorArm : AnimationPlayer
     private AnimationPlayer buttonAnimationPlayer;
     [SerializeField]
     private EventInteractable buttonInteractable;
-    [Header("Light")]
+    [Header("Printer")]
     [SerializeField]
     public Printer printer;
 
