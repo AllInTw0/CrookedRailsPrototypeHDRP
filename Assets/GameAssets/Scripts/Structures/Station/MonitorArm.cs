@@ -5,9 +5,7 @@ public class MonitorArm : AnimationPlayer
 {
     [Header("Light")]
     [SerializeField]
-    private Light monitorLight;
-    [SerializeField]
-    private float turnOnOffTime;
+    private Flickerer lightFlickerer;
     [Header("Button")]
     [SerializeField]
     private AnimationPlayer buttonAnimationPlayer;
@@ -19,9 +17,6 @@ public class MonitorArm : AnimationPlayer
 
     public UnityEvent onInteract;
 
-    private float time;
-    private bool lightOn;
-
     private bool monitorEnabled;
 
     private void Start()
@@ -29,31 +24,13 @@ public class MonitorArm : AnimationPlayer
         if (buttonInteractable != null) buttonInteractable.interactEvent.AddListener(() => { onInteract.Invoke(); });
         DisableButton();
     }
-    private void Update()
-    {
-        if(time <= turnOnOffTime)
-        {
-            time += Time.deltaTime;
-            float normlized = (1f-(time / turnOnOffTime)) * 0.5f;
-            float pow = normlized * normlized;
-            int num = Mathf.RoundToInt(pow * 10f);
-
-            monitorLight.enabled = (num % 2 == 0);
-        }
-        else
-        {
-            monitorLight.enabled = lightOn;
-        }
-    }
     public void TurnOnLight()
     {
-        time = 0f;
-        lightOn = true;
+        lightFlickerer.TurnOn();
     }
     public void TurnOffLight()
     {
-        time = turnOnOffTime;
-        lightOn = false;
+        lightFlickerer.TurnOff();
     }
     public void EnableButton()
     {

@@ -77,7 +77,11 @@ public class Printer : MonoBehaviour
     {
         return true;
     }
-
+    public void ClearNotifications()
+    {
+        if (activeNotification != null) activeNotification.time = 0f;
+        notificationQueList = new List<Notification>();
+    }
     public void AddNotification(Texture2D texture, float length = 5f)
     {
         notificationQueList.Add(new Notification(texture, length));

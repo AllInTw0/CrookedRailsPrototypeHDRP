@@ -1,8 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.AI.Navigation;
 using UnityEngine;
-using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
 public class GenerationManager : MonoBehaviour
@@ -52,12 +52,18 @@ public class GenerationManager : MonoBehaviour
         GenerateStart();
     }
 
+    private IEnumerator BuildNavMesh()
+    {
+        yield return new WaitForEndOfFrame();
+        navMeshSurface.BuildNavMesh();
+        Debug.Log("Building Nav Mesh");
+    }
     private void Update()
     {
         if (generateNavMesh)
         {
             generateNavMesh = false;
-            navMeshSurface.BuildNavMesh();
+            StartCoroutine(BuildNavMesh());
         }
 
         int sectionsAhead = 0;
@@ -193,6 +199,7 @@ public class GenerationManager : MonoBehaviour
         generatedSection = GenerateStraightSection(stationSpeedTrackDistance);
         generatedSection.SetAutoStop(generatedSection.length - 1f, AutoStopType.Front);
 
+        generateNavMesh = true;
         stationGenerated = true;
     }
     private TrackSection GenerateStraightSection(float distance, float handleLength = 10f)

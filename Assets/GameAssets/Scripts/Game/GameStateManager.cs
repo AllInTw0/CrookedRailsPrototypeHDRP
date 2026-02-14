@@ -8,6 +8,8 @@ public class GameStateManager : MonoBehaviour
     public static bool isStartingLocationSpawned;
     public static bool isStationSpawned;
 
+    public static int currentLevel = 1;
+
     public static bool canEnemiesSpawn
     {
         get
@@ -19,6 +21,6 @@ public class GameStateManager : MonoBehaviour
 
     private void Start()
     {
-        
+        Money.SetStartingMoney();
     }
 }

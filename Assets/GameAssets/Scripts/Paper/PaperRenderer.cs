@@ -11,6 +11,7 @@ public enum OverrideType
     Text,
     HaulingJobEntry,
     HaulReceipt,
+    RawImageTexture,
 }
 public class Override
 {
@@ -19,6 +20,7 @@ public class Override
     public string stringOverride;
     public HaulingJob haulingJobOverride;
     public List<CargoInfo> cargoListOverride;
+    public Texture2D textureOverride;
     public Override(string targetName, OverrideType overrideType, string stringOverride = "")
     {
         this.targetName = targetName;
@@ -89,7 +91,9 @@ public class PaperRenderer : MonoBehaviour
             {
                 if (overrideInfo.overrideType == OverrideType.Text)
                     overrideEntry.objectRefrence.GetComponent<TMP_Text>().text = overrideInfo.stringOverride;
-                if (overrideInfo.overrideType == OverrideType.HaulingJobEntry)
+                else if (overrideInfo.overrideType == OverrideType.RawImageTexture)
+                    overrideEntry.objectRefrence.GetComponent<RawImage>().texture = overrideInfo.textureOverride;
+                else if (overrideInfo.overrideType == OverrideType.HaulingJobEntry)
                 {
                     float listHeight = 6.5f; //Hard coded is bad but whatever
                     float heigth = Mathf.Clamp(listHeight / overrideInfo.haulingJobOverride.haulingJobEntryList.Count, 0f, 1f);
@@ -119,7 +123,7 @@ public class PaperRenderer : MonoBehaviour
                         destroyList.Add(overrideEntry.objectRefrence.GetChild(i).gameObject);
                     }
                 }
-                if (overrideInfo.overrideType == OverrideType.HaulReceipt)
+                else if (overrideInfo.overrideType == OverrideType.HaulReceipt)
                 {
                     float listHeight = 6.5f; //Hard coded is bad but whatever
                     float heigth = Mathf.Clamp(listHeight / overrideInfo.cargoListOverride.Count, 0f, 1f);

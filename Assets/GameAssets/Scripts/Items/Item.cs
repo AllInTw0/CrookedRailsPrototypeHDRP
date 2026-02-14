@@ -107,4 +107,10 @@ public class Item : Interactable
         }
         interactableCollider.enabled = true;
     }
+
+    public static void SpawnItem(ItemSO itemSO, Vector3 pos, Quaternion rot)
+    {
+        Transform copy = Instantiate(itemSO.prefab,pos,rot).transform;
+        copy.GetComponent<Item>().DropFromPos(pos);
+    }
 }

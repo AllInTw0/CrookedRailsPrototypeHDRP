@@ -71,10 +71,7 @@ public class HaulingJobMonitorHandler : MonoBehaviour
                             sum += cargoList[i].GetPaySum();
                     }
 
-                    Override newOverride = new Override("Sum", OverrideType.Text);
-                    newOverride.stringOverride = sum + "$";
-
-                    MiniPrinter.active.AddNotification(PaperRenderer.active.RenderPaper("Receipt", new List<Override>() { newOverride }));
+                    Money.AddMoney(Mathf.RoundToInt(sum));
 
                     Train.playerTrain.RemoveNonPlayerRailCars();
 

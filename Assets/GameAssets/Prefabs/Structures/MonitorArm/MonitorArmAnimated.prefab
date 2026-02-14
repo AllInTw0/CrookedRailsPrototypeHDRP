@@ -194,11 +194,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 230901894305640619, guid: 8d5772772c7c43940bfcb0993b018148, type: 3}
       propertyPath: m_Intensity
-      value: 1.3793428
+      value: 4.244132
+      objectReference: {fileID: 0}
+    - target: {fileID: 230901894305640619, guid: 8d5772772c7c43940bfcb0993b018148, type: 3}
+      propertyPath: m_AreaSize.x
+      value: 1.55
+      objectReference: {fileID: 0}
+    - target: {fileID: 230901894305640619, guid: 8d5772772c7c43940bfcb0993b018148, type: 3}
+      propertyPath: m_AreaSize.y
+      value: 2.05
       objectReference: {fileID: 0}
     - target: {fileID: 230901894305640619, guid: 8d5772772c7c43940bfcb0993b018148, type: 3}
       propertyPath: m_Lightmapping
       value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 230901894305640619, guid: 8d5772772c7c43940bfcb0993b018148, type: 3}
+      propertyPath: m_ColorTemperature
+      value: 6500
+      objectReference: {fileID: 0}
+    - target: {fileID: 230901894305640619, guid: 8d5772772c7c43940bfcb0993b018148, type: 3}
+      propertyPath: m_BoundingSphereOverride.w
+      value: 2.2850099
       objectReference: {fileID: 0}
     - target: {fileID: 1417519089273225566, guid: 8d5772772c7c43940bfcb0993b018148, type: 3}
       propertyPath: m_LocalRotation.x
@@ -215,6 +231,10 @@ PrefabInstance:
     - target: {fileID: 1673283749688507174, guid: 8d5772772c7c43940bfcb0993b018148, type: 3}
       propertyPath: m_LocalRotation.z
       value: -0.33810264
+      objectReference: {fileID: 0}
+    - target: {fileID: 2155561421242423222, guid: 8d5772772c7c43940bfcb0993b018148, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: 2630787139832014319, guid: 8d5772772c7c43940bfcb0993b018148, type: 3}
       propertyPath: m_Positions.Array.data[0].x
@@ -846,6 +866,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7582436392874989887, guid: 8d5772772c7c43940bfcb0993b018148, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4352998371666432055}
+    - targetCorrespondingSourceObject: {fileID: 7582436392874989887, guid: 8d5772772c7c43940bfcb0993b018148, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8704593307939713182}
     - targetCorrespondingSourceObject: {fileID: 6181697025409570822, guid: 8d5772772c7c43940bfcb0993b018148, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4707414934866251053}
@@ -875,9 +898,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2442276398636648b422d18e59e9644, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScrollingPrinter
---- !u!108 &4203363485398052928 stripped
-Light:
-  m_CorrespondingSourceObject: {fileID: 230901894305640619, guid: 8d5772772c7c43940bfcb0993b018148, type: 3}
+--- !u!1 &5423023750384974344 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8224557545776298723, guid: 8d5772772c7c43940bfcb0993b018148, type: 3}
   m_PrefabInstance: {fileID: 4134600078326415595}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &5790280452442692052 stripped
@@ -901,8 +924,7 @@ MonoBehaviour:
   defaultAnimName: startPose1
   animName: move1
   speed: 1
-  monitorLight: {fileID: 4203363485398052928}
-  turnOnOffTime: 0.5
+  lightFlickerer: {fileID: 8704593307939713182}
   buttonAnimationPlayer: {fileID: 8220391147781439745}
   buttonInteractable: {fileID: 3455489789800410078}
   printer: {fileID: 3822090304529241172}
@@ -931,6 +953,21 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &8704593307939713182
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5790280452442692052}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1a43c1abdb6bed4bbae473f8dc5970f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Flickerer
+  turnOnOffTime: 0.5
+  objectList:
+  - {fileID: 5423023750384974344}
 --- !u!1 &7829719523083327725 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6181697025409570822, guid: 8d5772772c7c43940bfcb0993b018148, type: 3}
