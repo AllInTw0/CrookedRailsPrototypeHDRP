@@ -17,6 +17,7 @@ MonoBehaviour:
   slotCount: 1
   maxCount: 10
   isTool: 0
+  description: Ammo for the shotgun.
   offset: {x: 0.1, y: 0.2, z: 0.2}
   origin: {x: -0.02, y: 0.05, z: 0}
   rotation: {x: 0, y: 0, z: 0}

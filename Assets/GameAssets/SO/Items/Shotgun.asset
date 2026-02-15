@@ -17,6 +17,7 @@ MonoBehaviour:
   slotCount: 2
   maxCount: 1
   isTool: 1
+  description: A powerfull starter weapon.
   offset: {x: -0.95, y: 0, z: 0.065}
   origin: {x: 0, y: 0, z: 0.065}
   rotation: {x: -25, y: 0, z: 0}

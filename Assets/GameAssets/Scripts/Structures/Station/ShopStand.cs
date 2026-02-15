@@ -8,7 +8,11 @@ public class ShopStand : AnimationPlayer
     [SerializeField]
     private Flickerer glowFlickerer;
     [SerializeField]
-    private Transform glowCenter;
+    private Transform glow;
+    [SerializeField]
+    private float glowRadius;
+    [SerializeField]
+    private float spinSpeed;
     [Header("Button")]
     [SerializeField]
     private AnimationPlayer buttonAnimationPlayer;
@@ -40,9 +44,14 @@ public class ShopStand : AnimationPlayer
         {
             if(shopItem.stock <= 0 && outOfStock == false)
             {
-                DisableButton();
-                glowFlickerer.TurnOff();
+                //DisableButton();
+                //glowFlickerer.TurnOff();
+                DisableStand();
                 outOfStock = true;
+            }
+            if(shopItem.linkedShop.selectedShopItem == shopItem)
+            {
+                glow.localRotation *= Quaternion.Euler(0f, Time.deltaTime * spinSpeed, 0f);
             }
         }
     }
@@ -79,13 +88,20 @@ public class ShopStand : AnimationPlayer
     {
         this.shopItem = shopItem;
 
-        Transform copy = Instantiate(shopItem.itemInfo.prefab,glowCenter).transform;
+        Transform copy = Instantiate(shopItem.itemInfo.prefab,glow).transform;
 
         if (copy.TryGetComponent(out Item item)) item.enabled = false;
         copy.gameObject.layer = 0;
 
-        copy.localPosition = Vector3.zero;
-        copy.localRotation = Quaternion.identity;
+        //Set pos and scale based on box collider
+        BoxCollider boxCollider = copy.GetComponent<BoxCollider>();
+
+        copy.localPosition = -boxCollider.center;
+
+        float scale = Mathf.Max(Mathf.Sqrt(boxCollider.size.x * boxCollider.size.x + boxCollider.size.y * boxCollider.size.y), Mathf.Sqrt(boxCollider.size.x * boxCollider.size.x + boxCollider.size.z * boxCollider.size.z), Mathf.Sqrt(boxCollider.size.y * boxCollider.size.y + boxCollider.size.z * boxCollider.size.z));
+        copy.localScale = Vector3.one * Mathf.Clamp((glowRadius / scale) * 2f, 0f, 2.5f);
+
+        copy.localRotation = Quaternion.Euler(shopItem.itemInfo.rotation);
 
         nameText.text = shopItem.itemInfo.itemName;
         priceText.text = shopItem.price + "$";

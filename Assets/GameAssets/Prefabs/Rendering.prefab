@@ -683,7 +683,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: -9}
-  m_SizeDelta: {x: -0.39999992, y: 1}
+  m_SizeDelta: {x: -0.5000001, y: 1}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &7956177734817582273
 CanvasRenderer:
@@ -740,7 +740,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 0.7
+  m_fontSize: 0.65
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -4318,7 +4318,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: -5}
-  m_SizeDelta: {x: -0.39999992, y: 4}
+  m_SizeDelta: {x: -0.5000001, y: 4}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &1091340952329758812
 CanvasRenderer:
@@ -5975,7 +5975,7 @@ MonoBehaviour:
   clearDepth: 1
   volumeLayerMask:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 0
   volumeAnchorOverride: {fileID: 0}
   antialiasing: 0
   SMAAQuality: 2
@@ -8212,7 +8212,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Job Reciept
+  m_text: Job Receipt
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 3382481b98028f04fb8d832a61527bad, type: 2}
   m_sharedMaterial: {fileID: -1468209428814183147, guid: 3382481b98028f04fb8d832a61527bad, type: 2}

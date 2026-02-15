@@ -17,6 +17,8 @@ MonoBehaviour:
   slotCount: 2
   maxCount: 1
   isTool: 1
+  description: Repair broken train parts or build a sentry to defend your train.
+    Can be used as a melee weapon.
   offset: {x: -0.4, y: 0.1, z: 0.05}
   origin: {x: 0, y: 0.1, z: 0.05}
   rotation: {x: 30, y: 0, z: 0}

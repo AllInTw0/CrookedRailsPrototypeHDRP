@@ -5,13 +5,13 @@ public class ItemGun : Item
     //Variables
     [Header("Gun")] 
     [SerializeField] 
-    private int clipSize = 2;
+    public int clipSize = 2;
     [SerializeField] 
-    private ItemSO ammoItem;
+    public ItemSO ammoItem;
     [SerializeField] 
-    private int bulletCount = 1;
+    public int bulletCount = 1;
     [SerializeField] 
-    private float bulletDamage = 1;
+    public float bulletDamage = 1;
     [SerializeField] 
     private float spread = 0.05f;
     [SerializeField] 

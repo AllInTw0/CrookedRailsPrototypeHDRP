@@ -210,6 +210,11 @@ public class Train : MonoBehaviour
     {
         return frontTrackSection;
     }
+    public TrackSection GetBackTrackSection()
+    {
+        TrackManager.active.GetTrackSectionFromProgress(sectionProgress - consistLength, frontTrackSection, out TrackSection newSection, out float newSectionProgress);
+        return newSection;
+    }
     public float GetMaxDeceleration()
     {
         return controlls.locoBreakDeceleration;

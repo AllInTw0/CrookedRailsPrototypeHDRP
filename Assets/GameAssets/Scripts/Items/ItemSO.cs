@@ -12,6 +12,9 @@ public class ItemSO : ScriptableObject
     [Header("Tool Only")]
     public bool isTool;
 
+    [Header("Description")]
+    public string description;
+
     [Header("Icon Rendering")] 
     public Vector3 offset = new Vector3(0.5f,0.5f,0.5f);
     public Vector3 origin;

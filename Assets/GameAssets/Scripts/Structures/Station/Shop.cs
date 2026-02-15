@@ -59,7 +59,8 @@ public class Shop : MonoBehaviour
 
     private List<ShopItem> shopItemList;
 
-    private ShopItem selectedShopItem;
+    [HideInInspector]
+    public ShopItem selectedShopItem;
 
     private void Start()
     {
@@ -170,7 +171,6 @@ public class Shop : MonoBehaviour
         shopMonitor.EnableButton();
         RenderMonitorPaper();     
     }
-
     private void RenderMonitorPaper()
     {
         shopMonitor.EnableMonitor();
@@ -181,11 +181,34 @@ public class Shop : MonoBehaviour
         Override override2 = new Override("ItemIcon", OverrideType.RawImageTexture);
         override2.textureOverride = selectedShopItem.itemInfo.icon;
         Override override3 = new Override("ItemDescription", OverrideType.Text);
-        override3.stringOverride = selectedShopItem.itemInfo.itemName;
+        override3.stringOverride = GetDescription(selectedShopItem.itemInfo);
         Override override4 = new Override("ItemShopStats", OverrideType.Text);
         override4.stringOverride = "Stock:" + selectedShopItem.stock + " Price:" + selectedShopItem.price + "$";
 
         shopMonitor.printer.AddNotification(PaperRenderer.active.RenderPaper("ItemInfo", new List<Override>() { override1 , override2, override3, override4}), float.MaxValue);
+    }
+    private string GetDescription(ItemSO itemInfo)
+    {
+        string description = itemInfo.description;
+
+        Item itemScript = itemInfo.prefab.GetComponent<Item>();
+        if(itemScript is ItemGun)
+        {
+            ItemGun gunScript = (ItemGun)itemScript;
+            description += "\nSTATS:";
+            description += "\nAmmo: " + gunScript.ammoItem.itemName;
+            description += "\nClip Size: " + gunScript.clipSize;
+            description += "\nBullet Damage: " + gunScript.bulletDamage;
+            description += "\nBullet Count: " + gunScript.bulletCount;
+        }
+        if (itemScript is ItemMelee)
+        {
+            ItemMelee meleeScript = (ItemMelee)itemScript;
+            description += "\nSTATS:";
+            description += "\nDamage: " + meleeScript.damage;
+            description += "\nRange: " + meleeScript.range +"m";
+        }
+        return description;
     }
     public void PlayerEntered()
     {

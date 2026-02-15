@@ -221,11 +221,22 @@ public class TrackManager : MonoBehaviour
         }
         return false;
     }
-    public TrackSection RemoveAtIndexAndReturn(int index = 0)
+    //public TrackSection RemoveAtIndexAndReturn(int index = 0)
+    //{
+    //    TrackSection section = trackSectionList[index];
+    //    trackSectionList.RemoveAt(index);
+    //    return section;
+    //}
+    public void DestroyTrackSection(TrackSection section)
     {
-        TrackSection section = trackSectionList[index];
-        trackSectionList.RemoveAt(index);
-        return section;
+        trackSectionList.Remove(section);
+        if (section.nextSection != null) section.nextSection.previousSection = null;
+        if (section.previousSection != null) section.previousSection.nextSection = null;
+
+        foreach (var obj in section.associatedObjects)
+        {
+            Destroy(obj);
+        }
     }
     //Get Position On Path
     public static Vector3 GetPathPosition(List<PathPoint> path, float progress)

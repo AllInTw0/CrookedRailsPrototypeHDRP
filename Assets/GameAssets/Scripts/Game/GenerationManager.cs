@@ -67,20 +67,19 @@ public class GenerationManager : MonoBehaviour
         }
 
         int sectionsAhead = 0;
-        TrackSection trainSection = playerTrain.GetFrontTrackSection();
-        for (int i = TrackManager.active.trackSectionList.Count-1; i >= 0; i--)
+        TrackSection trackSection = playerTrain.GetFrontTrackSection();
+        while(trackSection.nextSection != null)
         {
-            if (TrackManager.active.trackSectionList[i] == trainSection)
-                break;
             sectionsAhead++;
+            trackSection = trackSection.nextSection;
         }
 
         int sectionsBehind = 0;
-        for (int i = 0; i < TrackManager.active.trackSectionList.Count; i++)
+        trackSection = playerTrain.GetBackTrackSection();
+        while (trackSection.previousSection != null)
         {
-            if (TrackManager.active.trackSectionList[i] == trainSection)
-                break;
             sectionsBehind++;
+            trackSection = trackSection.previousSection;
         }
 
         if (stationGenerated == false && sectionsAhead < generatedSectionsAheadOfPlayer)
@@ -91,14 +90,8 @@ public class GenerationManager : MonoBehaviour
         if (sectionsBehind > generatedSectionsBehindPlayer)
         {
             Debug.Log("Destroy Section");
-            TrackSection section = TrackManager.active.RemoveAtIndexAndReturn(0);
-            foreach (var obj in section.associatedObjects)
-            {
-                Destroy(obj);
-            }
-            
-            //playerTrain.OffsetProgress(-section.length);
-            
+            TrackManager.active.DestroyTrackSection(trackSection);
+
             GameStateManager.isStartingLocationSpawned = false;
         }
     }
