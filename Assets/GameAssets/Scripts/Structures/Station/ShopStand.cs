@@ -23,6 +23,9 @@ public class ShopStand : AnimationPlayer
     private TMP_Text nameText;
     [SerializeField]
     private TMP_Text priceText;
+    [Header("Missing")]
+    [SerializeField]
+    private GameObject missingPrefab;
 
     public UnityEvent onInteract;
 
@@ -88,22 +91,25 @@ public class ShopStand : AnimationPlayer
     {
         this.shopItem = shopItem;
 
-        Transform copy = Instantiate(shopItem.itemInfo.prefab,glow).transform;
+        if (shopItem.itemInfo.prefab != null || missingPrefab != null)
+        {
+            Transform copy = Instantiate(shopItem.itemInfo.prefab != null ? shopItem.itemInfo.prefab : missingPrefab, glow).transform;
 
-        if (copy.TryGetComponent(out Item item)) item.enabled = false;
-        copy.gameObject.layer = 0;
+            if (copy.TryGetComponent(out Item item)) item.enabled = false;
+            copy.gameObject.layer = 0;
 
-        //Set pos and scale based on box collider
-        BoxCollider boxCollider = copy.GetComponent<BoxCollider>();
+            //Set pos and scale based on box collider
+            BoxCollider boxCollider = copy.GetComponent<BoxCollider>();
 
-        copy.localPosition = -boxCollider.center;
+            float scale = Mathf.Max(Mathf.Sqrt(boxCollider.size.x * boxCollider.size.x + boxCollider.size.y * boxCollider.size.y), Mathf.Sqrt(boxCollider.size.x * boxCollider.size.x + boxCollider.size.z * boxCollider.size.z), Mathf.Sqrt(boxCollider.size.y * boxCollider.size.y + boxCollider.size.z * boxCollider.size.z));
+            scale = Mathf.Clamp((glowRadius / scale) * 2f, 0f, 2.5f);
+            copy.localScale = Vector3.one * scale;
 
-        float scale = Mathf.Max(Mathf.Sqrt(boxCollider.size.x * boxCollider.size.x + boxCollider.size.y * boxCollider.size.y), Mathf.Sqrt(boxCollider.size.x * boxCollider.size.x + boxCollider.size.z * boxCollider.size.z), Mathf.Sqrt(boxCollider.size.y * boxCollider.size.y + boxCollider.size.z * boxCollider.size.z));
-        copy.localScale = Vector3.one * Mathf.Clamp((glowRadius / scale) * 2f, 0f, 2.5f);
+            copy.localPosition = -boxCollider.center * scale;
 
-        copy.localRotation = Quaternion.Euler(shopItem.itemInfo.rotation);
-
-        nameText.text = shopItem.itemInfo.itemName;
+            copy.localRotation = Quaternion.Euler(shopItem.itemInfo.rotation);
+        }
+        nameText.text = shopItem.itemInfo.GetName();
         priceText.text = shopItem.price + "$";
 
         EnableStand();

@@ -97,6 +97,7 @@ public class PlayerInventory : MonoBehaviour
         if (sum <= equippedItem.itemInfo.maxCount)
         {
             equippedItem.count = sum;
+            item.count = 0;
             Destroy(item.gameObject);
         }
         else
@@ -146,6 +147,40 @@ public class PlayerInventory : MonoBehaviour
         Debug.Log(item + " Dropped As Item");
     }
 
+    public bool RemoveItem(ItemSO itemInfo, out int itemCountRemoved, int targetCount = 1)
+    {
+        itemCountRemoved = 0;
+
+        //Loop through items in inventory and get the amount of ammo needed
+        for (int i = 0; i < items.Count; i++)
+        {
+            Item item = items[i];
+            if (item.itemInfo == itemInfo)
+            {
+                int ammoToFind = targetCount - itemCountRemoved;
+                for (int j = 0; j < ammoToFind; j++)
+                {
+                    item.count--;
+                    itemCountRemoved++;
+                    if (item.count <= 0)
+                    {
+                        DestroyItem(item);
+                        i--;
+                        break;
+                    }
+
+                    if (itemCountRemoved == targetCount)
+                        break;
+                }
+            }
+            if (itemCountRemoved == targetCount)
+                break;
+        }
+
+        InventoryUI.active.UpdateItemIcons();
+
+        return itemCountRemoved != 0;
+    }
     public void DestroyItem(Item item)
     {
         items.Remove(item);

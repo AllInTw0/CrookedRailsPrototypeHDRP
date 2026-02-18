@@ -4,14 +4,14 @@ using static UnityEngine.ParticleSystem;
 
 public class ShopItem
 {
-    public ItemSO itemInfo;
+    public ShopItemSO itemInfo;
     public int price;
     public int stock;
 
     public Shop linkedShop;
 
 
-    public ShopItem(ItemSO itemInfo, int price, int stock, Shop linkedShop)
+    public ShopItem(ShopItemSO itemInfo, int price, int stock, Shop linkedShop)
     {
         this.itemInfo = itemInfo;
         this.price = price;
@@ -22,7 +22,7 @@ public class ShopItem
 [System.Serializable]
 public class ShopItemEntry
 {
-    public ItemSO itemInfo;
+    public ShopItemSO itemInfo;
     [Header("Params")]
     public AnimationCurve probabilityCurve;
     public AnimationCurve priceCurve;
@@ -56,6 +56,9 @@ public class Shop : MonoBehaviour
     [Header("Items")]
     [SerializeField]
     private List<ShopItemEntry> shopItemEntryList;
+    [Header("Missing")]
+    [SerializeField]
+    private Texture2D missingIcon;
 
     private List<ShopItem> shopItemList;
 
@@ -70,9 +73,15 @@ public class Shop : MonoBehaviour
             {
                 if (selectedShopItem.stock > 0 && Money.CanAfford(selectedShopItem.price))
                 {
-                    Vector3 pos = itemSpawnPos.position + new Vector3(Random.Range(-0.4f, 0.4f), 0, Random.Range(-0.4f, 0.4f));
-                    Quaternion rot = Quaternion.Euler(Random.Range(-90f, 90), Random.Range(-90f, 90), Random.Range(-90f, 90));
-                    Item.SpawnItem(selectedShopItem.itemInfo, pos, rot);
+                    if (selectedShopItem.itemInfo is ItemSO) {
+                        Vector3 pos = itemSpawnPos.position + new Vector3(Random.Range(-0.4f, 0.4f), 0, Random.Range(-0.4f, 0.4f));
+                        Quaternion rot = Quaternion.Euler(Random.Range(-90f, 90), Random.Range(-90f, 90), Random.Range(-90f, 90));
+                        Item.SpawnItem((ItemSO)selectedShopItem.itemInfo, pos, rot);
+                    }
+                    else if (selectedShopItem.itemInfo is UpgradeSO)
+                    {
+                        TrainUpgradeHandler.active.AddUpgrade((UpgradeSO)selectedShopItem.itemInfo);
+                    }
 
                     selectedShopItem.stock--;
                     Money.AddMoney(-selectedShopItem.price);
@@ -177,9 +186,9 @@ public class Shop : MonoBehaviour
         shopMonitor.printer.ClearNotifications();
 
         Override override1 = new Override("Title", OverrideType.Text);
-        override1.stringOverride = selectedShopItem.itemInfo.itemName;
+        override1.stringOverride = selectedShopItem.itemInfo.GetName();
         Override override2 = new Override("ItemIcon", OverrideType.RawImageTexture);
-        override2.textureOverride = selectedShopItem.itemInfo.icon;
+        override2.textureOverride = selectedShopItem.itemInfo.icon != null ? selectedShopItem.itemInfo.icon : missingIcon;
         Override override3 = new Override("ItemDescription", OverrideType.Text);
         override3.stringOverride = GetDescription(selectedShopItem.itemInfo);
         Override override4 = new Override("ItemShopStats", OverrideType.Text);
@@ -187,26 +196,36 @@ public class Shop : MonoBehaviour
 
         shopMonitor.printer.AddNotification(PaperRenderer.active.RenderPaper("ItemInfo", new List<Override>() { override1 , override2, override3, override4}), float.MaxValue);
     }
-    private string GetDescription(ItemSO itemInfo)
+    private string GetDescription(ShopItemSO itemInfo)
     {
         string description = itemInfo.description;
-
-        Item itemScript = itemInfo.prefab.GetComponent<Item>();
-        if(itemScript is ItemGun)
+        if (itemInfo is ItemSO)
         {
-            ItemGun gunScript = (ItemGun)itemScript;
-            description += "\nSTATS:";
-            description += "\nAmmo: " + gunScript.ammoItem.itemName;
-            description += "\nClip Size: " + gunScript.clipSize;
-            description += "\nBullet Damage: " + gunScript.bulletDamage;
-            description += "\nBullet Count: " + gunScript.bulletCount;
+            Item itemScript = itemInfo.prefab.GetComponent<Item>();
+            if (itemScript is ItemGun)
+            {
+                ItemGun gunScript = (ItemGun)itemScript;
+                description += "\nSTATS:";
+                description += "\nAmmo: " + gunScript.ammoItem.GetName();
+                description += "\nClip Size: " + gunScript.clipSize;
+                description += "\nBullet Damage: " + gunScript.bulletDamage;
+                description += "\nBullet Count: " + gunScript.bulletCount;
+            }
+            if (itemScript is ItemMelee)
+            {
+                ItemMelee meleeScript = (ItemMelee)itemScript;
+                description += "\nSTATS:";
+                description += "\nDamage: " + meleeScript.damage;
+                description += "\nRange: " + meleeScript.range + "m";
+            }
         }
-        if (itemScript is ItemMelee)
+        else if(itemInfo is UpgradeSO)
         {
-            ItemMelee meleeScript = (ItemMelee)itemScript;
-            description += "\nSTATS:";
-            description += "\nDamage: " + meleeScript.damage;
-            description += "\nRange: " + meleeScript.range +"m";
+            description += "\nEFFECT:";
+            foreach (Upgrade upgrade in ((UpgradeSO)itemInfo).upgradeList)
+            {
+                description += "\n" + TrainUpgradeHandler.active.GetUpgradeDescription(upgrade);
+            }
         }
         return description;
     }

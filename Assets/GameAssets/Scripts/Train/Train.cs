@@ -7,6 +7,14 @@ public class Train : MonoBehaviour
 {
     public static Train playerTrain;
 
+    [System.Serializable]
+    public class FuelSource
+    {
+        public TrainStatType consumptionRate;
+        public Health targetHealth;
+        public string fuelName;
+    }
+
     //Variables
     [SerializeField]
     private bool isPlayerTrain;
@@ -16,7 +24,10 @@ public class Train : MonoBehaviour
     public float couplerLength;
     [SerializeField]
     private LocomotiveControls controlls;
-
+    [SerializeField]
+    private List<FuelSource> fuelSourceList;
+    [SerializeField]
+    private float drag = 0.25f;
     //Run Time
     [NonSerialized]
     public float acceleration;
@@ -32,6 +43,7 @@ public class Train : MonoBehaviour
 
     private float maxAutoStopOffset;
     private bool activeSupersonic;
+    private bool autoBreaking;
     private void Start()
     {
         if (isPlayerTrain)
@@ -84,32 +96,68 @@ public class Train : MonoBehaviour
                 {
                     controlls.Break();
                 }
+                autoBreaking = true;
                 nearestAutoStop.ignore = true;
             }
         }
-        if(activeSupersonic && Mathf.Abs(speed) < 0.01f)
+        if (Mathf.Abs(speed) < 0.01f) 
         {
-            activeSupersonic = false;
-            controlls.ActivateSupersonic();
+            if (autoBreaking)
+            {
+                autoBreaking = false;
+
+                //Unfreze players if the train was supersonic
+                PlayerMovement.active.UnFreeze();
+            }
+            if (activeSupersonic)
+            {
+                activeSupersonic = false;
+                controlls.ActivateSupersonic();
+            }
         }
-        //update Speed    
+
+        //Check if derailed
+        bool derailed = false;
+        foreach (RailCar railCar in consist)
+        {
+            if(railCar.derailed)
+            {
+                derailed = true;
+                break;
+            }
+        }
+        if(controlls.currentState == LocomotiveControls.State.derailed)
+        {
+            if (derailed == false)
+                controlls.Unlock();
+        }
+        else if(controlls.currentState == LocomotiveControls.State.normal)
+        {
+            if (derailed)
+                controlls.SetDerailled();
+        }
+
+        //Update Speed    
         if (Mathf.Abs(speed) < Mathf.Abs(maxSpeed) || (speed > 0 && acceleration < 0) || (speed < 0 && acceleration > 0))
         {
             speed += acceleration * Time.deltaTime;
             speed = Mathf.Clamp(speed , -maxSpeed, maxSpeed);
         }
-        
-        if (deceleration > 0f)
+
+        float decel = drag;
+        if (deceleration > 0) decel = deceleration;
+        if (derailed) decel += 2.5f;
+        if (decel > 0f)
         {
             if (speed > 0)
             {
-                speed -= deceleration * Time.deltaTime;
+                speed -= decel * Time.deltaTime;
                 if (speed < 0)
                     speed = 0;
             }
             if (speed < 0)
             {
-                speed += deceleration * Time.deltaTime;
+                speed += decel * Time.deltaTime;
                 if (speed > 0)
                     speed = 0;
             }
@@ -152,6 +200,16 @@ public class Train : MonoBehaviour
             railCar.UpdateRailCar(railCarProgress, railCarSection, distanceTravelled);
 
             railCarProgress -= railCar.backLength + couplerLength;
+        }
+
+        //Fuel
+        if(acceleration > 0f && (controlls == null || controlls.currentState == LocomotiveControls.State.normal))
+        {
+            foreach (FuelSource fuelSource in fuelSourceList)
+            {
+                fuelSource.targetHealth.TakeDamage(distanceTravelled * TrainUpgradeHandler.active.GetStatValue(fuelSource.consumptionRate));
+                //Not having enough fuel handles LocomotiveControls.cs
+            }
         }
     }
 
@@ -215,10 +273,6 @@ public class Train : MonoBehaviour
         TrackManager.active.GetTrackSectionFromProgress(sectionProgress - consistLength, frontTrackSection, out TrackSection newSection, out float newSectionProgress);
         return newSection;
     }
-    public float GetMaxDeceleration()
-    {
-        return controlls.locoBreakDeceleration;
-    }
     public float GetSpeed()
     {
         return speed;
@@ -275,6 +329,21 @@ public class Train : MonoBehaviour
         RecalculateConsistLength();
 
         return railCarCopy;
+    }
+
+    public bool HasEnoughFuel(out string depletedFuelSourceName)
+    {
+        depletedFuelSourceName = "";
+        foreach (FuelSource fuelSource in fuelSourceList)
+        {
+            if (fuelSource.targetHealth.health <= 0)
+            {
+                depletedFuelSourceName = fuelSource.fuelName;
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public void RemoveNonPlayerRailCars()

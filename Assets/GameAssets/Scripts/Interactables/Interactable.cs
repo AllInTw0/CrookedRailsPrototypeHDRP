@@ -9,13 +9,32 @@ public class Interactable : MonoBehaviour
     public Transform iconPosition;
 
     [SerializeField] 
-    private string interactSound = "Click";
+    public string interactSound = "Click";
 
     [HideInInspector]
     public string objectNameOverride;
     [HideInInspector]
     public string actionNameOverride;
 
+    private float objectNameOverrideTime;
+    private float actionNameOverrideTime;
+    private void Update()
+    {
+        UpdateInetractable();
+    }
+    public void UpdateInetractable()
+    {
+        if (objectNameOverride != "")
+        {
+            objectNameOverrideTime -= Time.deltaTime;
+            if (objectNameOverrideTime <= 0f) SetObjectNameOverride();
+        }
+        if (actionNameOverride != "")
+        {
+            actionNameOverrideTime -= Time.deltaTime;
+            if (actionNameOverrideTime <= 0f) SetActionNameOverride();
+        }
+    }
     public virtual bool Interact()
     {
         SoundManager.active.PlayAtPos(iconPosition.position,interactSound);
@@ -36,15 +55,17 @@ public class Interactable : MonoBehaviour
             return actionName;
     }
 
-    public void SetObjectNameOverride(string name = "")
+    public void SetObjectNameOverride(string name = "", float time = float.MaxValue)
     {
         objectNameOverride = name;
         InteractIcon.active.Refresh();
+        objectNameOverrideTime = time;
     }
-    public void SetActionNameOverride(string name = "")
+    public void SetActionNameOverride(string name = "", float time = float.MaxValue)
     {
         actionNameOverride = name;
         InteractIcon.active.Refresh();
+        actionNameOverrideTime = time;
     }
 
     public void ClearOverrides()

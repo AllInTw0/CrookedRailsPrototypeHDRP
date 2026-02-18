@@ -36,6 +36,8 @@ public class RailCar : MonoBehaviour
     public float frontLength = 5f;
     public float backLength = 5f;
     public bool isPlayerRailCar;
+    public float derailVisualAngle = 5f;
+    public Vector3 derailVisualOffset = new Vector3(0.18f,-0.09f,0f);
     //public float wheelLength = 2f;
     public List<RunningGear> railCarRunningGearList;
     [Header("Health")]
@@ -48,7 +50,8 @@ public class RailCar : MonoBehaviour
     //Run Time
     //[NonSerialized]
     //public TrackSection currentFrontSection;
-
+    public bool derailed;
+    private float derailTime;
     private CargoInfo currentCargo;
 
     private void Awake()
@@ -57,12 +60,23 @@ public class RailCar : MonoBehaviour
         currentCargo.railCarRefrence = this;
         currentCargo.railCarHealth = health;
     }
+    private void Update()
+    {
+        derailTime += derailed ? Time.deltaTime : -Time.deltaTime;
+        derailTime = Mathf.Clamp01(derailTime);
+    }
     public void UpdateRailCar(float sectionProgress, TrackSection trackSection, float distanceTravelled)
     {
         foreach (RunningGear runningGear in railCarRunningGearList)
         {
             runningGear.UpdateRunningGearPosition(sectionProgress, trackSection);
             runningGear.UpdateRunningGearRotation(distanceTravelled);
+        }
+
+        if (derailTime != 0)
+        {
+            transform.RotateAround(transform.position, transform.forward, derailTime * -derailVisualAngle);
+            transform.position += (transform.forward * derailVisualOffset.z + transform.right * derailVisualOffset.x + transform.up * derailVisualOffset.y) * derailTime;
         }
     }
     public CargoInfo GetCargoInfo()

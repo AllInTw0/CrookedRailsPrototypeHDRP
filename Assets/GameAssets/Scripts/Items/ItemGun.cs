@@ -73,41 +73,12 @@ public class ItemGun : Item
 
     private void Reload()
     {
-        int ammoFound = 0;
-        
-        //Loop through items in inventory and get the amount of ammo needed
-        for (int i = 0; i < PlayerInventory.active.items.Count; i++)
-        {
-            Item item = PlayerInventory.active.items[i];
-            if (item.itemInfo == ammoItem)
-            {
-                int ammoToFind = (clipSize - clip) - ammoFound;
-                for (int j = 0; j < ammoToFind; j++)
-                {
-                    item.count--;
-                    ammoFound++;
-                    if (item.count <= 0)
-                    {
-                        PlayerInventory.active.DestroyItem(item);
-                        i--;
-                        break;
-                    }
-
-                    if (ammoFound == (clipSize - clip))
-                        break;
-                }
-            } 
-            if (ammoFound == (clipSize - clip))
-                break;
-        }
-        InventoryUI.active.UpdateItemIcons();
-
-        if (ammoFound > 0)
+        if (PlayerInventory.active.RemoveItem(ammoItem, out int itemCountRemoved, clipSize - clip))
         {
             SoundManager.active.PlayAtPos(transform.position, reloadSound);
             PlayerAvatar.active.animator.SetTrigger("Reload");
             coolDown = reloadCoolDown;
-            clip += ammoFound;
+            clip += itemCountRemoved;
         }
         else
         {

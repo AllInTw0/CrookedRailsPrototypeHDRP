@@ -19,7 +19,7 @@ public class ScrollingPrinter : Printer
 
         if(activeNotification != null)
         {
-            Debug.Log("1");
+            //Debug.Log("1");
             if (paperMesh.material.mainTextureOffset.y != 0)
             {
                 paperMesh.material.mainTextureOffset += new Vector2(0, printSpeed * Time.deltaTime);
@@ -29,7 +29,7 @@ public class ScrollingPrinter : Printer
         }
         else
         {
-            Debug.Log("2");
+            //Debug.Log("2");
             if (paperMesh.material.mainTextureOffset.y != 0.5f)
             {
                 paperMesh.material.mainTextureOffset += new Vector2(0, printSpeed * Time.deltaTime);

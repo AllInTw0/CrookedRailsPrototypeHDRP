@@ -588,6 +588,7 @@ MonoBehaviour:
     price: 0
     stock: 0
     randomness: 0
+  missingIcon: {fileID: 2800000, guid: fcb45a163bc448b4db66d51dcf7ee55f, type: 2}
 --- !u!114 &3585015128310410117
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b1fea353dc6f1b448e5869dc3e90a7a, type: 3}
+  m_Name: Firewood
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSO
+  nameOverride: Firewood
+  prefab: {fileID: 7598475369353874153, guid: f96bed87790e06249b755e8d0ed7fd85, type: 3}
+  description: Fuel for the loco
+  offset: {x: -0.35, y: 0.35, z: 0.4}
+  origin: {x: 0, y: 0, z: 0}
+  rotation: {x: -25, y: -150, z: 0}
+  icon: {fileID: 2800000, guid: 79346a8f26903ee468cb2dc5395cc1f8, type: 2}
+  renderLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  slotCount: 1
+  maxCount: 5
+  isTool: 0

@@ -14,14 +14,7 @@ public class LocomotiveControls : MonoBehaviour
     [SerializeField] 
     private LeverInteractable locoBreaks;
     
-    [Header("Values")]
-    [SerializeField] 
-    private float maxSpeed;
-    [SerializeField] 
-    private float maxAcceleration;
-    [SerializeField] 
-    public float locoBreakDeceleration;
-    [Header("Values")]
+    [Header("Supersonic")]
     [SerializeField]
     private float supersonicSpeed;
     [SerializeField]
@@ -33,25 +26,38 @@ public class LocomotiveControls : MonoBehaviour
     private int reverserNotch;
     private int locoBreaksNotch;
 
-    private bool supersonic;
-    private bool locked;
-    private void Update()
+    public enum State
     {
-        if (locked)
+        normal,
+        supersonic,
+        locked,
+        depletedFuel,
+        derailed
+    }
+    [HideInInspector]
+    public State currentState;
+    private void LateUpdate()
+    {
+        if (currentState == State.locked)
         {
             throttle.currentNotch = throttleNotch;
             locoBreaks.currentNotch = locoBreaksNotch;
             reverser.currentNotch = reverserNotch;
             return;
         }
-        else if(supersonic)
+        else if (currentState == State.supersonic)
         {
-            if(throttle.currentNotch > 0)
+            if (throttle.currentNotch > 0)
             {
                 throttleNotch = throttle.notches;
             }
-            if(throttleNotch > 0)
+            if (throttleNotch > 0)
             {
+                if (throttle.actionNameOverride != "")
+                {
+                    //Freeze the players to the train
+                    PlayerMovement.active.Freeze(Train.playerTrain.GetRailCarAtIndex(0));
+                }
                 throttle.SetActionNameOverride("");
                 throttle.currentNotch = throttleNotch;
 
@@ -67,44 +73,81 @@ public class LocomotiveControls : MonoBehaviour
             }
             return;
         }
+        else if (currentState == State.depletedFuel)
+        {
+            //Fuel
+            if (train.HasEnoughFuel(out string depletedFuelSourceName))
+            {
+                throttle.SetActionNameOverride("");
+                throttle.SetLocked(false);
+                currentState = State.normal;
+            }
 
+            //Controlls
+            UpdateThrottle();
+            UpdateBreaks();
+            UpdateReverser();
+        }
+        else if (currentState == State.normal) 
+        {
+            if(train.HasEnoughFuel(out string depletedFuelSourceName) == false)
+            {
+                throttle.SetActionNameOverride("No " + depletedFuelSourceName + "!");
+                throttle.SetLocked(true);
+                throttle.currentNotch = 0;
+                currentState = State.depletedFuel;
+            }
+
+            //Controlls
+            UpdateThrottle();
+            UpdateBreaks();
+            UpdateReverser();
+        }
+    }
+    public void UpdateThrottle()
+    {
         if (throttleNotch != throttle.currentNotch)
         {
             throttleNotch = throttle.currentNotch;
-            
+
             locoBreaks.currentNotch = 0;
             locoBreaksNotch = 0;
-            
-            train.SetMaxSpeed((throttleNotch / (float)throttle.notches) * maxSpeed);
-            if(throttleNotch == 0)
+
+            train.SetMaxSpeed((throttleNotch / (float)throttle.notches) * TrainUpgradeHandler.active.GetStatValue(TrainStatType.Speed));
+            if (throttleNotch == 0)
                 train.SetAcceleration(0f);
             else
-                train.SetAcceleration(reverserNotch == 0 ? maxAcceleration : -maxAcceleration);
-            
+                train.SetAcceleration(reverserNotch == 0 ? TrainUpgradeHandler.active.GetStatValue(TrainStatType.Acceleration) : -TrainUpgradeHandler.active.GetStatValue(TrainStatType.Acceleration));
+
             train.SetDeceleration(0f);
         }
+    }
+    public void UpdateBreaks()
+    {
         if (locoBreaksNotch != locoBreaks.currentNotch)
         {
             locoBreaksNotch = locoBreaks.currentNotch;
 
             throttle.currentNotch = 0;
             throttleNotch = 0;
-            
+
             train.SetMaxSpeed(0f);
             train.SetAcceleration(0f);
-            train.SetDeceleration(locoBreakDeceleration);
+            train.SetDeceleration(TrainUpgradeHandler.active.GetStatValue(TrainStatType.Deceleration));
         }
+    }
+    public void UpdateReverser()
+    {
         if (reverserNotch != reverser.currentNotch)
         {
             reverserNotch = reverser.currentNotch;
-            
-            if(throttleNotch == 0)
+
+            if (throttleNotch == 0)
                 train.SetAcceleration(0f);
             else
-                train.SetAcceleration(reverserNotch == 0 ? maxAcceleration : -maxAcceleration);
+                train.SetAcceleration(reverserNotch == 0 ? TrainUpgradeHandler.active.GetStatValue(TrainStatType.Acceleration) : -TrainUpgradeHandler.active.GetStatValue(TrainStatType.Acceleration));
         }
     }
-
     public void Break()
     {
         throttle.currentNotch = 0;
@@ -115,18 +158,26 @@ public class LocomotiveControls : MonoBehaviour
 
         train.SetMaxSpeed(0f);
         train.SetAcceleration(0f);
-        if(supersonic)
-            train.SetDeceleration(supersonicDeceleration);
-        else
-            train.SetDeceleration(locoBreakDeceleration);
+        train.SetDeceleration(GetDeceleration());
 
-        supersonic = false;
+        //if (supersonic)
+        //{
+        //    //UnFreeze the players from the train
+        //MOVED TO TRAIN.CS
+        //}
+        currentState = State.normal;//supersonic = false;
     }
-
+    public void SetDerailled()
+    {
+        LockControlls();
+        throttle.SetActionNameOverride("Derailed!");
+        currentState = State.derailed;
+    }
     public void LockControlls()
     {
-        locked = true;
         Break();
+
+        currentState = State.locked; //locked = true;   
         reverser.currentNotch = 0;
         reverserNotch = 0;
 
@@ -136,8 +187,9 @@ public class LocomotiveControls : MonoBehaviour
     }
     public void ActivateSupersonic()
     {
-        supersonic = true;
-        locked = false;
+        currentState = State.supersonic;
+        //supersonic = true;
+        //locked = false;
 
         throttle.SetActionNameOverride("Set off");
 
@@ -147,7 +199,8 @@ public class LocomotiveControls : MonoBehaviour
     }
     public void Unlock()
     {
-        locked = false;
+        currentState = State.normal;//locked = false;
+        throttle.SetActionNameOverride("");
         throttle.SetLocked(false);
         locoBreaks.SetLocked(false);
         reverser.SetLocked(false);
@@ -155,9 +208,9 @@ public class LocomotiveControls : MonoBehaviour
 
     public float GetDeceleration()
     {
-        if (supersonic)
+        if (currentState == State.supersonic)
             return supersonicDeceleration;
         else
-            return locoBreakDeceleration;
+            return TrainUpgradeHandler.active.GetStatValue(TrainStatType.Deceleration);
     }
 }

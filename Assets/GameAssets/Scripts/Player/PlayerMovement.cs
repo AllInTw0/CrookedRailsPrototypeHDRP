@@ -289,6 +289,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void CheckGrounded()
     {
+        if (rb.constraints == RigidbodyConstraints.FreezeAll) return;
+
         Debug.DrawRay(transform.position + new Vector3(0, 0.05f, 0),Vector3.down*0.175f);
         if (Physics.Raycast(transform.position + new Vector3(0, 0.05f, 0), Vector3.down, out RaycastHit  hit ,0.175f, groundLayer))
         {
@@ -321,17 +323,24 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public void Freeze()
+    public void Freeze(RailCar lockToRailCar = null)
     {
         rb.constraints = RigidbodyConstraints.FreezeAll;
+
+        if (lockToRailCar != null)
+        {
+            MovingPlatformManager.active.AddEntry(rb, orientation, lockToRailCar.transform, true);
+        }
     }
     public void UnFreeze()
     {
         rb.constraints = RigidbodyConstraints.FreezeRotation;
+        MovingPlatformManager.active.RemoveEntry(transform);
     }
     public void EnableNoclip()
     {
         Freeze();
+        MovingPlatformManager.active.RemoveEntry(transform);
         playerCollider.enabled = false;
         noclip = true;
     }

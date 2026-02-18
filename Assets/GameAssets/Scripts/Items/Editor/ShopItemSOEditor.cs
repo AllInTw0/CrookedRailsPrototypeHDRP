@@ -2,10 +2,10 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.Rendering.HighDefinition;
 
-[CustomEditor(typeof(ItemSO))]
-public class ItemSOEditor : Editor
+[CustomEditor(typeof(ShopItemSO),editorForChildClasses : true)]
+public class ShopItemSOEditor : Editor
 {
-    private ItemSO itemInfo;
+    private ShopItemSO itemInfo;
     
     private GameObject parent;
     private Camera renderCam;
@@ -13,7 +13,7 @@ public class ItemSOEditor : Editor
     private RenderTexture renderTexture;
     void OnEnable()
     {
-        itemInfo = (ItemSO)target;
+        itemInfo = (ShopItemSO)target;
     }
     public override void OnInspectorGUI()
     {
@@ -74,7 +74,7 @@ public class ItemSOEditor : Editor
         texture.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
         texture.Apply();
         
-        AssetDatabase.CreateAsset(texture, "Assets/GameAssets/SO/Items/"+itemInfo.itemName+"Icon.asset");
+        AssetDatabase.CreateAsset(texture, "Assets/GameAssets/SO/Icons/"+itemInfo.GetName()+"Icon.asset");
         itemInfo.icon = texture;
         
     }

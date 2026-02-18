@@ -108,9 +108,14 @@ public class Item : Interactable
         interactableCollider.enabled = true;
     }
 
-    public static void SpawnItem(ItemSO itemSO, Vector3 pos, Quaternion rot)
+    public static Item SpawnItem(ItemSO itemSO, Vector3 pos, Quaternion rot, int stackCount = 1)
     {
         Transform copy = Instantiate(itemSO.prefab,pos,rot).transform;
-        copy.GetComponent<Item>().DropFromPos(pos);
+
+        Item item = copy.GetComponent<Item>();
+        item.DropFromPos(pos);
+        item.count = Mathf.Clamp(stackCount, 1, item.itemInfo.maxCount);
+
+        return item;
     }
 }

@@ -1,16 +1,21 @@
 using UnityEngine;
 
-public class ShopItemSO : MonoBehaviour
+public class ShopItemSO : ScriptableObject
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [Header("Shop Item")]
+    public string nameOverride;
+    public GameObject prefab;
+    public string description;
 
-    // Update is called once per frame
-    void Update()
+    [Header("Icon Rendering")]
+    public Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f);
+    public Vector3 origin;
+    public Vector3 rotation;
+    public Texture2D icon;
+
+    public LayerMask renderLayer;
+    public string GetName()
     {
-        
+        return nameOverride == "" ? this.name : nameOverride;
     }
 }
