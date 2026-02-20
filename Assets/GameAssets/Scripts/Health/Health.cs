@@ -10,6 +10,7 @@ public enum HealthType
 
 public class Health : MonoBehaviour
 {
+    [Header("Health")]
     public HealthType healthType;
     public float health = 100;
     public float maxHealth = 100;

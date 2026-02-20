@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CargoSO
   cargoName: WoodLogs
   cargoPrefab: {fileID: 8865918870207968878, guid: e9fb1446a51eb1545ab1f1de2be72e8b, type: 3}
+  weight: 22.5
   fittingCargo:
   - {fileID: 11400000}
   dangerLevel: 0.01

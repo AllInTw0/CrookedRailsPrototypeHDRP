@@ -13,5 +13,8 @@ MonoBehaviour:
   m_Name: TankCarTwoAxle
   m_EditorClassIdentifier: Assembly-CSharp::RailCarSO
   railCarName: 
+  prefab: {fileID: 0}
+  icon: {fileID: 0}
+  weight: 50
   minLevel: 0
   maxLevel: 4

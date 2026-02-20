@@ -43,11 +43,10 @@ public class GroundEnemy : Enemy
                 }
 
                 //Check for nearby targets
-                if (CheckForTargets(enemyInfo.sightDistance, out Health closestHealth))
+                if (CheckForTargets(out Health closestHealth))
                 {
                     if (IsInPack()) targetPack.AngerPack(closestHealth.transform);
                     else Anger(closestHealth.transform,5f);
-
                 }
                 else
                 {
@@ -67,7 +66,7 @@ public class GroundEnemy : Enemy
                 break;
             case State.Attacking:
                 //Attack player / train
-                if (CheckForTargets(enemyInfo.sightDistance, out Health closestHealth1))
+                if (CheckForTargets(out Health closestHealth1))
                 {
                     SetTarget(closestHealth1.transform, 1f);
                     timmer = 5f;
@@ -111,7 +110,7 @@ public class GroundEnemy : Enemy
         Vector2 randomDir = Random.insideUnitCircle * radius;
         return new Vector3(randomDir.x, 0, randomDir.y);
     }
-    public bool CheckForTargets(float maxDistance, out Health closestHealth)
+    public bool CheckForTargets(out Health closestHealth)
     {
         closestHealth = null;
         float closestDistance = float.PositiveInfinity;
@@ -119,12 +118,12 @@ public class GroundEnemy : Enemy
         {
             foreach (Health health in EnemyManager.active.healthTypeArray[(int)healthWeight.healthType])
             {
-                if (health == this.health)
+                if (health == this.health || health.health <= 0f)
                     continue;
 
                 float distance = Vector3.Distance(transformPos, health.transform.position);
 
-                if (distance < maxDistance && (distance / healthWeight.importanceWeight) < closestDistance)
+                if (distance <= healthWeight.sightDistance && (distance / healthWeight.importanceWeight) < closestDistance)
                 {
                     closestHealth = health;
                     closestDistance = distance / healthWeight.importanceWeight;

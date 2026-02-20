@@ -88,6 +88,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &1901329263910839372
 GameObject:
@@ -157,11 +158,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d717c5d8b6493a43bb0ed6a08bd55ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDamageCollider
-  enemyBehaviour: {fileID: 0}
-  coolDown: 0.6
-  freezeTime: 0.4
+  enemyBehaviour: {fileID: 2535033255997809392}
+  coolDown: 0.8
+  freezeTime: 0.8
   attackDelay: 0.225
-  attackDamage: 15
+  playerAttackDamage: 20
+  trainAttackDamage: 20
   attackSoundName: Small Enemy Attack
   attackImpactSoundName: Enemy Attack Impact
 --- !u!1 &2856334375121245355
@@ -252,6 +254,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &6631932380828592750
 GameObject:

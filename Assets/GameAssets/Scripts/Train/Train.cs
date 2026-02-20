@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -28,6 +29,12 @@ public class Train : MonoBehaviour
     private List<FuelSource> fuelSourceList;
     [SerializeField]
     private float drag = 0.25f;
+    [SerializeField]
+    private float weightAccelerationPenalty = 0.01f;
+    [SerializeField]
+    private float brokenDownWeightSpeedPenalty = 0.01f;
+    [SerializeField]
+    private float minSpeed = 1f;
     //Run Time
     [NonSerialized]
     public float acceleration;
@@ -138,13 +145,16 @@ public class Train : MonoBehaviour
         }
 
         //Update Speed    
-        if (Mathf.Abs(speed) < Mathf.Abs(maxSpeed) || (speed > 0 && acceleration < 0) || (speed < 0 && acceleration > 0))
+        float modifiedMaxSpeed = Mathf.Clamp(maxSpeed - GetBrokenCarWeight() * brokenDownWeightSpeedPenalty, minSpeed, float.MaxValue);
+        if (Mathf.Abs(speed) < Mathf.Abs(modifiedMaxSpeed) || (speed > 0 && acceleration < 0) || (speed < 0 && acceleration > 0))
         {
-            speed += acceleration * Time.deltaTime;
-            speed = Mathf.Clamp(speed , -maxSpeed, maxSpeed);
+            //Debug.Log((acceleration / (GetConsistWeight() * weightAccelerationPenalty + 1f)));
+            speed += (acceleration / (GetConsistWeight() * weightAccelerationPenalty + 1f)) * Time.deltaTime;
+            speed = Mathf.Clamp(speed, -modifiedMaxSpeed, modifiedMaxSpeed);
         }
 
-        float decel = drag;
+        float decel = 0f;
+        if(acceleration == 0f) decel += drag;
         if (deceleration > 0) decel = deceleration;
         if (derailed) decel += 2.5f;
         if (decel > 0f)
@@ -212,7 +222,6 @@ public class Train : MonoBehaviour
             }
         }
     }
-
     public void SetAcceleration(float value)
     {
         acceleration = value;
@@ -276,6 +285,25 @@ public class Train : MonoBehaviour
     public float GetSpeed()
     {
         return speed;
+    }
+    public float GetBrokenCarWeight()
+    {
+        float sum = 0f;
+        foreach (RailCar railCar in consist)
+        {
+            if(railCar.IsBroken())
+                sum += railCar.GetWeight();
+        }
+        return sum;
+    }
+    public float GetConsistWeight()
+    {
+        float sum = 0f;
+        foreach (RailCar railCar in consist)
+        {
+            sum += railCar.GetWeight();
+        }
+        return sum;
     }
     public float GetAutoStopTypeOffset(AutoStopType type)
     {

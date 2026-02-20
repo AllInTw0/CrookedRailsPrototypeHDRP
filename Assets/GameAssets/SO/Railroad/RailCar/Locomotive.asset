@@ -15,5 +15,6 @@ MonoBehaviour:
   railCarName: 
   prefab: {fileID: 0}
   icon: {fileID: 21300000, guid: fea4014a2368d3f41b3da47d6df6be32, type: 3}
+  weight: 100
   minLevel: 0
   maxLevel: 0

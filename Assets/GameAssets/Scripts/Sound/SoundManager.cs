@@ -28,7 +28,9 @@ public class SoundManager : MonoBehaviour
             source.clip = soundInfo.AudioClips[Random.Range(0, soundInfo.AudioClips.Count - 1)];
             source.volume = soundInfo.volume;
             source.pitch = Random.Range(soundInfo.pitch.x, soundInfo.pitch.y);
-            
+
+            source.spatialBlend = 1f;
+
             source.Play();
             
             Destroy(soundObject,source.clip.length);

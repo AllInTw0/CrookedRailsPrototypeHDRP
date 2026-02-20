@@ -272,8 +272,9 @@ public class PlayerMovement : MonoBehaviour
         }
     }
     
-    //Not my code
+    
     private Vector2 FindVelRelativeToLook() {
+        //Not my code. From Dani
         float lookAngle = orientation.eulerAngles.y;
         float moveAngle = Mathf.Atan2(rb.linearVelocity.x, rb.linearVelocity.z) * Mathf.Rad2Deg;
 

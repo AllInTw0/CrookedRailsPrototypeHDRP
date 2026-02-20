@@ -227,7 +227,10 @@ public class Enemy : MonoBehaviour
     {
         rb.constraints = RigidbodyConstraints.FreezeRotation;
     }
-
+    public bool DoIWantToAttack()
+    {
+        return Vector3.Distance(transform.position, GetTargetPosition()) <= 5f;
+    }
     private void OnDrawGizmos()
     {
         Gizmos.color = IsNavigatingByPath() ? Color.green : Color.red;

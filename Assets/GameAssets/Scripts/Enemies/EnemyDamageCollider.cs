@@ -14,7 +14,9 @@ public class EnemyDamageCollider : MonoBehaviour
     [SerializeField] 
     private float attackDelay = 0.1f;
     [SerializeField] 
-    private float attackDamage = 5f;
+    private float playerAttackDamage = 5f;
+    [SerializeField]
+    private float trainAttackDamage = 5f;
     [SerializeField] 
     private string attackSoundName;
     [SerializeField] 
@@ -30,10 +32,12 @@ public class EnemyDamageCollider : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
+        if (enemyBehaviour.DoIWantToAttack() == false) return;
+
         if (coolDownTime < 0f)
         {
             Health healthScript = other.GetComponent<Health>();
-            if (healthScript != null)
+            if (healthScript != null && healthScript.health > 0f && (healthScript.healthType == HealthType.Player || healthScript.healthType == HealthType.Train))
             {
                 SoundManager.active.PlayAtPos(transform.position,attackSoundName);
                 
@@ -41,8 +45,8 @@ public class EnemyDamageCollider : MonoBehaviour
                 enemyBehaviour.Freeze();
                 
                 Invoke(nameof(UnFreeze),freezeTime);
-                
-                StartCoroutine(DamageDelayed(healthScript,attackDamage,attackDelay));
+
+                StartCoroutine(DamageDelayed(healthScript, healthScript.healthType == HealthType.Player ? playerAttackDamage : trainAttackDamage, attackDelay));
             }
         }
     }

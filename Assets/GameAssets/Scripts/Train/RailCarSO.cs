@@ -10,6 +10,9 @@ public class RailCarSO : ScriptableObject
     public GameObject prefab;
     public Sprite icon;
 
+    [Header("Params")]
+    public float weight;
+
     [Header("HaulingJobParams")]
     public int minLevel;
     public int maxLevel;

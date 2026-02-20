@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CargoInfo
@@ -42,7 +43,7 @@ public class RailCar : MonoBehaviour
     public List<RunningGear> railCarRunningGearList;
     [Header("Health")]
     [SerializeField]
-    private Health health;
+    private RailCarHealth health;
     [Header("Cargo")]
     [SerializeField]
     private Transform cargoOrigin;
@@ -101,5 +102,16 @@ public class RailCar : MonoBehaviour
         cargoInfo.railCarRefrence = this;
 
         currentCargo = cargoInfo;
+    }
+    public float GetWeight()
+    {
+        if (currentCargo != null && currentCargo.cargoInfo != null)
+            return railCarSO.weight + currentCargo.cargoInfo.weight;
+
+        return railCarSO.weight;
+    }
+    public bool IsBroken()
+    {
+        return health.IsBroken();
     }
 }

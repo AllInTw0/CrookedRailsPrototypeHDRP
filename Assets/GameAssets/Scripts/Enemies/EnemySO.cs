@@ -8,6 +8,7 @@ public class EnemySO : ScriptableObject
     public class HealthWeightParams
     {
         public HealthType healthType;
+        public float sightDistance;
         public float importanceWeight;
     }
 

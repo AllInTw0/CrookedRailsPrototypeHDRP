@@ -9,6 +9,9 @@ public class CargoSO : ScriptableObject
     [Header("Visual")]
     public GameObject cargoPrefab;
 
+    [Header("Params")]
+    public float weight;
+
     [Header("HaulingJobParams")]
     public List<CargoSO> fittingCargo = new List<CargoSO>();
     public float dangerLevel;
