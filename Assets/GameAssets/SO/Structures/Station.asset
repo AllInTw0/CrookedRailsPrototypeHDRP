@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 096a0938c127a5d40a1026d0ddf7f580, type: 3}
   m_Name: Station
   m_EditorClassIdentifier: Assembly-CSharp::StructureSO
-  structurePrefab: {fileID: 5236288195229733903, guid: df22903ef6b8b514cadd3fa4e723fd8f, type: 3}
+  structurePrefab: {fileID: 5848184906683987402, guid: 3acd4f25efab0ae4cae9b845741c33b9, type: 3}
   addAutoStop: 1
-  stopType: 2
+  stopType: 3
   stopOffset: 0

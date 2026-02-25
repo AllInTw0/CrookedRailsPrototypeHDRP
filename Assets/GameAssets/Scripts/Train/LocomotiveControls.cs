@@ -36,6 +36,8 @@ public class LocomotiveControls : MonoBehaviour
     }
     [HideInInspector]
     public State currentState;
+    [HideInInspector]
+    public bool onSetOffTriggerGenerationReset;
     private void LateUpdate()
     {
         if (currentState == State.locked)
@@ -53,6 +55,12 @@ public class LocomotiveControls : MonoBehaviour
             }
             if (throttleNotch > 0)
             {
+                if (onSetOffTriggerGenerationReset)
+                {
+                    onSetOffTriggerGenerationReset = false;
+                    GenerationManager.active.ResetGeneration();
+                }
+
                 if (throttle.actionNameOverride != "")
                 {
                     //Freeze the players to the train

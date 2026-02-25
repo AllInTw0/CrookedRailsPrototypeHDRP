@@ -49,9 +49,8 @@ public class Train : MonoBehaviour
     private float consistLength;
 
     private float maxAutoStopOffset;
-    private bool activeSupersonic;
-    private bool autoBreaking;
-    private void Start()
+    private AutoStop currentAutoBreakingStop;
+    private void Awake()
     {
         if (isPlayerTrain)
             playerTrain = this;
@@ -94,32 +93,30 @@ public class Train : MonoBehaviour
             if(distanceToAutoStop <= distanceToStop)
             {
                 Debug.Log("Engaging breaks! Detected autostop");
-                if (nearestAutoStop.stopType == AutoStopType.Supersonic)
+                if (nearestAutoStop.stopType == AutoStopType.Supersonic || nearestAutoStop.stopType == AutoStopType.Station)
                 {
                     controlls.LockControlls();
-                    activeSupersonic = true;
                 }
                 else
                 {
                     controlls.Break();
                 }
-                autoBreaking = true;
+                currentAutoBreakingStop = nearestAutoStop;
                 nearestAutoStop.ignore = true;
             }
         }
         if (Mathf.Abs(speed) < 0.01f) 
         {
-            if (autoBreaking)
+            if (currentAutoBreakingStop != null)
             {
-                autoBreaking = false;
-
+                if (currentAutoBreakingStop.stopType == AutoStopType.Supersonic || currentAutoBreakingStop.stopType == AutoStopType.Station)
+                {
+                    controlls.ActivateSupersonic();
+                    if (currentAutoBreakingStop.stopType == AutoStopType.Station) controlls.onSetOffTriggerGenerationReset = true;
+                }
+                currentAutoBreakingStop = null;
                 //Unfreze players if the train was supersonic
                 PlayerMovement.active.UnFreeze();
-            }
-            if (activeSupersonic)
-            {
-                activeSupersonic = false;
-                controlls.ActivateSupersonic();
             }
         }
 
@@ -272,6 +269,10 @@ public class Train : MonoBehaviour
     {
         this.frontTrackSection = trackSection;
         this.sectionProgress = sectionProgress;
+    }
+    public List<FuelSource> GetFuelSourceList()
+    {
+        return fuelSourceList;
     }
     public TrackSection GetFrontTrackSection()
     {

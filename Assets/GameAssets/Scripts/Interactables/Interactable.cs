@@ -37,7 +37,7 @@ public class Interactable : MonoBehaviour
     }
     public virtual bool Interact()
     {
-        SoundManager.active.PlayAtPos(iconPosition.position,interactSound);
+        SoundManager.active.PlayAtPos(iconPosition != null ? iconPosition.position : transform.position,interactSound);
         return true;
     }
     public virtual string GetName()

@@ -15,6 +15,10 @@ public class StructureMasterEditor : Editor
     {
         base.OnInspectorGUI();
 
+        if (GUILayout.Button("Destroy"))
+        {
+            structureMaster.DestroyStructure();
+        }
         if (GUILayout.Button("Generate"))
         {
             structureMaster.Generate();

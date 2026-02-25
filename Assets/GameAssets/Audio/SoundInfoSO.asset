@@ -112,3 +112,8 @@ MonoBehaviour:
     - {fileID: 8300000, guid: e3390fe43dd1e0648af8137a98017660, type: 3}
     volume: 1
     pitch: {x: 0.7, y: 1.3}
+  - name: Bucket - Fill
+    AudioClips:
+    - {fileID: 8300000, guid: 8e6f2ac2d402fcc41927755b56170d12, type: 3}
+    volume: 1
+    pitch: {x: 0.7, y: 1.3}

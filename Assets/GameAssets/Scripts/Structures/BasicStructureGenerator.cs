@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,6 +8,11 @@ public class BasicStructureGenerator : StructureGenerator
 
     public override void Generate(StructureMaster structureMaster)
     {
+        StartCoroutine(GenerateIEnumerator(structureMaster));
+    }
+
+    IEnumerator GenerateIEnumerator(StructureMaster structureMaster)
+    {      
         foreach (GenerationEntry generationEntry in generationEntryList)
         {
             Section SpawnSection()
@@ -36,6 +42,7 @@ public class BasicStructureGenerator : StructureGenerator
                 }
                 if (safety <= 0f) Debug.LogWarning("Safety == 0!");
             }
+            yield return new WaitForSeconds(0.4f);
         }
         structureMaster.SpawnEndPrefabs();
     }

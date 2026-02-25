@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1478508816660959985}
   m_Layer: 0
-  m_Name: Left
+  m_Name: l
   m_TagString: Untagged
   m_Icon: {fileID: 3936346786652291628, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
@@ -76,7 +76,7 @@ GameObject:
   m_Component:
   - component: {fileID: 727919138203811217}
   m_Layer: 0
-  m_Name: Back
+  m_Name: b
   m_TagString: Untagged
   m_Icon: {fileID: 3936346786652291628, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
@@ -107,7 +107,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7313880571818482146}
   m_Layer: 0
-  m_Name: Front
+  m_Name: f
   m_TagString: Untagged
   m_Icon: {fileID: 3936346786652291628, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
@@ -138,7 +138,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2248830015738109323}
   m_Layer: 0
-  m_Name: Right
+  m_Name: r
   m_TagString: Untagged
   m_Icon: {fileID: 3936346786652291628, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
@@ -205,29 +205,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Section
   connectionList:
-  - name: f
-    connectionTransform: {fileID: 7313880571818482146}
+  - connectionTransform: {fileID: 7313880571818482146}
     validConnectionNameList:
-    - b
+    - b*
     - start
     endPrefabList:
     - {fileID: 5696203136410669033, guid: 2e29a9c4e20d5af498cf3570328daeba, type: 3}
-  - name: b
-    connectionTransform: {fileID: 727919138203811217}
+  - connectionTransform: {fileID: 727919138203811217}
     validConnectionNameList:
-    - f
+    - f*
     endPrefabList:
     - {fileID: 5696203136410669033, guid: 2e29a9c4e20d5af498cf3570328daeba, type: 3}
-  - name: r
-    connectionTransform: {fileID: 2248830015738109323}
+  - connectionTransform: {fileID: 2248830015738109323}
     validConnectionNameList: []
     endPrefabList:
     - {fileID: 6115765350493854045, guid: f173b423707b7c84c8e9b509ce8780af, type: 3}
     - {fileID: 2507658061477924480, guid: ad28856f245b91d4995234dc88039085, type: 3}
     - {fileID: 7409151111500213708, guid: 6d47c0ad139c5a248884a89fe9012228, type: 3}
     - {fileID: 2058946597376396915, guid: 44b173b50aaff4248b362b2babfad656, type: 3}
-  - name: l
-    connectionTransform: {fileID: 1478508816660959985}
+  - connectionTransform: {fileID: 1478508816660959985}
     validConnectionNameList: []
     endPrefabList:
     - {fileID: 6115765350493854045, guid: f173b423707b7c84c8e9b509ce8780af, type: 3}

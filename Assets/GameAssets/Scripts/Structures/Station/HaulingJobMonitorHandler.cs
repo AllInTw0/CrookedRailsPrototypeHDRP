@@ -125,6 +125,7 @@ public class HaulingJobMonitorHandler : MonoBehaviour
     }
     public void LoadHaulingJob(HaulingJob haulingJob)
     {
+        GameStateManager.currentHaulingJob = haulingJob;
         foreach (HaulingJobEntry haulingJobEntry in haulingJob.haulingJobEntryList)
         {
             RailCar railCar = Train.playerTrain.AddRailCar(haulingJobEntry.railCar, 2); // 2 because 0-locomotive, 1-tender

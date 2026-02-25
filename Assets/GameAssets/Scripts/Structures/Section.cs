@@ -13,6 +13,8 @@ public class Section : MonoBehaviour
     public List<Connection> connectingConnectionList;
     [HideInInspector]
     public List<Connection> nonConnectingConnectionList;
+
+    private BoxCollider[] boxColliderArray;
     private void Awake()
     {
         //Initialize()
@@ -34,6 +36,8 @@ public class Section : MonoBehaviour
                 nonConnectingConnectionList.Add(connection);
             }
         }
+
+        boxColliderArray = GetComponents<BoxCollider>();
     }
     public List<Connection> GetConnectingConnectionList()
     {
@@ -50,5 +54,9 @@ public class Section : MonoBehaviour
     public float GetLength()
     {
         return length;
+    }
+    public BoxCollider[] GetBoxColliderArray()
+    {
+        return boxColliderArray;
     }
 }

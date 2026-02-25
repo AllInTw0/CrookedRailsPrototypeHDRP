@@ -16,8 +16,8 @@ MonoBehaviour:
   rotationSpeed: 5
   HealthWeightParamsList:
   - healthType: 1
-    sightDistance: 35
-    importanceWeight: 5
+    sightDistance: 20
+    importanceWeight: 2
   - healthType: 2
     sightDistance: 50
     importanceWeight: 0.5

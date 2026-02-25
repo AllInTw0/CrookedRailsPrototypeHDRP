@@ -75,7 +75,7 @@ public class Item : Interactable
         falling = true;
         velocity = 0;
         rotVelocity = Random.Range(-35f, 35f);
-        if (Physics.Raycast(startPos, Vector3.down, out RaycastHit hit))
+        if (Physics.Raycast(startPos, Vector3.down, out RaycastHit hit, 100f, ItemManager.itemDropLayerMask))
         {
             targetY = hit.point.y;
             distance = transform.position.y - targetY;

@@ -50,7 +50,6 @@ MonoBehaviour:
   - {fileID: 2736879475369904080}
   structureType: 0
   startConnection:
-    name: start
     connectionTransform: {fileID: 3676580495160993857}
     validConnectionNameList: []
     endPrefabList: []
@@ -73,6 +72,12 @@ MonoBehaviour:
     minMaxCount: {x: 5, y: 5}
     lengthType: 1
     lengthAddition: 7
+    countCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
 --- !u!1 &6484579278942707270
 GameObject:
   m_ObjectHideFlags: 0
@@ -83,7 +88,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3676580495160993857}
   m_Layer: 0
-  m_Name: Start
+  m_Name: start
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

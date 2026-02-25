@@ -32,9 +32,52 @@ public class GenerationManager : MonoBehaviour
     private StructureSO stationSO;
     [SerializeField]
     private StructureSO preStationSO;
-    [Header("Temp")]
+
+    public enum StructureDistanceType
+    {
+        setDistance,
+        fuelDistance
+    }
+    [System.Serializable]
+    public class StructureSpawnParams
+    {
+        public List<StructureSO> structureInfoList;
+        public StructureDistanceType distanceType;
+        public float distanceTypeValue; // setDistance = distance; fuelDistance = fuelDistance * value
+        public bool repeating;
+
+        public void ResetDistance(bool resetSpawningDisabled = false)
+        {
+            if (resetSpawningDisabled || repeating) spawningDisabled = false;
+
+            if (spawningDisabled == false)
+            {
+                if (distanceType == StructureDistanceType.setDistance)
+                {
+                    distanceTillStructure = distanceTypeValue;
+                }
+                else if (distanceType == StructureDistanceType.fuelDistance)
+                {
+                    float minDistance = float.MaxValue;
+                    foreach (Train.FuelSource fuelSource in Train.playerTrain.GetFuelSourceList())
+                    {
+                        minDistance = Mathf.Min(fuelSource.targetHealth.maxHealth / TrainUpgradeHandler.active.GetStatValue(fuelSource.consumptionRate));
+                    }
+                    distanceTillStructure = minDistance * distanceTypeValue;
+                }
+            }
+        }
+        //Run time
+        //[HideInInspector]
+        public float distanceTillStructure;
+        //[HideInInspector]
+        public bool spawningDisabled;
+    }
+    [Header("Structures")]
     [SerializeField]
-    private StructureSO waterTowerTemp;
+    private List<StructureSpawnParams> strutureSpawnParamList;
+    [SerializeField]
+    private float distanceBufferBetweenStructures;
 
     //Run Time
     private float currentGeneratedDistance = 0f;
@@ -45,10 +88,12 @@ public class GenerationManager : MonoBehaviour
     //Station stuff
     private bool stationGenerated;
     private float distanceLeftTillNextStation;
+    //structures
+    private float currentStructureDistanceBuffer;
     private void Start()
     {
         active = this;
-        distanceLeftTillNextStation = stationSpawnDistance;
+        ResetGeneration();
         GenerateStart();
     }
 
@@ -95,7 +140,19 @@ public class GenerationManager : MonoBehaviour
             GameStateManager.isStartingLocationSpawned = false;
         }
     }
-
+    public void ResetGeneration()
+    {
+        stationGenerated = false;
+        if (GameStateManager.currentHaulingJob != null)
+            distanceLeftTillNextStation = GameStateManager.currentHaulingJob.distance;
+        else
+            distanceLeftTillNextStation = stationSpawnDistance;
+        foreach (StructureSpawnParams structureSpawnParams in strutureSpawnParamList)
+        {
+            structureSpawnParams.ResetDistance(true);
+        }
+        currentStructureDistanceBuffer = 0f;
+    }
     private void GenerateNextSection()
     {
         if (distanceLeftTillNextStation > 0f)
@@ -110,12 +167,9 @@ public class GenerationManager : MonoBehaviour
             Spline.DEBUG_DrawPointGizmos(nextPoint);
 
             TrackSection generatedSection = TrackManager.active.CreateTrackSection(lastPoint, nextPoint);
-            if (TrackManager.active.trackSectionList.Count == 3)
-            {
-                //SpawnStructureNearTrack(generatedSection.length - 0.1f, generatedSection, waterTowerTemp);
-            }
+            UpdateStructureDistances(generatedSection);
             distanceLeftTillNextStation -= generatedSection.length;
-            Debug.Log("Distance Left: " + distanceLeftTillNextStation);
+            //Debug.Log("Distance Left: " + distanceLeftTillNextStation);
 
             currentGeneratedDistance += generatedSection.length;
 
@@ -129,6 +183,27 @@ public class GenerationManager : MonoBehaviour
         }
 
         generateNavMesh = true;
+    }
+    private void UpdateStructureDistances(TrackSection generatedSection)
+    {
+        currentStructureDistanceBuffer -= generatedSection.length;
+
+        foreach (StructureSpawnParams structureSpawnParams in strutureSpawnParamList)
+        {
+            if (structureSpawnParams.spawningDisabled) continue;
+
+            structureSpawnParams.distanceTillStructure -= generatedSection.length;
+
+            if(currentStructureDistanceBuffer <= 0f && structureSpawnParams.distanceTillStructure <= 0f)
+            {
+                float sectionProgress = Mathf.Clamp01(Mathf.Min(-currentStructureDistanceBuffer, -structureSpawnParams.distanceTillStructure) / generatedSection.length) * generatedSection.length;
+                SpawnStructureNearTrack(sectionProgress, generatedSection, structureSpawnParams.structureInfoList[Random.Range(0, structureSpawnParams.structureInfoList.Count)]);
+                currentStructureDistanceBuffer = distanceBufferBetweenStructures;
+
+                structureSpawnParams.spawningDisabled = true;
+                structureSpawnParams.ResetDistance();
+            }
+        }
     }
     private void SpawnStructureNearTrack(float sectionProgress, TrackSection section, StructureSO structureInfo)
     {

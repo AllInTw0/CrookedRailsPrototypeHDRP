@@ -18,7 +18,8 @@ public enum AutoStopType
 {
     Front,
     TenderHatch,
-    Supersonic
+    Supersonic,
+    Station
 }
 public class AutoStop
 {

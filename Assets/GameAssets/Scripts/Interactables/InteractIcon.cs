@@ -39,27 +39,16 @@ public class InteractIcon : MonoBehaviour
         if (activeTarget)
         {
             //Position
-            PlayerCamera.active.WorldPosToUI(activeTarget.iconPosition.position, out Vector3 screenPos, out bool onScreen);
-            if (onScreen == false)
-            {
-                if(mainTransform.gameObject.activeSelf == true)
-                    mainTransform.gameObject.SetActive(false);
-            }
+            if(activeTarget.iconPosition != null)
+                UpdatePos(activeTarget.iconPosition.position);
             else
-            {
-                if(mainTransform.gameObject.activeSelf == false)
-                    mainTransform.gameObject.SetActive(true);
-                mainTransform.position = screenPos;
-            }
-            
-            //Scale
-            float scale = scalingFactor / Vector3.Distance(PlayerCamera.active.transform.position,activeTarget.iconPosition.position);
-            mainTransform.localScale = new Vector3(scale, scale, scale);
+                UpdatePos(PlayerCamera.active.GetRaycastPos());
+
         }
         else
         {
-            if(mainTransform.gameObject.activeSelf == true)
-                mainTransform.gameObject.SetActive(false);
+           // if(mainTransform.gameObject.activeSelf == true)
+               // mainTransform.gameObject.SetActive(false);
         }
         //Interaction Progress
         currentProgress = math.lerp(currentProgress, targetProgress, progressSpeed * Time.deltaTime);
@@ -71,6 +60,33 @@ public class InteractIcon : MonoBehaviour
         activeTarget = interactable;
         objectText.text = interactable.GetName();
         actionText.text = interactable.GetAction();
+    }
+    public void Enable(string objectTextString, string actionTextString, Vector3 worldPos)
+    {
+        //activeTarget = interactable;
+        objectText.text = objectTextString;
+        actionText.text = actionTextString;
+        UpdatePos(worldPos);
+    }
+
+    private void UpdatePos(Vector3 worldPos)
+    {
+        PlayerCamera.active.WorldPosToUI(worldPos, out Vector3 screenPos, out bool onScreen);
+        if (onScreen == false)
+        {
+            if (mainTransform.gameObject.activeSelf == true)
+                mainTransform.gameObject.SetActive(false);
+        }
+        else
+        {
+            if (mainTransform.gameObject.activeSelf == false)
+                mainTransform.gameObject.SetActive(true);
+            mainTransform.position = screenPos;
+        }
+
+        //Scale
+        float scale = scalingFactor / Vector3.Distance(PlayerCamera.active.transform.position, worldPos);
+        mainTransform.localScale = new Vector3(scale, scale, scale);
     }
 
     public void Refresh()
@@ -84,6 +100,7 @@ public class InteractIcon : MonoBehaviour
     public void Disable()
     {
         activeTarget = null;
+        mainTransform.gameObject.SetActive(false);
     }
 
     public void SetProgress(float progress)

@@ -17,7 +17,7 @@ public enum StructureType
 [System.Serializable]
 public class Connection 
 {
-    public string name;
+    //public string name;
     public Transform connectionTransform;
     public List<string> validConnectionNameList;
     public List<GameObject> endPrefabList;
@@ -34,26 +34,33 @@ public class GenerationEntry
     public enum CountType
     {
         minMaxRandom,
-        fillLenght
+        fillLenght,
+        probabilityCurve
     }
     [Header("Count")]
     public CountType countType;
     public Vector2Int minMaxCount = Vector2Int.one;
     public LengthType lengthType;
     public float lengthAddition;
+    public AnimationCurve countCurve;
 }
 public class StructureMaster : MonoBehaviour
 {
     public List<StructureGenerator> structureList;
     public StructureType structureType;
     public Connection startConnection;
+    public LayerMask overlapCheckLayerMask;
 
     private List<Connection> structureConnectionList;
+    private List<Section> structureSectionList;
+    private int count;
     public void Generate()
     {
         structureConnectionList = new List<Connection>();
         startConnection.connectedConnection = null;
         structureConnectionList.Add(startConnection);
+        structureSectionList = new List<Section>();
+        count = 0;
 
         foreach (StructureGenerator structure in structureList)
         {
@@ -71,10 +78,17 @@ public class StructureMaster : MonoBehaviour
             GameStateManager.isStationSpawned = false;
         }
     }
+    public void DestroyStructure()
+    {
+        foreach (Section section in structureSectionList)
+        {
+            DestroyImmediate(section.gameObject);
+        }
+    }
     public float GetLength(LengthType lengthType)
     {
         if (lengthType == LengthType.PlayerTrainLength)
-            return Train.playerTrain.GetConsistLenght();
+            return Train.playerTrain != null ? Train.playerTrain.GetConsistLenght() : 50f;
         else if(lengthType == LengthType.MaxChosenTrainLength)
         {
             float maxLength = 0f;
@@ -118,7 +132,7 @@ public class StructureMaster : MonoBehaviour
             List<Connection> connectionList = new List<Connection>();
             foreach (Connection otherConnection in structureConnectionList)
             {
-                if(otherConnection.connectedConnection == null && DoesStringListMatch(connection.validConnectionNameList, otherConnection.name))
+                if(otherConnection.connectedConnection == null && DoesStringListMatch(connection.validConnectionNameList, otherConnection.connectionTransform.name))
                 {
                     connectionList.Add(otherConnection);
                 }
@@ -137,28 +151,93 @@ public class StructureMaster : MonoBehaviour
             Debug.LogWarning("Cant find valid connection: validConnectionList.Count == 0, " + sectionObject.name);
             return sectionScript;
         }
-        int connectionListIndex = Random.Range(0, validConnectionList.Count);
-        int connectionIndex = Random.Range(0, validConnectionList[connectionListIndex].Count);
-        Connection sectionConnection = sectionConnectionList[connectionListIndex];
-        Connection otherSectionConnection = validConnectionList[connectionListIndex][connectionIndex];
+        while (sectionConnectionList.Count > 0 && validConnectionList.Count > 0)
+        {
+            int connectionListIndex = Random.Range(0, validConnectionList.Count);
+            int connectionIndex = Random.Range(0, validConnectionList[connectionListIndex].Count);
+            Connection sectionConnection = sectionConnectionList[connectionListIndex];
+            Connection otherSectionConnection = validConnectionList[connectionListIndex][connectionIndex];
 
-        //Connect section
-        sectionConnection.connectedConnection = otherSectionConnection;
-        otherSectionConnection.connectedConnection = sectionConnection;
 
-        sectionTransform.SetParent(otherSectionConnection.connectionTransform);
-        sectionTransform.localRotation = Quaternion.identity;
-        sectionTransform.localPosition = -sectionConnection.connectionTransform.localPosition;
-        sectionTransform.RotateAround(sectionConnection.connectionTransform.position, Vector3.up, sectionConnection.connectionTransform.eulerAngles.y - otherSectionConnection.connectionTransform.eulerAngles.y + 180f);
+            //Set position
+            sectionTransform.SetParent(otherSectionConnection.connectionTransform);
+            sectionTransform.localRotation = Quaternion.identity;
+            sectionTransform.localPosition = -sectionConnection.connectionTransform.localPosition;
+            sectionTransform.RotateAround(sectionConnection.connectionTransform.position, Vector3.up, otherSectionConnection.connectionTransform.eulerAngles.y - sectionConnection.connectionTransform.eulerAngles.y + 180f);
 
-        Debug.DrawLine(sectionConnection.connectionTransform.position, otherSectionConnection.connectionTransform.position, Color.purple, 60f);
-        Debug.DrawRay(sectionConnection.connectionTransform.position, Vector3.up, Color.purple, 60f);
+            //Check overlap
+            if (DoesSectionOverlap(sectionScript))
+            {
+                //try another connection
+                validConnectionList[connectionListIndex].RemoveAt(connectionIndex);
+                if(validConnectionList[connectionListIndex].Count == 0)
+                {
+                    validConnectionList.RemoveAt(connectionListIndex);
+                    sectionConnectionList.RemoveAt(connectionListIndex);
+                }
+
+                if(sectionConnectionList.Count == 0 || validConnectionList.Count == 0)
+                {
+                    DestroyImmediate(sectionObject);
+                    Debug.Log("Couldnt spawn " + sectionObject.name);
+                    return null;
+                }
+                continue;
+            }
+
+            //Connect section
+            sectionConnection.connectedConnection = otherSectionConnection;
+            otherSectionConnection.connectedConnection = sectionConnection;
+            break;
+        }
+        //Debug.DrawLine(sectionConnection.connectionTransform.position, otherSectionConnection.connectionTransform.position, Color.purple, 60f);
+        //Debug.DrawRay(sectionConnection.connectionTransform.position, Vector3.up, Color.purple, 60f);
 
         sectionTransform.SetParent(transform);
 
+        //Rename strings + connect connections close to each other
+        count++;
+        foreach (Connection connection in sectionScript.GetAllConnectionList())
+        {
+            //rename
+            connection.connectionTransform.name = RenameString(connection.connectionTransform.name, count);
+
+            //connect
+            foreach (Connection connectionB in structureConnectionList)
+            {
+                if(Vector3.Distance(connection.connectionTransform.position,connectionB.connectionTransform.position) < 0.01f)
+                {
+                    connection.connectedConnection = connectionB;
+                    connectionB.connectedConnection = connection;
+                }
+            }
+        }
+
         structureConnectionList.AddRange(sectionScript.GetAllConnectionList());
+        structureSectionList.Add(sectionScript);
 
         return sectionScript;
+    }
+    public bool DoesSectionOverlap(Section section)
+    {
+        BoxCollider[] boxColliderArray = section.GetBoxColliderArray();
+        foreach (BoxCollider boxCollider in boxColliderArray)
+        {
+            Collider[] overlapingColiderArray = Physics.OverlapBox(section.transform.TransformPoint(boxCollider.center), boxCollider.size * 0.5f, section.transform.rotation, overlapCheckLayerMask);
+            foreach (Collider collider in overlapingColiderArray)
+            {
+                foreach (BoxCollider sectionBoxCollider in boxColliderArray)
+                {
+                    if (collider != sectionBoxCollider) 
+                    { 
+                        Debug.Log(section.gameObject.name + " overlaps " + collider.gameObject.name);
+                        Debug.DrawLine(section.transform.TransformPoint(boxCollider.center), collider.transform.position,Color.red,60f);
+                        return true; 
+                    }
+                }
+            }
+        }
+        return false;
     }
     public bool DoesStringListMatch(List<string> stringList, string targetString)
     {
@@ -188,5 +267,14 @@ public class StructureMaster : MonoBehaviour
         }
 
         return false;
+    }
+    public string RenameString(string str, int countIndex)
+    {
+        int index = str.IndexOf("_");
+        if (index != -1)
+        {
+            str = str[0..index] + countIndex;
+        }
+        return str;
     }
 }

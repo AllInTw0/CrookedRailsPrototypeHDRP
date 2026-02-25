@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class PlayerInteract : MonoBehaviour
 {
+    public static PlayerInteract active;
     //Variables
     [SerializeField] 
     private LayerMask raycastLayer;
@@ -21,7 +22,7 @@ public class PlayerInteract : MonoBehaviour
     private float timeHoldingInteract;
     void Start()
     {
-        
+        active = this;
     }
 
 
@@ -116,6 +117,8 @@ public class PlayerInteract : MonoBehaviour
 
     private void StopInteracting()
     {
+        if (currentInteractable == null && currentTarget == null) return;
+
         currentTarget = null;
         currentInteractable = null;
         if (InteractIcon.active.animator.isActiveAndEnabled) InteractIcon.active.animator.SetBool("Interacting", false);
@@ -137,5 +140,9 @@ public class PlayerInteract : MonoBehaviour
             InteractIcon.active.animator.SetTrigger("Finished");
         else
             InteractIcon.active.animator.SetTrigger("Failed");
+    }
+    public bool IsLookingAtInteractable()
+    {
+        return currentInteractable != null;
     }
 }

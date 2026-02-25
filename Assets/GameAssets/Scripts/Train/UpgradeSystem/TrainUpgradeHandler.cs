@@ -50,7 +50,7 @@ public class TrainUpgradeHandler : MonoBehaviour
 
     private Dictionary<TrainStatType, DefaultStats> defaultStatsDict = new Dictionary<TrainStatType, DefaultStats>();
     private Dictionary<TrainStatType, List<Upgrade>> currentUpgradeDict = new Dictionary<TrainStatType, List<Upgrade>>();
-    void Start()
+    void Awake()
     {
         foreach (DefaultStats defaultStats in defaultStatsList)
         {

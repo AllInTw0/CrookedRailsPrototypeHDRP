@@ -78,6 +78,11 @@ public class PlayerCamera : MonoBehaviour
         }
     }
 
+    public Ray GetRay()
+    {
+        return new Ray(transform.position, transform.forward);
+    }
+
     public void WorldPosToUI(Vector3 worldPos, out Vector3 screenPos, out bool onScreen)
     {
         Vector3 renderTexturePos = camera.WorldToScreenPoint(worldPos);

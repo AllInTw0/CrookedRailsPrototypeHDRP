@@ -14,6 +14,8 @@ public class RailCarHealth : Health
     private bool brokenDown;
     private void Start()
     {
+        AddHealthToGlobalList();
+
         foreach (EventInteractable interactable in rerailInteractableList)
         {
             interactable.interactEvent.AddListener(() =>

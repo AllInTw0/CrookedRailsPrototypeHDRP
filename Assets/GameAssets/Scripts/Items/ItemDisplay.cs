@@ -39,7 +39,7 @@ public class ItemDisplay : MonoBehaviour
                 }
 
                 copy.transform.localPosition = new Vector3((objectList.Count - rowObjCount + row * 0.5f) * spacing.x, row * spacing.y) + new Vector3(Random.Range(-posRandomness, posRandomness), Random.Range(-posRandomness, posRandomness), Random.Range(-posRandomness, posRandomness));
-                copy.transform.rotation = Quaternion.Euler(rotation + new Vector3(Random.Range(-rotRandomness,rotRandomness), Random.Range(-rotRandomness, rotRandomness), Random.Range(-rotRandomness, rotRandomness)));
+                copy.transform.localRotation = Quaternion.Euler(rotation + new Vector3(Random.Range(-rotRandomness,rotRandomness), Random.Range(-rotRandomness, rotRandomness), Random.Range(-rotRandomness, rotRandomness)));
                 copy.transform.localScale = Vector3.one + new Vector3(Random.Range(-sizeRandomness, sizeRandomness), Random.Range(-sizeRandomness, sizeRandomness), Random.Range(-sizeRandomness, sizeRandomness));
                 objectList.Add(copy);
             }
