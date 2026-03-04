@@ -1,8 +1,6 @@
-using System;
+using NUnit.Framework;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class Train : MonoBehaviour
 {
@@ -19,14 +17,17 @@ public class Train : MonoBehaviour
     //Variables
     [SerializeField]
     private bool isPlayerTrain;
+    [Header("Consist")]
     [SerializeField]
     private List<RailCar> consist = new List<RailCar>();
     [SerializeField] 
     public float couplerLength;
-    [SerializeField]
-    private LocomotiveControls controlls;
+    [Header("Fuel")]
     [SerializeField]
     private List<FuelSource> fuelSourceList;
+    [Header("Speed")]
+    [SerializeField]
+    private LocomotiveControls controlls;
     [SerializeField]
     private float drag = 0.25f;
     [SerializeField]
@@ -35,12 +36,23 @@ public class Train : MonoBehaviour
     private float brokenDownWeightSpeedPenalty = 0.01f;
     [SerializeField]
     private float minSpeed = 1f;
+    [Header("Player")]
+    [SerializeField]
+    private float autoStopPlayerDist = 30f;
+    [Header("Debri Detection")]
+    [SerializeField]
+    private BoxCollider debriBoxCollider;
+    [SerializeField]
+    private TrainStatType debriDerailChance;
+    [SerializeField]
+    private LayerMask debriLayerMask;
+
     //Run Time
-    [NonSerialized]
+    [HideInInspector]
     public float acceleration;
-    [NonSerialized]
+    [HideInInspector]
     public float deceleration;
-    [NonSerialized]
+    [HideInInspector]
     public float maxSpeed;
     
     private float speed;
@@ -57,7 +69,7 @@ public class Train : MonoBehaviour
 
         RecalculateConsistLength();
 
-        foreach (AutoStopType type in Enum.GetValues(typeof(AutoStopType)))
+        foreach (AutoStopType type in System.Enum.GetValues(typeof(AutoStopType)))
         {
             float offset = GetAutoStopTypeOffset(type);
             if (offset > maxAutoStopOffset)
@@ -72,6 +84,19 @@ public class Train : MonoBehaviour
         {
             Debug.LogWarning("No track section assigned!");
             return;
+        }
+
+        //Player dist
+        float playerDist = GetClosestDistanceToPos(PlayerMovement.active.transform.position);
+        if (autoStopPlayerDist > 0 && playerDist >= autoStopPlayerDist && deceleration == 0)
+        {
+            Debug.Log("Player Is To Far! Engaging breaks!");
+            Override title = new Override("Title",OverrideType.Text,"WARNING");
+            Override message = new Override("Message", OverrideType.Text, "You're to far from the train! Engaging breaks!");
+            Override subText = new Override("SubText", OverrideType.Text, Mathf.Round(playerDist) + "m");
+            MiniPrinter.active.AddNotification(PaperRenderer.active.RenderPaper("Message", new List<Override>(){ title, message, subText }));
+
+            controlls.Break();
         }
 
         //Handle AutoStops
@@ -216,6 +241,33 @@ public class Train : MonoBehaviour
             {
                 fuelSource.targetHealth.TakeDamage(distanceTravelled * TrainUpgradeHandler.active.GetStatValue(fuelSource.consumptionRate));
                 //Not having enough fuel handles LocomotiveControls.cs
+            }
+        }
+        //Debri
+        if(debriBoxCollider != null && derailed == false && speed > 0.4f)
+        {
+            Collider[] debriColliders = Util.PhysicsBoxColliderOverlap(debriBoxCollider, debriLayerMask);
+            for (int i = 0; i < debriColliders.Length; i++)
+            {
+                if (debriColliders[i].TryGetComponent(out Item item) && item.IsPhysicsEnabled() == false)
+                {
+                    if (Random.Range(0f, 1f) >= 0.5f)
+                        item.EnablePhysics(consist[0].transform.forward * (speed * 1.5f) + consist[0].transform.right * Random.Range(2f, 4f) + consist[0].transform.up * Random.Range(5f, 6f));
+                    else
+                        item.EnablePhysics(consist[0].transform.forward * (speed * 1.5f) + consist[0].transform.right * Random.Range(-4f, -2f) + consist[0].transform.up * Random.Range(5f, 6f));
+
+                    if (Random.Range(0f, 1f) <= TrainUpgradeHandler.active.GetStatValue(debriDerailChance))
+                    {
+                        consist[0].Derail();
+
+                        Override title = new Override("Title", OverrideType.Text, "WARNING");
+                        Override message = new Override("Message", OverrideType.Text, "Trin DERAILED! Due to object on track!");
+                        Override subText = new Override("SubText", OverrideType.Text, "Locomotive");
+                        MiniPrinter.active.AddNotification(PaperRenderer.active.RenderPaper("Message", new List<Override>() { title, message, subText }));
+
+                        break;
+                    }
+                }
             }
         }
     }
@@ -388,5 +440,22 @@ public class Train : MonoBehaviour
         }
 
         Debug.Log("Removed NonPlayer RailCars");
+    }
+    public float GetClosestDistanceToPos(Vector3 pos)
+    {
+        int minDistIndex = 0;
+        float minDist = Vector3.Distance(consist[0].transform.position, pos);
+
+        for (int i = 1; i < consist.Count; i++)
+        {
+            float d = Vector3.Distance(consist[i].transform.position, pos);
+            if (d < minDist)
+            {
+                minDistIndex = i;
+                minDist = d;
+            }
+        }
+
+        return minDist;
     }
 }

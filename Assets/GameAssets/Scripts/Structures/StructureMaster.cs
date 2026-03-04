@@ -21,6 +21,7 @@ public class Connection
     public Transform connectionTransform;
     public List<string> validConnectionNameList;
     public List<GameObject> endPrefabList;
+    public bool dontConnect;
 
     //Nonserializeable
     [HideInInspector]
@@ -129,14 +130,7 @@ public class StructureMaster : MonoBehaviour
         List<List<Connection>> validConnectionList = new List<List<Connection>>();
         foreach (Connection connection in sectionScript.GetConnectingConnectionList())
         {
-            List<Connection> connectionList = new List<Connection>();
-            foreach (Connection otherConnection in structureConnectionList)
-            {
-                if(otherConnection.connectedConnection == null && DoesStringListMatch(connection.validConnectionNameList, otherConnection.connectionTransform.name))
-                {
-                    connectionList.Add(otherConnection);
-                }
-            }
+            List<Connection> connectionList = GetValidConnectionsForConnection(connection);
 
             if (connectionList.Count > 0) 
             {
@@ -186,8 +180,10 @@ public class StructureMaster : MonoBehaviour
             }
 
             //Connect section
-            sectionConnection.connectedConnection = otherSectionConnection;
-            otherSectionConnection.connectedConnection = sectionConnection;
+            if (otherSectionConnection.dontConnect == false)
+                sectionConnection.connectedConnection = otherSectionConnection;
+            if (sectionConnection.dontConnect == false)
+                otherSectionConnection.connectedConnection = sectionConnection;
             break;
         }
         //Debug.DrawLine(sectionConnection.connectionTransform.position, otherSectionConnection.connectionTransform.position, Color.purple, 60f);
@@ -207,8 +203,10 @@ public class StructureMaster : MonoBehaviour
             {
                 if(Vector3.Distance(connection.connectionTransform.position,connectionB.connectionTransform.position) < 0.01f)
                 {
-                    connection.connectedConnection = connectionB;
-                    connectionB.connectedConnection = connection;
+                    if(connectionB.dontConnect == false)
+                        connection.connectedConnection = connectionB;
+                    if (connection.dontConnect == false)
+                        connectionB.connectedConnection = connection;
                 }
             }
         }
@@ -216,14 +214,28 @@ public class StructureMaster : MonoBehaviour
         structureConnectionList.AddRange(sectionScript.GetAllConnectionList());
         structureSectionList.Add(sectionScript);
 
+        if (sectionTransform.TryGetComponent(out StructureGenerator structureGenerator)) structureGenerator.Generate(this);
+
         return sectionScript;
+    }
+    public List<Connection> GetValidConnectionsForConnection(Connection connection)
+    {
+        List<Connection> connectionList = new List<Connection>();
+        foreach (Connection otherConnection in structureConnectionList)
+        {
+            if (otherConnection.connectedConnection == null && DoesStringListMatch(connection.validConnectionNameList, otherConnection.connectionTransform.name))
+            {
+                connectionList.Add(otherConnection);
+            }
+        }
+        return connectionList;
     }
     public bool DoesSectionOverlap(Section section)
     {
         BoxCollider[] boxColliderArray = section.GetBoxColliderArray();
         foreach (BoxCollider boxCollider in boxColliderArray)
         {
-            Collider[] overlapingColiderArray = Physics.OverlapBox(section.transform.TransformPoint(boxCollider.center), boxCollider.size * 0.5f, section.transform.rotation, overlapCheckLayerMask);
+            Collider[] overlapingColiderArray = Util.PhysicsBoxColliderOverlap(boxCollider, overlapCheckLayerMask);
             foreach (Collider collider in overlapingColiderArray)
             {
                 foreach (BoxCollider sectionBoxCollider in boxColliderArray)

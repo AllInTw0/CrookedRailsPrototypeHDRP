@@ -115,7 +115,7 @@ public class PlayerInteract : MonoBehaviour
         }
     }
 
-    private void StopInteracting()
+    public void StopInteracting()
     {
         if (currentInteractable == null && currentTarget == null) return;
 

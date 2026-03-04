@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 2780181721606275437}
   - component: {fileID: 6172209109160299988}
   - component: {fileID: 2985993113713911680}
-  m_Layer: 0
-  m_Name: OilLamp
+  m_Layer: 7
+  m_Name: ElectricLampVisual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -41,7 +41,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3015091432788408613}
-  m_Mesh: {fileID: 369944530233536066, guid: 9201b86d2ecd0b74aacd8175735ab727, type: 3}
+  m_Mesh: {fileID: -2432090755550338912, guid: f07855533af1ec54d89f067dc951afa2, type: 3}
 --- !u!23 &6172209109160299988
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -110,5 +110,5 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.48, y: 0.8, z: 0.470499}
-  m_Center: {x: 0, y: 0.4, z: 0.014749497}
+  m_Size: {x: 0.56, y: 0.5600002, z: 0.46000004}
+  m_Center: {x: 0, y: 3.38, z: 7.77}

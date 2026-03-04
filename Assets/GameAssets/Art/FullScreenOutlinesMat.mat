@@ -145,7 +145,7 @@ Material:
     - _CoatMask: 0
     - _Color_Threshold: 0.2
     - _Color_Threshold_End: 2
-    - _Color_Threshold_Start: 0.5
+    - _Color_Threshold_Start: 1
     - _CullMode: 2
     - _CullModeForward: 2
     - _Cutoff: 0.5
@@ -191,7 +191,7 @@ Material:
     - _MetallicRemapMax: 1
     - _MetallicRemapMin: 0
     - _Noramal_Threshold: 0.5
-    - _Noramal_Threshold_Start: 0.5
+    - _Noramal_Threshold_Start: 1
     - _Noraml_Threshold: 0.15
     - _NormalMapSpace: 0
     - _NormalScale: 1

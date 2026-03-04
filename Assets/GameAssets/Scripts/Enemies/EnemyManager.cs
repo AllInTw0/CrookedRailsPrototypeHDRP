@@ -104,7 +104,7 @@ public class EnemyManager : MonoBehaviour
     {
         if (j > 0)
         {
-            enemyList.Add(Instantiate(enemyPrefab, new Vector3(Random.Range(-3f,3f),Random.Range(0f,6f),Random.Range(-3f,3f)), Quaternion.identity).transform.GetComponent<Enemy>());
+            enemyList.Add(Instantiate(enemyPrefab, new Vector3(Random.Range(-3f,3f),Random.Range(0f,0f),Random.Range(-3f,3f)), Quaternion.identity).transform.GetComponent<Enemy>());
             j--;
         }
 
@@ -115,7 +115,7 @@ public class EnemyManager : MonoBehaviour
 
         if (enemyList.Count < targetEnemyCount_Debug && j <= 0)
         {
-            enemyList.Add(Instantiate(enemyPrefab, new Vector3(Random.Range(-3f,3f),Random.Range(0f,6f),Random.Range(-3f,3f)), Quaternion.identity).transform.GetComponent<Enemy>());
+            enemyList.Add(Instantiate(enemyPrefab, new Vector3(Random.Range(-3f,3f),Random.Range(0f,0f),Random.Range(-3f,3f)), Quaternion.identity).transform.GetComponent<Enemy>());
         }
         
         //Spawning

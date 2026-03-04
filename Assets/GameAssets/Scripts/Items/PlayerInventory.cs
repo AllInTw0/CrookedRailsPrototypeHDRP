@@ -39,6 +39,25 @@ public class PlayerInventory : MonoBehaviour
             else
                 UnEquipItem(selectIndex - 1);
         }
+
+        //Swaping Tools
+        if (InputManager.swapToolAction.triggered)
+        {
+            if(selectIndex > 0 && items.Count > 0 && items[selectIndex - 1].itemInfo.isTool)
+            {
+                Item toolRefrence = tool == null ? null : UnEquipTool();
+                Item newTool = UnEquipItem(selectIndex - 1);
+
+                newTool.Interact();
+                toolRefrence.Interact();
+
+                //TryEquipping(newTool);
+                //TryEquipping(toolRefrence);
+
+                selectIndex = 0;
+                UpdateSelectIndexInterval();
+            }
+        }
     }
 
     public bool TryEquipping(Item item)
@@ -98,6 +117,7 @@ public class PlayerInventory : MonoBehaviour
         {
             equippedItem.count = sum;
             item.count = 0;
+            PlayerInteract.active.StopInteracting();
             Destroy(item.gameObject);
         }
         else
@@ -112,7 +132,7 @@ public class PlayerInventory : MonoBehaviour
         Debug.Log(item + " Equipped As Stackable Item");
         InventoryUI.active.UpdateItemIcons();
     }
-    private void UnEquipTool()
+    private Item UnEquipTool()
     {
         ToolAnimationInfo animInfo = PlayerAvatar.active.GetAnimationInfo();
         
@@ -127,12 +147,16 @@ public class PlayerInventory : MonoBehaviour
         tool.BecomeVisible();
         tool.transform.rotation = rot;
         tool.DropFromPos(pos);
-        
+
+        Item refrence = tool;
+
         tool = null;
         PlayerAvatar.active.UnEquipTool();
         InventoryUI.active.UpdateToolIcon();
+
+        return refrence;
     }
-    private void UnEquipItem(int index)
+    private Item UnEquipItem(int index)
     {
         Item item = items[index];
         items.RemoveAt(index);
@@ -145,6 +169,8 @@ public class PlayerInventory : MonoBehaviour
         UpdateSelectIndexInterval();
         InventoryUI.active.UpdateItemIcons();
         Debug.Log(item + " Dropped As Item");
+
+        return item;
     }
 
     public bool RemoveItem(ItemSO itemInfo, out int itemCountRemoved, int targetCount = 1)

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using static System.Collections.Specialized.BitVector32;
 using Random = UnityEngine.Random;
 public class Point
 {
@@ -8,13 +9,14 @@ public class Point
     public Vector3 handleBackward;
 }
 [System.Serializable]
-public class SplineMeshInfo
+public struct SplineMeshInfo
 {
     public Mesh mainMesh;
     public List<Mesh> repeatingMeshList;
     public float repeatingMeshInterval;
     public Material material;
     public int layer;
+    public Vector3 scale;
     [System.NonSerialized]
     public Vector3 meshSize;
 }
@@ -22,13 +24,17 @@ public class Spline : MonoBehaviour
 {
     public static Spline active;
     [SerializeField]
-    private List<SplineMeshInfo> splineMeshList = new List<SplineMeshInfo>();
+    public List<SplineMeshInfo> splineMeshList = new List<SplineMeshInfo>();
     private void Awake()
     {
         active = this;
         for (int i = 0; i < splineMeshList.Count; i++)
         {
-            splineMeshList[i].meshSize = calculateMeshSize(splineMeshList[i].mainMesh);
+            //splineMeshList[i].meshSize = calculateMeshSize(splineMeshList[i].mainMesh);
+            //struct version
+            SplineMeshInfo splineMeshInfo = splineMeshList[i];
+            splineMeshInfo.meshSize = calculateMeshSize(splineMeshList[i].mainMesh);
+            splineMeshList[i] = splineMeshInfo;
         }
     }
     
@@ -86,11 +92,14 @@ public class Spline : MonoBehaviour
     }
     
     //Mesh Generation Functions
-    public GameObject GenerateMeshAlongSpline(Point pointA, Point pointB, SplineMeshInfo splineMesh = null, float fromTime = 0f, float toTime = 1f)
+    public GameObject GenerateMeshAlongSpline(Point pointA, Point pointB, SplineMeshInfo? _splineMesh = null, float fromTime = 0f, float toTime = 1f)
     {
-        if (splineMesh == null)
+        SplineMeshInfo splineMesh;
+        if (_splineMesh.HasValue)
+            splineMesh = _splineMesh.Value;
+        else
             splineMesh = splineMeshList[0];
-        
+
         Mesh segmentMesh = new Mesh();
         int last_vert_count = 0;
         List<Vector3> vert_list = new List<Vector3>();
@@ -109,7 +118,7 @@ public class Spline : MonoBehaviour
 
         float splineLenght = CalculateSplineLenght(pointA,pointB);
         splineLenght *= toTime - fromTime;
-        int segments = Mathf.RoundToInt(splineLenght);
+        int segments = Mathf.RoundToInt(splineLenght / (splineMesh.meshSize.z * splineMesh.scale.z));
         float repeatingMeshCounter = 0f;
         float increment = (splineLenght / (float)segments) / (splineLenght / (toTime - fromTime));
         for (int i = 0; i < segments; i++)
@@ -122,16 +131,16 @@ public class Spline : MonoBehaviour
             int index = 0;
             foreach (var vert in splineMesh.mainMesh.vertices)
             {
-                float zTime = vert.z/ splineMesh.meshSize.z;
+                float zTime = vert.z / splineMesh.meshSize.z;
                 
                 Vector3 pos = CalculateSplinePosition(pointA, pointB, startTime + increment * zTime);
                 Vector3 dirZ = CalculateSplineDirectionVector(pointA, pointB, startTime + increment * zTime);
                 Vector3 dirX = new Vector3(-dirZ.z, 0, dirZ.x);
-                float xTime = vert.x;
+                float xTime = vert.x * splineMesh.scale.x;
 
                 pos += xTime * dirX;
 
-                pos.y += vert.y;
+                pos.y += vert.y * splineMesh.scale.y;
 
 
                 //Debug.DrawRay(pos, Vector3.up * 0.1f, Color.black, 60f);
@@ -195,13 +204,16 @@ public class Spline : MonoBehaviour
         Destroy(obj);
         return meshObject;
     }
-    public GameObject GenerateMeshAlongTrackSection(TrackSection section, SplineMeshInfo splineMesh = null, float fromProgress = 0f, float toProgress = -1f)
+    public GameObject GenerateMeshAlongTrackSection(TrackSection section, SplineMeshInfo? _splineMesh = null, float fromProgress = 0f, float toProgress = -1f)
     {
         List<PathPoint> path = section.path;
-        
-        if (splineMesh == null)
+
+        SplineMeshInfo splineMesh;
+        if (_splineMesh.HasValue)
+            splineMesh = _splineMesh.Value;
+        else
             splineMesh = splineMeshList[0];
-        
+
         if (toProgress < 0f)
             toProgress = path[^1].distance;
         
@@ -223,7 +235,7 @@ public class Spline : MonoBehaviour
 
         float pathLenght = toProgress - fromProgress;
         
-        int segments = Mathf.RoundToInt(pathLenght);
+        int segments = Mathf.RoundToInt(pathLenght / (splineMesh.meshSize.z * splineMesh.scale.z));
         
         float repeatingMeshCounter = 0f;
         float increment = pathLenght / (float)segments;
@@ -238,16 +250,16 @@ public class Spline : MonoBehaviour
             int index = 0;
             foreach (var vert in splineMesh.mainMesh.vertices)
             {
-                float zTime = vert.z/ splineMesh.meshSize.z;
-                
-                Vector3 pos = TrackManager.GetPathPosition(path,startProgress + increment * zTime);
+                float zTime = vert.z / splineMesh.meshSize.z;
+
+                Vector3 pos = TrackManager.GetPathPosition(path, startProgress + increment * zTime);
                 Vector3 dirZ = TrackManager.GetPathDirectionVector(section, startProgress + increment * zTime);
                 Vector3 dirX = new Vector3(-dirZ.z, 0, dirZ.x);
-                float xTime = vert.x;
+                float xTime = vert.x * splineMesh.scale.x;
 
                 pos += xTime * dirX;
 
-                pos.y += vert.y;
+                pos.y += vert.y * splineMesh.scale.y;
 
 
                 //Debug.DrawRay(pos, Vector3.up * 0.1f, Color.black, 60f);
@@ -308,6 +320,123 @@ public class Spline : MonoBehaviour
         //meshCollider.convex = true;
         meshCollider.sharedMesh = combinedMesh;
         
+        Destroy(obj);
+        return meshObject;
+    }
+    public GameObject GenerateMeshAlongPath(List<PathPoint> path, SplineMeshInfo? _splineMesh = null, float fromProgress = 0f, float toProgress = -1f)
+    {
+        SplineMeshInfo splineMesh;
+        if (_splineMesh.HasValue)
+            splineMesh = _splineMesh.Value;
+        else
+            splineMesh = splineMeshList[0];
+
+        if (toProgress < 0f)
+            toProgress = path[^1].distance;
+
+        Mesh segmentMesh = new Mesh();
+        int last_vert_count = 0;
+        List<Vector3> vert_list = new List<Vector3>();
+        List<Vector2> uv_list = new List<Vector2>();
+        List<int> tris_list = new List<int>();
+
+        //Object for mesh combinations
+        GameObject obj = new GameObject();
+        Transform objTransform = obj.transform;
+
+        CombineInstance instance = new CombineInstance();
+        //
+        //Sleepers
+        List<CombineInstance> combineMeshes = new List<CombineInstance>();
+        //
+
+        float pathLenght = toProgress - fromProgress;
+
+        int segments = Mathf.RoundToInt(pathLenght / (splineMesh.meshSize.z * splineMesh.scale.z));
+
+        float repeatingMeshCounter = 0f;
+        float increment = pathLenght / (float)segments;
+
+        for (int i = 0; i < segments; i++)
+        {
+            //time
+            float startProgress = fromProgress + i * increment;
+            repeatingMeshCounter += 1f / splineMesh.repeatingMeshInterval;
+            //
+
+            int index = 0;
+            foreach (var vert in splineMesh.mainMesh.vertices)
+            {
+                float zTime = vert.z / splineMesh.meshSize.z;
+
+                Vector3 pos = TrackManager.GetPathPosition(path, startProgress + increment * zTime);
+                Vector3 dirZ = TrackManager.GetPathDirectionVector(path, startProgress + increment * zTime);
+                Vector3 dirX = new Vector3(-dirZ.z, 0, dirZ.x);
+                float xTime = vert.x * splineMesh.scale.x;
+
+                pos += xTime * dirX;
+
+                pos.y += vert.y * splineMesh.scale.y;
+
+
+                //Debug.DrawRay(pos, Vector3.up * 0.1f, Color.black, 60f);
+                vert_list.Add(pos);
+                uv_list.Add(splineMesh.mainMesh.uv[index]);
+                index++;
+            }
+            foreach (var tris in splineMesh.mainMesh.triangles)
+            {
+                index = tris + last_vert_count;
+                tris_list.Add(index);
+            }
+            last_vert_count = vert_list.Count;
+            //Debug.DrawRay(posStart, Vector3.up, Color.yellow, 60f);
+
+            //Repeating Meshes (Sleepers)
+            int meshCount = Mathf.FloorToInt(repeatingMeshCounter);
+            repeatingMeshCounter -= meshCount;
+            float meshTimeIncrement = 1f / (float)meshCount;
+            for (int a = 0; a < meshCount; a++)
+            {
+                instance.mesh = splineMesh.repeatingMeshList[Random.Range(0, splineMesh.repeatingMeshList.Count - 1)];
+                Vector3 pos = TrackManager.GetPathPosition(path, startProgress + meshTimeIncrement * a * increment);
+                Vector3 dirZ = TrackManager.GetPathDirectionVector(path, startProgress + meshTimeIncrement * a * increment);
+                objTransform.position = pos;
+                objTransform.rotation = Quaternion.LookRotation(dirZ, Vector3.up);
+                instance.transform = objTransform.localToWorldMatrix;
+                combineMeshes.Add(instance);
+            }
+            //
+        }
+        segmentMesh.vertices = vert_list.ToArray();
+        segmentMesh.uv = uv_list.ToArray();
+        tris_list.Reverse();
+        segmentMesh.triangles = tris_list.ToArray();
+
+
+        GameObject meshObject = new GameObject("GeneratedTrackMesh");
+        meshObject.layer = splineMesh.layer;
+        MeshFilter meshFilter = meshObject.AddComponent<MeshFilter>();
+        MeshRenderer meshRenderer = meshObject.AddComponent<MeshRenderer>();
+        MeshCollider meshCollider = meshObject.AddComponent<MeshCollider>();
+
+        Mesh combinedMesh = new Mesh();
+        objTransform.position = Vector3.zero;
+        objTransform.rotation = Quaternion.Euler(0f, 0f, 0f);
+        instance.mesh = segmentMesh;
+        instance.transform = objTransform.localToWorldMatrix;
+        combineMeshes.Add(instance);
+
+        combinedMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+        combinedMesh.CombineMeshes(combineMeshes.ToArray());
+        combinedMesh.RecalculateNormals();
+
+        meshFilter.sharedMesh = combinedMesh;
+        meshRenderer.material = splineMesh.material;
+
+        //meshCollider.convex = true;
+        meshCollider.sharedMesh = combinedMesh;
+
         Destroy(obj);
         return meshObject;
     }

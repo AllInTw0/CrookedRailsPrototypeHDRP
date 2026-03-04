@@ -272,8 +272,20 @@ public class TrackManager : MonoBehaviour
         Debug.LogWarning("Couldn't Get Path Direction Vector." + section + ", " + progress);
         return Vector3.zero;
     }
+    public static Vector3 GetPathDirectionVector(List<PathPoint> path, float progress)
+    {
+        for (int i = 1; i < path.Count; i++)
+        {
+            if (path[i].distance >= progress)
+            {
+                return (path[i].position - path[i - 1].position).normalized;
+            }
+        }
+        Debug.LogWarning("Couldn't Get Path Direction Vector. " + progress);
+        return Vector3.zero;
+    }
     //Generating Path Functions
-    public void CalculatePath(Point pointA, Point pointB, float splineLenght, out List<PathPoint> path, float resolution = 2.5f)
+    static public void CalculatePath(Point pointA, Point pointB, float splineLenght, out List<PathPoint> path, float resolution = 2.5f)
     {
         path = new List<PathPoint>();
 
@@ -302,7 +314,7 @@ public class TrackManager : MonoBehaviour
 
         Debug.Log("PointDist: " + pathLenght + " SplineDist: " + splineLenght);
     }
-    public void CalculatePath(List<PathPoint> path, out List<PathPoint> newPath, float resolution = 1f)
+    static public void CalculatePath(List<PathPoint> path, out List<PathPoint> newPath, float resolution = 1f)
     {
         newPath = new List<PathPoint>();
         

@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Enemy
   m_EditorClassIdentifier: Assembly-CSharp::EnemySO
   speed: 3
+  acceleration: 10
+  deceleration: 10
   rotationSpeed: 5
   HealthWeightParamsList:
   - healthType: 1

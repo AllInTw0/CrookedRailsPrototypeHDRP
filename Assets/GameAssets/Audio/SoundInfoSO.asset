@@ -117,3 +117,16 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 8e6f2ac2d402fcc41927755b56170d12, type: 3}
     volume: 1
     pitch: {x: 0.7, y: 1.3}
+  - name: Explosion
+    AudioClips:
+    - {fileID: 8300000, guid: b0ddaa4b07b2cc3409aad6bbf25dbf59, type: 3}
+    - {fileID: 8300000, guid: 62e8fd92057a6094baca271516a211b0, type: 3}
+    - {fileID: 8300000, guid: 4b0f7c9fca99c1b4e8963a857bf86abe, type: 3}
+    volume: 1
+    pitch: {x: 0.7, y: 1.3}
+  - name: Launcher Shot
+    AudioClips:
+    - {fileID: 8300000, guid: 2e4f090a6ad4b384d890112f6eb2bc0d, type: 3}
+    - {fileID: 8300000, guid: 8e01826c370bfbc4daefafa0b9f6a34f, type: 3}
+    volume: 1
+    pitch: {x: 1, y: 1.3}

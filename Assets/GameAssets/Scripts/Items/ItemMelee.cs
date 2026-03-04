@@ -36,7 +36,7 @@ public class ItemMelee : Item
 
         Invoke(nameof(Swing),damageDelay);
         
-        SoundManager.active.PlayAtPos(transform.position, swingSound);
+        SoundManager.active.PlayAtPos(PlayerAvatar.active.GetAnimationInfo().animatedObject.transform.position, swingSound);
         PlayerAvatar.active.animator.SetTrigger("Swing");
         
         coolDown = swingCoolDown;

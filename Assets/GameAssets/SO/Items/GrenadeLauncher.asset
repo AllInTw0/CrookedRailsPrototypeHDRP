@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b1fea353dc6f1b448e5869dc3e90a7a, type: 3}
+  m_Name: GrenadeLauncher
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSO
+  nameOverride: 
+  prefab: {fileID: 9183420046349202715, guid: a270bf30990ea674cba054e28b087c09, type: 3}
+  description: A powerfull grenade launcher.
+  offset: {x: -0.75, y: 0, z: -0.06}
+  origin: {x: 0, y: 0, z: -0.06}
+  rotation: {x: -25, y: 0, z: 0}
+  icon: {fileID: 2800000, guid: f9bd25da4e2dcdc4c8f0ae2370a5d5dc, type: 2}
+  renderLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  slotCount: 2
+  maxCount: 1
+  isTool: 1

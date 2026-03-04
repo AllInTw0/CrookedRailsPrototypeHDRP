@@ -114,4 +114,12 @@ public class RailCar : MonoBehaviour
     {
         return health.IsBroken();
     }
+    public void Derail()
+    {
+        health.Derail();
+    }
+    public void Rerail()
+    {
+        health.Rerail();
+    }
 }

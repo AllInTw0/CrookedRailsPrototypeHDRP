@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f31a82457e9ad9a448d39854d88aac01, type: 3}
   m_Name: OilLamp
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeSO
-  nameOverride: Oil Headlamp Upgrade
+  nameOverride: Oil Headlamp
   prefab: {fileID: 3015091432788408613, guid: 11c38d0a751073d4c8eb0daaae331e7a, type: 3}
   description: Throws a dim and short beam of light ahead of the locomotive.
   offset: {x: 0.75, y: 0.6, z: 0.5}

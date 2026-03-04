@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEngine.EventSystems.EventTrigger;
 
 public enum OverrideType
 {
@@ -72,7 +70,6 @@ public class PaperRenderer : MonoBehaviour
     {
         active = this;
     }
-
     public Texture2D RenderPaper(string paperName,List<Override> overrideList)
     {
         Paper paper = GetPaper(paperName);
@@ -196,7 +193,6 @@ public class PaperRenderer : MonoBehaviour
 
         return texture;
     }
-
     private Paper GetPaper(string paperName)
     {
         foreach (Paper paper in paperList)

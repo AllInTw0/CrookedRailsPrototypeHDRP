@@ -82,6 +82,10 @@ public class PlayerCamera : MonoBehaviour
     {
         return new Ray(transform.position, transform.forward);
     }
+    public Vector3 GetDir()
+    {
+        return transform.forward;
+    }
 
     public void WorldPosToUI(Vector3 worldPos, out Vector3 screenPos, out bool onScreen)
     {

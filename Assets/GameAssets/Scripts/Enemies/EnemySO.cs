@@ -14,6 +14,8 @@ public class EnemySO : ScriptableObject
 
     [Header("Speed")]
     public float speed = 1f;
+    public float acceleration = 1f;
+    public float deceleration = 1f;
     public float rotationSpeed = 1f;
 
     [Header("Sight")]

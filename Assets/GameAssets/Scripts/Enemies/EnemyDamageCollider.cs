@@ -40,7 +40,9 @@ public class EnemyDamageCollider : MonoBehaviour
             if (healthScript != null && healthScript.health > 0f && (healthScript.healthType == HealthType.Player || healthScript.healthType == HealthType.Train))
             {
                 SoundManager.active.PlayAtPos(transform.position,attackSoundName);
-                
+
+                enemyBehaviour.animator.SetTrigger("Attack");
+
                 coolDownTime = coolDown;
                 enemyBehaviour.Freeze();
                 

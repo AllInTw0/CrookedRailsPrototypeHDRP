@@ -31,4 +31,8 @@ public static class Money
         newOverride.stringOverride = str;
         MiniPrinter.active.AddNotification(PaperRenderer.active.RenderPaper("Receipt", new List<Override>() { newOverride }));
     }
+    public static int GetAmmount()
+    {
+        return money;
+    }
 }

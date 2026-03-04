@@ -10,6 +10,7 @@ public enum TrainStatType
     Acceleration,
     Deceleration,
     BreakdownChance,
+    DerailByObjectChance,
 }
 public enum UpgradeType
 {
@@ -38,7 +39,8 @@ public class TrainUpgradeHandler : MonoBehaviour
     public class UpgradeVisual
     {
         public UpgradeSO linkedUpgrade;
-        public GameObject objectRefrence;
+        public List<GameObject> enableObjectList;
+        public List<GameObject> disableObjectList;
     }
 
     [SerializeField]
@@ -80,7 +82,15 @@ public class TrainUpgradeHandler : MonoBehaviour
     {
         foreach (UpgradeVisual visual in upgradeVisualList)
         {
-            visual.objectRefrence.SetActive(boughtUpgradeList.Contains(visual.linkedUpgrade));
+            foreach (GameObject obj in visual.enableObjectList)
+            {
+                obj.SetActive(boughtUpgradeList.Contains(visual.linkedUpgrade));
+            }
+            foreach (GameObject obj in visual.disableObjectList)
+            {
+                if(boughtUpgradeList.Contains(visual.linkedUpgrade))
+                    obj.SetActive(false);
+            }
         }
     }
     public float GetStatValue(TrainStatType trainStatType)

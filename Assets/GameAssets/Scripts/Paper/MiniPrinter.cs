@@ -14,6 +14,15 @@ public class MiniPrinter : AnimatedPrinter
         active = this;
     }
 
+    private void Update()
+    {
+        if (InputManager.moneyAction.WasPressedThisFrame())
+        {
+            Override moneySumOverride = new Override("Ammount", OverrideType.Text, Money.GetAmmount() + "$");
+            AddNotification(PaperRenderer.active.RenderPaper("Money", new List<Override>() { moneySumOverride }));
+        }
+        UpdatePrinterCall();
+    }
     public override void BeginPrint()
     {
         base.BeginPrint();

@@ -7,11 +7,21 @@ public class EnemyHealth : Health
     private Enemy behaviour;
     [SerializeField] 
     private float destroyDelay;
+    [SerializeField]
+    private Collider collision;
+    [SerializeField]
+    private GameObject ragdollPrefab;
 
-    public override void HealthReachedZero()
+    private void Update()
     {
+        UpdateCall();
+    }
+    public override void HealthReachedZero(Vector3 force = default)
+    {
+        collision.enabled = false;
+        SpawnRagdoll(behaviour.animator.gameObject, ragdollPrefab, force, 10f);
         EnemyManager.active.RemoveEnemy(behaviour);
-        behaviour.Freeze();
-        Destroy(gameObject,destroyDelay);
+        //behaviour.Freeze();
+        Destroy(gameObject,0f);
     }
 }

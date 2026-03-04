@@ -18,7 +18,7 @@ public class ItemBucket : Item
     {
         bool equiped = base.Interact();
 
-        if (equiped)
+        if (equiped && PlayerInventory.active.tool == this)
         {
             ToolAnimationInfo toolAnimInfo = PlayerAvatar.active.GetAnimationInfo();
             toolAnimInfo.animatedObject.transform.GetChild(0).Find("BucketFluid").gameObject.SetActive(filled);

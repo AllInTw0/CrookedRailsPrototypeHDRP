@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -15,6 +16,10 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private float crouchingSpeed = 1f;
     [SerializeField]
+    private float climbingSpeed = 1f;
+    [SerializeField]
+    private float climbingAngleThreshold = 45f;
+    [SerializeField]
     private float noclipSpeed = 1f;
     [SerializeField]
     private float acceleration = 1f;
@@ -30,7 +35,9 @@ public class PlayerMovement : MonoBehaviour
     private float colliderCrouchHeight;
     [SerializeField]
     private float cameraCrouchHeight;
-
+    [Header("Stamina")]
+    [SerializeField]
+    private float maxDistancefromTrain;
     [Header("Stamina")] 
     [SerializeField] 
     private float maxStamina;
@@ -82,6 +89,10 @@ public class PlayerMovement : MonoBehaviour
 
     private float stamina;
     private float staminaGainDelayTime;
+
+    private bool tooFarFromTrain;
+
+    private Ladder currentLadder;
     //Input
     private Vector2 moveInput;
     private bool noclip;
@@ -202,73 +213,146 @@ public class PlayerMovement : MonoBehaviour
     {
         if(noclip)
             return;
-        
-        //Gravity
-        rb.AddForce(grounded ? -groundNormal * gravityForce * 0.15f : Vector3.down * gravityForce);
-        
-        //Movement
-        Vector2 mag = FindVelRelativeToLook();
-        float xMag = mag.x, zMag = mag.y;
-        
-        Debug.DrawLine(transform.position + Vector3.up,transform.position + Vector3.up + new Vector3(xMag,0,zMag), Color.cyan);
-        Debug.DrawLine(transform.position + Vector3.up,transform.position + Vector3.up + rb.linearVelocity, Color.green);
-        
-        if (moveInput.x > 0 && xMag > targetSpeed) moveInput.x = 0;
-        if (moveInput.x < 0 && xMag < -targetSpeed) moveInput.x = 0;
-        if (moveInput.y > 0 && zMag > targetSpeed) moveInput.y = 0;
-        if (moveInput.y < 0 && zMag < -targetSpeed) moveInput.y  = 0;
-        
-        Vector3 targetVector = ((orientation.forward * moveInput.y) + (orientation.right * moveInput.x)).normalized;
-        Vector3 projectedVector = Vector3.ProjectOnPlane(targetVector, groundNormal).normalized;
+       
 
-        Debug.DrawLine(transform.position + Vector3.up, transform.position + Vector3.up + projectedVector * acceleration, grounded ? Color.beige : Color.red);
-        
-        
-        rb.AddForce(projectedVector * ((targetSpeed / walkingSpeed) * acceleration));
-
-        if (grounded)
+        if (currentLadder != null) 
         {
-            //Drag
-            Vector3 velocityPlane = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
-            float velocity = velocityPlane.sqrMagnitude;
-            if (moveInput == Vector2.zero && velocity > 0.1f)
-            {
-                rb.AddForce(-velocityPlane.normalized * ((targetSpeed / walkingSpeed) * deceleration));
-            }
-            else if(moveInput == Vector2.zero)
-            {
-                rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0);
-            }
+            //Ladder
+            targetSpeed = climbingSpeed;
 
-            //Limit speed
-            float angleBetweenDirections = Vector2.Angle(new Vector2(rb.linearVelocity.x, rb.linearVelocity.y), new Vector2(targetVector.x,targetVector.z));
-            if (velocity > targetSpeed && moveInput != Vector2.zero && angleBetweenDirections <=90f)
-            {
-                float fallSpeed = rb.linearVelocity.y;
-                Vector3 n = rb.linearVelocity.normalized * targetSpeed;
-                rb.linearVelocity = new Vector3(n.x, fallSpeed, n.z);
-            }
-            
-            //Counter movement
-            if (moveInput != Vector2.zero && angleBetweenDirections > 90f)
-            {
-                rb.AddForce(projectedVector * ((targetSpeed / walkingSpeed) * acceleration));
-            }
-        }
 
-        //Step detection
-        if ((moveInput.x > 0 || moveInput.y > 0 ) && rb.linearVelocity.y < 0.1f)
-        {
-            if (Physics.Raycast(transform.position + new Vector3(0, stepCheckHigh, 0), projectedVector, stepCheckDistance, groundLayer) == false) 
+
+            Vector3 forceVector = Vector3.zero;
+            Vector3 ladderDir = currentLadder.GetLadderDir();
+            void CheckIfVectorIsClimbing(Vector3 vector)
             {
-                if (Physics.Raycast(transform.position + new Vector3(0, stepCheckLow, 0), projectedVector, out RaycastHit hit, stepCheckDistance, groundLayer))
+                if (vector == Vector3.zero) return;
+
+                float angle = Vector2.Angle(new Vector2(vector.x, vector.z), new Vector2(ladderDir.x, ladderDir.z));
+                if(angle < climbingAngleThreshold)
                 {
-                    transform.position += projectedVector * hit.distance + new Vector3(0, stepCheckHigh, 0);
-                    Debug.Log("Preformed step!");
+                    forceVector += new Vector3(0f, vector.y + 0.1f, 0f); // +0.1f bias to climbing upwards
+                }
+                else
+                {
+                    forceVector += vector;
                 }
             }
-            Debug.DrawRay(transform.position + new Vector3(0,stepCheckLow,0), projectedVector.normalized * stepCheckDistance, Color.red);
-            Debug.DrawRay(transform.position + new Vector3(0, stepCheckHigh, 0), projectedVector.normalized * stepCheckDistance, Color.red);
+            CheckIfVectorIsClimbing(PlayerCamera.active.GetDir() * moveInput.y);
+            CheckIfVectorIsClimbing(orientation.right * moveInput.x);
+
+            forceVector = forceVector.normalized;
+
+            rb.AddForce(forceVector * ((targetSpeed / walkingSpeed) * acceleration));
+
+            //Limit speed
+            float velocity = rb.linearVelocity.magnitude;
+            if (velocity > targetSpeed && moveInput != Vector2.zero)
+            {
+                Vector3 n = rb.linearVelocity.normalized * targetSpeed;
+                rb.linearVelocity = new Vector3(n.x, n.y, n.z);
+            }
+
+            //Drag
+            if (moveInput == Vector2.zero && velocity > 0.1f)
+            {
+                rb.AddForce(-rb.linearVelocity.normalized * ((targetSpeed / walkingSpeed) * deceleration));
+            }
+            else if (moveInput == Vector2.zero)
+            {
+                rb.linearVelocity = new Vector3(0, 0, 0);
+            }
+        }
+        else
+        {
+            //Gravity
+            rb.AddForce(grounded ? -groundNormal * gravityForce * 0.15f : Vector3.down * gravityForce);
+
+            //Movement
+            Vector2 mag = FindVelRelativeToLook();
+            float xMag = mag.x, zMag = mag.y;
+
+            Debug.DrawLine(transform.position + Vector3.up, transform.position + Vector3.up + new Vector3(xMag, 0, zMag), Color.cyan);
+            Debug.DrawLine(transform.position + Vector3.up, transform.position + Vector3.up + rb.linearVelocity, Color.green);
+
+            if (moveInput.x > 0 && xMag > targetSpeed) moveInput.x = 0;
+            if (moveInput.x < 0 && xMag < -targetSpeed) moveInput.x = 0;
+            if (moveInput.y > 0 && zMag > targetSpeed) moveInput.y = 0;
+            if (moveInput.y < 0 && zMag < -targetSpeed) moveInput.y = 0;
+
+            Vector3 targetVector = ((orientation.forward * moveInput.y) + (orientation.right * moveInput.x)).normalized;
+            Vector3 projectedVector = Vector3.ProjectOnPlane(targetVector, groundNormal).normalized;
+
+            Debug.DrawLine(transform.position + Vector3.up, transform.position + Vector3.up + projectedVector * acceleration, grounded ? Color.beige : Color.red);
+
+
+            //Max Distance 
+            if (Train.playerTrain != null)
+            {
+                float dist = Train.playerTrain.GetClosestDistanceToPos(transform.position);
+                if (dist >= maxDistancefromTrain && Train.playerTrain.GetClosestDistanceToPos(transform.position + projectedVector) > dist)
+                {
+                    Debug.Log("Walking away from the train!");
+                    targetSpeed = 0f;
+                    if (tooFarFromTrain == false)
+                    {
+                        Override title = new Override("Title", OverrideType.Text, "WARNING");
+                        Override message = new Override("Message", OverrideType.Text, "You're to far from the train! You may NOT go FURTHER!");
+                        Override subText = new Override("SubText", OverrideType.Text, Mathf.Round(dist) + "m");
+                        MiniPrinter.active.AddNotification(PaperRenderer.active.RenderPaper("Message", new List<Override>() { title, message, subText }));
+                    }
+                    tooFarFromTrain = true;
+                }
+                else if (dist < maxDistancefromTrain - 2f)
+                    tooFarFromTrain = false;
+            }
+
+            rb.AddForce(projectedVector * ((targetSpeed / walkingSpeed) * acceleration));
+
+            if (grounded)
+            {
+                //Drag
+                Vector3 velocityPlane = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+                float velocity = velocityPlane.sqrMagnitude;
+                if (moveInput == Vector2.zero && velocity > 0.1f)
+                {
+                    rb.AddForce(-velocityPlane.normalized * ((targetSpeed / walkingSpeed) * deceleration));
+                }
+                else if (moveInput == Vector2.zero)
+                {
+                    rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0);
+                }
+
+                //Limit speed
+                float angleBetweenDirections = Vector2.Angle(new Vector2(rb.linearVelocity.x, rb.linearVelocity.z), new Vector2(targetVector.x, targetVector.z));
+                if (velocity > targetSpeed && moveInput != Vector2.zero && angleBetweenDirections <= 90f)
+                {
+                    float fallSpeed = rb.linearVelocity.y;
+                    Vector3 n = rb.linearVelocity.normalized * targetSpeed;
+                    rb.linearVelocity = new Vector3(n.x, fallSpeed, n.z);
+                }
+
+                //Counter movement
+                if (moveInput != Vector2.zero && angleBetweenDirections > 90f)
+                {
+                    rb.AddForce(projectedVector * ((targetSpeed / walkingSpeed) * acceleration));
+                }
+            }
+
+            //Step detection
+            if ((moveInput.x > 0 || moveInput.y > 0) && rb.linearVelocity.y < 0.1f)
+            {
+                if (Physics.Raycast(transform.position + new Vector3(0, stepCheckHigh, 0), projectedVector, stepCheckDistance, groundLayer) == false)
+                {
+                    if (Physics.Raycast(transform.position + new Vector3(0, stepCheckLow, 0), projectedVector, out RaycastHit hit, stepCheckDistance, groundLayer))
+                    {
+                        transform.position += projectedVector * hit.distance + new Vector3(0, stepCheckHigh, 0);
+                        Debug.Log("Preformed step!");
+                    }
+                }
+                Debug.DrawRay(transform.position + new Vector3(0, stepCheckLow, 0), projectedVector.normalized * stepCheckDistance, Color.red);
+                Debug.DrawRay(transform.position + new Vector3(0, stepCheckHigh, 0), projectedVector.normalized * stepCheckDistance, Color.red);
+            }
         }
     }
     
@@ -291,6 +375,12 @@ public class PlayerMovement : MonoBehaviour
     private void CheckGrounded()
     {
         if (rb.constraints == RigidbodyConstraints.FreezeAll) return;
+
+        if(currentLadder != null)
+        {
+            grounded = false;
+            return;
+        }
 
         Debug.DrawRay(transform.position + new Vector3(0, 0.05f, 0),Vector3.down*0.175f);
         if (Physics.Raycast(transform.position + new Vector3(0, 0.05f, 0), Vector3.down, out RaycastHit  hit ,0.175f, groundLayer))
@@ -350,5 +440,24 @@ public class PlayerMovement : MonoBehaviour
         UnFreeze();
         playerCollider.enabled = true;
         noclip = false;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(currentLadder == null && other.transform.TryGetComponent(out Ladder ladder))
+        {
+            currentLadder = ladder;
+            MovingPlatformManager.active.RemoveEntry(transform);
+            MovingPlatformManager.active.AddEntry(rb, orientation, currentLadder.ladderCollider.transform, true);
+            grounded = false;
+        }
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if (currentLadder != null && other.transform == currentLadder.ladderCollider.transform)
+        {
+            currentLadder = null;
+            MovingPlatformManager.active.RemoveEntry(transform);
+        }
     }
 }

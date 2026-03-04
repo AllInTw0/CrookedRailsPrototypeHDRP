@@ -30,11 +30,12 @@ public class PlayerHealth : Health
     private void Update()
     {
         StatUI.active.UpdateHealth(health,maxHealth);
+        UpdateCall();
     }
 
-    public override void HealthReachedZero()
+    public override void HealthReachedZero(Vector3 force = default)
     {
-        ragdoll = Instantiate(ragdollPrefab, playerMovement.transform.position, Quaternion.Euler(0, playerCamera.transform.rotation.y, 0));
+        SpawnRagdoll(playerAvatar.animator.gameObject, ragdollPrefab, force);
         playerInventory.UnEquipAll();
         playerMovement.EnableNoclip();
         playerAvatar.Hide();

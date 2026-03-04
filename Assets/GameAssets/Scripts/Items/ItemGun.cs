@@ -24,6 +24,9 @@ public class ItemGun : Item
     private string shootSound;
     [SerializeField] 
     private string failedSound;
+    [SerializeField]
+    private GameObject bulletPrefab;
+
     //Run Time
     private int clip;
     private float coolDown;
@@ -57,9 +60,12 @@ public class ItemGun : Item
             Vector3 startPos = bulletSpawn.position;
             Vector3 dir = (PlayerCamera.active.GetRaycastPos() - startPos).normalized;
 
-            BulletManager.active.ShootBullets(startPos, dir, bulletCount, bulletDamage, spread);
+            if (bulletPrefab == null)
+                BulletManager.active.ShootBullets(startPos, dir, bulletCount, bulletDamage, spread);
+            else
+                BulletManager.active.ShootPrefab(startPos, dir, bulletPrefab, bulletCount, spread);
 
-            SoundManager.active.PlayAtPos(transform.position, shootSound);
+            SoundManager.active.PlayAtPos(PlayerAvatar.active.GetAnimationInfo().bulletSpawn.position, shootSound);
             PlayerAvatar.active.animator.SetTrigger("Shoot");
 
             coolDown = shootCoolDown;
@@ -67,7 +73,7 @@ public class ItemGun : Item
         }
         else
         {
-            SoundManager.active.PlayAtPos(transform.position, failedSound);
+            SoundManager.active.PlayAtPos(PlayerAvatar.active.GetAnimationInfo().bulletSpawn.position, failedSound);
         }
     }
 
@@ -75,14 +81,14 @@ public class ItemGun : Item
     {
         if (PlayerInventory.active.RemoveItem(ammoItem, out int itemCountRemoved, clipSize - clip))
         {
-            SoundManager.active.PlayAtPos(transform.position, reloadSound);
+            SoundManager.active.PlayAtPos(PlayerAvatar.active.GetAnimationInfo().animatedObject.transform.position, reloadSound);
             PlayerAvatar.active.animator.SetTrigger("Reload");
             coolDown = reloadCoolDown;
             clip += itemCountRemoved;
         }
         else
         {
-            SoundManager.active.PlayAtPos(transform.position, failedSound);
+            SoundManager.active.PlayAtPos(PlayerAvatar.active.GetAnimationInfo().animatedObject.transform.position, failedSound);
         }
     }
 

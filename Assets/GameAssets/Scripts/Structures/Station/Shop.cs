@@ -221,10 +221,13 @@ public class Shop : MonoBehaviour
         }
         else if(itemInfo is UpgradeSO)
         {
-            description += "\nEFFECT:";
-            foreach (Upgrade upgrade in ((UpgradeSO)itemInfo).upgradeList)
+            if (((UpgradeSO)itemInfo).upgradeList.Count > 0)
             {
-                description += "\n" + TrainUpgradeHandler.active.GetUpgradeDescription(upgrade);
+                description += "\nEFFECT:";
+                foreach (Upgrade upgrade in ((UpgradeSO)itemInfo).upgradeList)
+                {
+                    description += "\n" + TrainUpgradeHandler.active.GetUpgradeDescription(upgrade);
+                }
             }
         }
         return description;

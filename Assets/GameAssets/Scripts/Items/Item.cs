@@ -22,18 +22,36 @@ public class Item : Interactable
     private float distance;
     private float velocity;
     private float rotVelocity;
+
+    private Rigidbody rb;
+    private bool physicsEnabled;
     void Start()
     {
+        Debug.Log(transform.name);
+        if (TryGetComponent(out Rigidbody rigidbody))
+        {
+            rb = rigidbody;
+        }
+        else
+        {
+            rb = gameObject.AddComponent<Rigidbody>();
+            rb.isKinematic = true;
+        }
+
         DropFromPos(transform.position);
     }
 
     public override bool Interact()
     {
         bool success = PlayerInventory.active.TryEquipping(this);
-        falling = false;
-        MovingPlatformManager.active.RemoveEntry(transform);
+        if (success)
+        {
+            falling = false;
+            DisablePhysics();
+            MovingPlatformManager.active.RemoveEntry(transform);     
+        }
         Debug.Log("Item Equipped Successfully: " + success);
-        
+
         base.Interact();
         return success;
     }
@@ -54,19 +72,31 @@ public class Item : Interactable
 
     public void UpdateItem()
     {
-        if (!falling)
-            return;
-
-        velocity += 10f * Time.deltaTime;
-        transform.position -= new Vector3(0, velocity * Time.deltaTime, 0f);
-        transform.Rotate(0f, rotVelocity * Time.deltaTime, 0f);
-        transform.rotation = Quaternion.Lerp(transform.rotation,Quaternion.Euler(0,transform.eulerAngles.y,0), (distance - (transform.position.y - targetY))/distance);
-        if (transform.position.y < targetY)
+        if (physicsEnabled)
         {
             falling = false;
-            transform.position = new Vector3(transform.position.x, targetY, transform.position.z);
-            transform.rotation = Quaternion.Euler(0,transform.eulerAngles.y,0);
-            SoundManager.active.PlayAtPos(transform.position,"Item - Drop");
+            if(rb.linearVelocity.magnitude <= 0.1f)
+            {
+                DropFromPos(transform.position);
+            }
+        }
+        else
+        {
+            rb.isKinematic = true;
+        }
+        if (falling)
+        {
+            velocity += 10f * Time.deltaTime;
+            transform.position -= new Vector3(0, velocity * Time.deltaTime, 0f);
+            transform.Rotate(0f, rotVelocity * Time.deltaTime, 0f);
+            transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0, transform.eulerAngles.y, 0), (distance - (transform.position.y - targetY)) / distance);
+            if (transform.position.y < targetY)
+            {
+                falling = false;
+                transform.position = new Vector3(transform.position.x, targetY, transform.position.z);
+                transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
+                SoundManager.active.PlayAtPos(transform.position, "Item - Drop");
+            }
         }
     }
     public void DropFromPos(Vector3 startPos)
@@ -75,7 +105,7 @@ public class Item : Interactable
         falling = true;
         velocity = 0;
         rotVelocity = Random.Range(-35f, 35f);
-        if (Physics.Raycast(startPos, Vector3.down, out RaycastHit hit, 100f, ItemManager.itemDropLayerMask))
+        if (Physics.Raycast(startPos + new Vector3(0f,0.05f,0f), Vector3.down, out RaycastHit hit, 100f, ItemManager.itemDropLayerMask))
         {
             targetY = hit.point.y;
             distance = transform.position.y - targetY;
@@ -84,6 +114,8 @@ public class Item : Interactable
             {
                 MovingPlatformManager.active.AddEntry(transform,transform,hit.transform);
             }
+
+            DisablePhysics();
         }
         else
         {
@@ -98,6 +130,7 @@ public class Item : Interactable
             mesh.enabled = false;
         }
         interactableCollider.enabled = false;
+        falling = false;
     }
     public void BecomeVisible()
     {
@@ -107,7 +140,34 @@ public class Item : Interactable
         }
         interactableCollider.enabled = true;
     }
+    public void EnablePhysics(Vector3 velocity)
+    {
+        if (interactableCollider.enabled == false) return;
 
+        MovingPlatformManager.active.RemoveEntry(transform);
+        rb.isKinematic = false;
+        falling = false;
+        physicsEnabled = true;
+        rb.linearVelocity = velocity;
+        rb.angularVelocity = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f));
+    }
+    public void AddExplosionForce(Vector3 explosionPos, float force, float range)
+    {
+        if(physicsEnabled == false)
+        {
+            EnablePhysics(Vector3.zero);
+        }
+        rb.AddExplosionForce(force, explosionPos, range);
+    }
+    public void DisablePhysics()
+    {
+        rb.isKinematic = true;
+        physicsEnabled = false;
+    }
+    public bool IsPhysicsEnabled()
+    {
+        return physicsEnabled;
+    }
     public static Item SpawnItem(ItemSO itemSO, Vector3 pos, Quaternion rot, int stackCount = 1)
     {
         Transform copy = Instantiate(itemSO.prefab,pos,rot).transform;

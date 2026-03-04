@@ -34,6 +34,11 @@ public class Enemy : MonoBehaviour
     private Transform targetTransform;
     [HideInInspector] public EnemyPack targetPack;
     private float targetDistance = 5f;
+    //Animation
+    [Header("Animation")]
+    public Animator animator;
+    public float spawnFreezeTime;
+    public float walkCycleSpeedMult;
 
     //Path
     private NavMeshPath navPath;
@@ -50,7 +55,7 @@ public class Enemy : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         Freeze();
-        Invoke(nameof(UnFreeze),1.5f);
+        Invoke(nameof(UnFreeze), spawnFreezeTime);
     }
 
     private void Start()
@@ -128,10 +133,13 @@ public class Enemy : MonoBehaviour
         //Gravity
         rb.AddForce(-groundNormal * enemyInfo.gravityForce);
 
+        float targetSpeed = enemyInfo.speed;
+
         //Check if at target
         CheckDistanceBehavour();
         if (distanceFromTarget <= targetDistance * 0.5f)
-            return;
+            targetSpeed = 0f; 
+
 
         //Get target Direction depending on navigation type
         if (IsNavigatingByPath() && navPath.corners.Length > pathIndex)
@@ -141,11 +149,44 @@ public class Enemy : MonoBehaviour
 
         //Debug.DrawRay(transform.position,targetDir,navigatingByNav ? Color.red:Color.green);
 
-        //2D and Normalize 
+        //2D and Normalize and Project
         targetDirVector = new Vector3(targetDirVector.x, 0, targetDirVector.z).normalized;
-        
+        Vector3 projectedDirVector = Vector3.ProjectOnPlane(targetDirVector, groundNormal).normalized;
+
         //Move the enemy
-        rb.MovePosition(transformPos + Vector3.ProjectOnPlane(targetDirVector, groundNormal).normalized * (enemyInfo.speed * Time.fixedDeltaTime));
+        if(targetSpeed != 0f)
+            rb.AddForce(projectedDirVector * enemyInfo.acceleration);
+
+        //Drag
+        Vector3 velocityPlane = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+        float velocity = velocityPlane.magnitude;
+        if (velocity > 0.1f && targetSpeed == 0f)
+        {
+            rb.AddForce(-velocityPlane.normalized * enemyInfo.deceleration);
+        }
+
+        //Limit speed
+        float angleBetweenDirections = Vector2.Angle(new Vector2(rb.linearVelocity.x, rb.linearVelocity.z), new Vector2(targetDirVector.x, targetDirVector.z));
+        if (velocity > enemyInfo.speed && targetSpeed != 0f && angleBetweenDirections <= 90f)
+        {
+            float fallSpeed = rb.linearVelocity.y;
+            Vector3 n = rb.linearVelocity.normalized * targetSpeed;
+            rb.linearVelocity = new Vector3(n.x, fallSpeed, n.z);
+        }
+
+        //Counter movement
+        if (targetSpeed != 0f && angleBetweenDirections > 90f)
+        {
+            rb.AddForce(projectedDirVector * enemyInfo.acceleration);
+        }
+
+        //Animation
+        if (animator != null)
+        {
+            //Debug.Log("vel: " + velocity);
+            animator.SetFloat("Velocity", velocity);
+            animator.SetFloat("SpeedMult", velocity * walkCycleSpeedMult);
+        }
     }
 
     private void Rotate()

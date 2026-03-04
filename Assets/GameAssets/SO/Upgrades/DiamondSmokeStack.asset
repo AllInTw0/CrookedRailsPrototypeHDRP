@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f31a82457e9ad9a448d39854d88aac01, type: 3}
+  m_Name: DiamondSmokeStack
+  m_EditorClassIdentifier: Assembly-CSharp::UpgradeSO
+  nameOverride: Diamond Stack
+  prefab: {fileID: 3015091432788408613, guid: d8b91838dc66c5040b05d7b1f66778e1, type: 3}
+  description: A complex construction of screens and baffles, which prevents sparks
+    and ash from escaping out the stack.
+  offset: {x: 1.5, y: 4.7, z: 7.5}
+  origin: {x: 0, y: 4.2, z: 6.5}
+  rotation: {x: 0, y: 0, z: 0}
+  icon: {fileID: 2800000, guid: b73fede377a49234aaf6b808e36e56da, type: 2}
+  renderLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  upgradeList: []
+  requiredBoughtUpgrades: []

@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
 public class BulletManager : MonoBehaviour
@@ -14,8 +15,16 @@ public class BulletManager : MonoBehaviour
     private GameObject impactParticle;
     [SerializeField] 
     private GameObject shortImpactParticle;
-    public int _count;
-    public float _spread;
+    [Header("Explosions")]
+    [SerializeField]
+    private string explosionSound;
+    [SerializeField]
+    private GameObject explosionParticle;
+    [SerializeField]
+    private LayerMask explosionLayerMask;
+    [Header("force")]
+    [SerializeField]
+    private float forcePerDamage;
     private void Start()
     {
         active = this;
@@ -36,7 +45,7 @@ public class BulletManager : MonoBehaviour
                 Health healthScript = hit.transform.GetComponent<Health>();
                 if (healthScript != null)
                 {
-                    HitSound.active.HandleHitSound(healthScript, healthScript.TakeDamage(bulletDamage), hit.point);
+                    HitSound.active.HandleHitSound(healthScript, healthScript.TakeDamage(bulletDamage, spreadDir.normalized * (bulletDamage * forcePerDamage)), hit.point);
                     SpawnImpactEffect(hit.point,hit.normal,true);
                 }
                 else
@@ -51,7 +60,20 @@ public class BulletManager : MonoBehaviour
         }
         
     }
+    public void ShootPrefab(Vector3 start, Vector3 dir, GameObject prefab, int count, float spread)
+    {
 
+        SpawnBurstEffect(start, dir);
+        for (int i = 0; i < count; i++)
+        {
+            Vector3 spreadDir = dir + new Vector3(Random.Range(-spread, spread), Random.Range(-spread, spread), Random.Range(-spread, spread));
+            GameObject copy = Instantiate(prefab);
+            copy.transform.position = start;
+            copy.transform.LookAt(start + spreadDir);
+            if (copy.TryGetComponent(out Bullet bulletScript)) bulletScript.Initialize();
+        }
+
+    }
     public RaycastHit ShootInvisibleBullet(Vector3 start, Vector3 dir, float damage, float range)
     {
         if (Physics.Raycast(start,dir, out RaycastHit hit, range))
@@ -59,7 +81,7 @@ public class BulletManager : MonoBehaviour
             Health healthScript = hit.transform.GetComponent<Health>();
             if (healthScript != null)
             {
-                HitSound.active.HandleHitSound(healthScript, healthScript.TakeDamage(damage), hit.point);
+                HitSound.active.HandleHitSound(healthScript, healthScript.TakeDamage(damage, dir.normalized * (damage * forcePerDamage)), hit.point);
                 SpawnImpactEffect(hit.point,hit.normal,true);
             }
             else
@@ -72,6 +94,50 @@ public class BulletManager : MonoBehaviour
 
         return new RaycastHit();
     }
+
+    public void SpawnExplosion(Vector3 position, float damage, float range, float force, Transform hitTransform = null)
+    {
+        GameObject explosion = Instantiate(explosionParticle);
+        explosion.transform.position = position;
+        Destroy(explosion, 10f);
+
+        SoundManager.active.PlayAtPos(position, explosionSound);
+
+        Collider[] colliderArray = Physics.OverlapSphere(position, range, explosionLayerMask);
+
+        foreach (Collider collider in colliderArray)
+        {
+            Vector3 dir = collider.transform.position - position;
+            if (collider.TryGetComponent(out Health health))
+            {
+                float dist = 0f;
+                if (hitTransform != collider.transform) {
+                    if (collider.TryGetComponent(out Enemy enemy))
+                        dist = Vector3.Distance(position, enemy.centerTransform.position);
+                    else
+                        dist = Vector3.Distance(position, collider.transform.position) - 2f;
+                }
+                dist = Mathf.Clamp(dist, 0f, range * 0.9f);
+                float distDamage = Mathf.Round(damage - (dist / range) * damage);
+                HitSound.active.HandleHitSound(health, health.TakeDamage(distDamage, dir.normalized * (distDamage * forcePerDamage) + Vector3.up * ((distDamage * forcePerDamage))), collider.transform.position);
+            }
+            if (collider.TryGetComponent(out Rigidbody rb))
+            {
+                if (rb.isKinematic)
+                {
+                    if (collider.TryGetComponent(out Item item))
+                    {
+                        item.AddExplosionForce(position - Vector3.down * 0.5f, force, range + 0.5f);
+                    }
+                }
+                else
+                {
+                    rb.AddExplosionForce(force, position - Vector3.down * 0.5f, range + 0.5f);
+                }
+            }
+        }
+    }
+
     private void SpawnBurstEffect(Vector3 position, Vector3 dir)
     {
         GameObject burst = Instantiate(burstParticle);

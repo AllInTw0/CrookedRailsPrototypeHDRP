@@ -35,8 +35,11 @@ public class RailCarHealth : Health
             obj.SetActive(false);
         }
     }
-
-    public override void HealthReachedZero()
+    private void Update()
+    {
+        UpdateCall();
+    }
+    public override void HealthReachedZero(Vector3 force = default)
     {
         if (brokenDown) return;
         
@@ -46,7 +49,7 @@ public class RailCarHealth : Health
         base.HealthReachedZero();
     }
 
-    private void Rerail()
+    public void Rerail()
     {
         foreach (EventInteractable interactable in rerailInteractableList)
         {
@@ -54,7 +57,7 @@ public class RailCarHealth : Health
         }
         linkedRailCar.derailed = false;
     }
-    private void Derail()
+    public void Derail()
     {
         foreach (EventInteractable interactable in rerailInteractableList)
         {
@@ -63,9 +66,12 @@ public class RailCarHealth : Health
 
         linkedRailCar.derailed = true;
 
-        foreach (GameObject obj in brokenDownParticles)
+        if (brokenDown)
         {
-            obj.SetActive(true);
+            foreach (GameObject obj in brokenDownParticles)
+            {
+                obj.SetActive(true);
+            }
         }
     }
 
