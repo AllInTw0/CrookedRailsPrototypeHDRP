@@ -92,7 +92,7 @@ public class Spline : MonoBehaviour
     }
     
     //Mesh Generation Functions
-    public GameObject GenerateMeshAlongSpline(Point pointA, Point pointB, SplineMeshInfo? _splineMesh = null, float fromTime = 0f, float toTime = 1f)
+    public GameObject GenerateMeshAlongSpline(Point pointA, Point pointB, SplineMeshInfo? _splineMesh = null, float fromTime = 0f, float toTime = 1f, bool addCollision = true)
     {
         SplineMeshInfo splineMesh;
         if (_splineMesh.HasValue)
@@ -182,7 +182,7 @@ public class Spline : MonoBehaviour
         meshObject.layer = splineMesh.layer;
         MeshFilter meshFilter = meshObject.AddComponent<MeshFilter>();
         MeshRenderer meshRenderer = meshObject.AddComponent<MeshRenderer>();
-        MeshCollider meshCollider = meshObject.AddComponent<MeshCollider>();
+
 
         Mesh combinedMesh = new Mesh();
         objTransform.position = Vector3.zero;
@@ -198,13 +198,17 @@ public class Spline : MonoBehaviour
         meshFilter.sharedMesh = combinedMesh;
         meshRenderer.material = splineMesh.material;
 
-        //meshCollider.convex = true;
-        meshCollider.sharedMesh = combinedMesh;
-        
+        if (addCollision)
+        {
+            MeshCollider meshCollider = meshObject.AddComponent<MeshCollider>();
+            //meshCollider.convex = true;
+            meshCollider.sharedMesh = combinedMesh;
+        }
+
         Destroy(obj);
         return meshObject;
     }
-    public GameObject GenerateMeshAlongTrackSection(TrackSection section, SplineMeshInfo? _splineMesh = null, float fromProgress = 0f, float toProgress = -1f)
+    public GameObject GenerateMeshAlongTrackSection(TrackSection section, SplineMeshInfo? _splineMesh = null, float fromProgress = 0f, float toProgress = -1f, bool addCollision = true)
     {
         List<PathPoint> path = section.path;
 
@@ -301,7 +305,6 @@ public class Spline : MonoBehaviour
         meshObject.layer = splineMesh.layer;
         MeshFilter meshFilter = meshObject.AddComponent<MeshFilter>();
         MeshRenderer meshRenderer = meshObject.AddComponent<MeshRenderer>();
-        MeshCollider meshCollider = meshObject.AddComponent<MeshCollider>();
 
         Mesh combinedMesh = new Mesh();
         objTransform.position = Vector3.zero;
@@ -317,13 +320,17 @@ public class Spline : MonoBehaviour
         meshFilter.sharedMesh = combinedMesh;
         meshRenderer.material = splineMesh.material;
 
-        //meshCollider.convex = true;
-        meshCollider.sharedMesh = combinedMesh;
-        
+        if (addCollision)
+        {
+            MeshCollider meshCollider = meshObject.AddComponent<MeshCollider>();
+            //meshCollider.convex = true;
+            meshCollider.sharedMesh = combinedMesh;
+        }
+
         Destroy(obj);
         return meshObject;
     }
-    public GameObject GenerateMeshAlongPath(List<PathPoint> path, SplineMeshInfo? _splineMesh = null, float fromProgress = 0f, float toProgress = -1f)
+    public GameObject GenerateMeshAlongPath(List<PathPoint> path, SplineMeshInfo? _splineMesh = null, float fromProgress = 0f, float toProgress = -1f, bool addCollision = true)
     {
         SplineMeshInfo splineMesh;
         if (_splineMesh.HasValue)
@@ -418,7 +425,6 @@ public class Spline : MonoBehaviour
         meshObject.layer = splineMesh.layer;
         MeshFilter meshFilter = meshObject.AddComponent<MeshFilter>();
         MeshRenderer meshRenderer = meshObject.AddComponent<MeshRenderer>();
-        MeshCollider meshCollider = meshObject.AddComponent<MeshCollider>();
 
         Mesh combinedMesh = new Mesh();
         objTransform.position = Vector3.zero;
@@ -434,8 +440,12 @@ public class Spline : MonoBehaviour
         meshFilter.sharedMesh = combinedMesh;
         meshRenderer.material = splineMesh.material;
 
-        //meshCollider.convex = true;
-        meshCollider.sharedMesh = combinedMesh;
+        if (addCollision)
+        {
+            MeshCollider meshCollider = meshObject.AddComponent<MeshCollider>();
+            //meshCollider.convex = true;
+            meshCollider.sharedMesh = combinedMesh;
+        }
 
         Destroy(obj);
         return meshObject;

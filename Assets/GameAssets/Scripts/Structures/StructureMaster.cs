@@ -1,4 +1,4 @@
-using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -63,14 +63,21 @@ public class StructureMaster : MonoBehaviour
         structureSectionList = new List<Section>();
         count = 0;
 
-        foreach (StructureGenerator structure in structureList)
-        {
-            structure.Generate(this);
-        }
+        StartCoroutine(GenerateIEnumerable());
+
         if(structureType == StructureType.Station)
         {
             GameStateManager.isStationSpawned = true;
         }
+    }
+    public IEnumerator GenerateIEnumerable()
+    {
+        Debug.Log("Running!");
+        foreach (StructureGenerator structure in structureList)
+        {
+            yield return StartCoroutine(structure.Generate(this));
+        }
+        yield break;
     }
     public void OnDestroy()
     {
@@ -128,9 +135,11 @@ public class StructureMaster : MonoBehaviour
         //Get all valid connections
         List<Connection> sectionConnectionList = new List<Connection>();
         List<List<Connection>> validConnectionList = new List<List<Connection>>();
+
         foreach (Connection connection in sectionScript.GetConnectingConnectionList())
         {
             List<Connection> connectionList = GetValidConnectionsForConnection(connection);
+            Debug.Log("c: " + connectionList.Count);
 
             if (connectionList.Count > 0) 
             {
@@ -142,7 +151,7 @@ public class StructureMaster : MonoBehaviour
         //Chose connection
         if(validConnectionList.Count == 0)
         {
-            Debug.LogWarning("Cant find valid connection: validConnectionList.Count == 0, " + sectionObject.name);
+            Debug.LogWarning("Cant find valid connection: validConnectionList.Count == 0, " + sectionObject.name +", sectionCount: " + structureSectionList.Count + ", connectionCount: " + structureConnectionList.Count);
             return sectionScript;
         }
         while (sectionConnectionList.Count > 0 && validConnectionList.Count > 0)
@@ -191,19 +200,27 @@ public class StructureMaster : MonoBehaviour
 
         sectionTransform.SetParent(transform);
 
-        //Rename strings + connect connections close to each other
+        //Rename strings
         count++;
         foreach (Connection connection in sectionScript.GetAllConnectionList())
         {
             //rename
             connection.connectionTransform.name = RenameString(connection.connectionTransform.name, count);
+        }
 
+        return sectionScript;
+    }
+    public void AddSectionToStructure(Section sectionScript)
+    {
+        //Connect connections close to each other
+        foreach (Connection connection in sectionScript.GetAllConnectionList())
+        {
             //connect
             foreach (Connection connectionB in structureConnectionList)
             {
-                if(Vector3.Distance(connection.connectionTransform.position,connectionB.connectionTransform.position) < 0.01f)
+                if (Vector3.Distance(connection.connectionTransform.position, connectionB.connectionTransform.position) < 0.01f)
                 {
-                    if(connectionB.dontConnect == false)
+                    if (connectionB.dontConnect == false)
                         connection.connectedConnection = connectionB;
                     if (connection.dontConnect == false)
                         connectionB.connectedConnection = connection;
@@ -213,10 +230,6 @@ public class StructureMaster : MonoBehaviour
 
         structureConnectionList.AddRange(sectionScript.GetAllConnectionList());
         structureSectionList.Add(sectionScript);
-
-        if (sectionTransform.TryGetComponent(out StructureGenerator structureGenerator)) structureGenerator.Generate(this);
-
-        return sectionScript;
     }
     public List<Connection> GetValidConnectionsForConnection(Connection connection)
     {

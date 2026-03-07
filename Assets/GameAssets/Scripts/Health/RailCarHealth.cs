@@ -28,7 +28,7 @@ public class RailCarHealth : Health
             interactable.objectName = linkedRailCar.railCarSO.GetName();
             interactable.actionName = "Rerail";
 
-            interactable.timeToInteract = 10f;
+            interactable.timeToInteract = 4.5f;
         }
         foreach (GameObject obj in brokenDownParticles)
         {

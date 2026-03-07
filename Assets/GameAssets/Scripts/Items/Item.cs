@@ -25,9 +25,8 @@ public class Item : Interactable
 
     private Rigidbody rb;
     private bool physicsEnabled;
-    void Start()
+    private void Awake()
     {
-        Debug.Log(transform.name);
         if (TryGetComponent(out Rigidbody rigidbody))
         {
             rb = rigidbody;
@@ -37,7 +36,9 @@ public class Item : Interactable
             rb = gameObject.AddComponent<Rigidbody>();
             rb.isKinematic = true;
         }
-
+    }
+    void Start()
+    {
         DropFromPos(transform.position);
     }
 

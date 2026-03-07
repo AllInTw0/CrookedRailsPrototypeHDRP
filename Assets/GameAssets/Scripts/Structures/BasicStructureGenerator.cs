@@ -6,28 +6,25 @@ public class BasicStructureGenerator : StructureGenerator
 {
     public List<GenerationEntry> generationEntryList;
 
-    public override void Generate(StructureMaster structureMaster)
+    public override IEnumerator Generate(StructureMaster structureMaster)
     {
-        StartCoroutine(GenerateIEnumerator(structureMaster));
-    }
-
-    IEnumerator GenerateIEnumerator(StructureMaster structureMaster)
-    {      
         foreach (GenerationEntry generationEntry in generationEntryList)
         {
-            Section SpawnSection()
-            {
-                GameObject randomPrefab = generationEntry.sectionPrefabList[Random.Range(0, generationEntry.sectionPrefabList.Count)];
-                return structureMaster.SpawnSection(randomPrefab);
-            }
-
             if (generationEntry.countType == GenerationEntry.CountType.minMaxRandom)
             {
                 int count = Random.Range(generationEntry.minMaxCount.x, generationEntry.minMaxCount.y + 1); //+1 because maxExclusive
 
                 for (int i = 0; i < count; i++)
                 {
-                    SpawnSection();
+                    //Spawn section
+                    GameObject randomPrefab = generationEntry.sectionPrefabList[Random.Range(0, generationEntry.sectionPrefabList.Count)];
+                    Section spawnedSection = structureMaster.SpawnSection(randomPrefab);
+                    //Invoke section scripts
+                    foreach (StructureGenerator structureGenerator in spawnedSection.GetComponents<StructureGenerator>())
+                    {
+                        yield return StartCoroutine(structureGenerator.Generate(structureMaster));
+                    }
+                    structureMaster.AddSectionToStructure(spawnedSection); //This is here so i can call the coroutines first then do the finishing touches
                 }
             }
             else if (generationEntry.countType == GenerationEntry.CountType.fillLenght)
@@ -36,8 +33,17 @@ public class BasicStructureGenerator : StructureGenerator
                 int safety = 30;
                 while (length > 0 && safety > 0)
                 {
-                    Section section = SpawnSection();
-                    length -= section.GetLength();
+                    //Spawn section
+                    GameObject randomPrefab = generationEntry.sectionPrefabList[Random.Range(0, generationEntry.sectionPrefabList.Count)];
+                    Section spawnedSection = structureMaster.SpawnSection(randomPrefab);
+                    //Invoke section scripts
+                    foreach (StructureGenerator structureGenerator in spawnedSection.GetComponents<StructureGenerator>())
+                    {
+                        yield return StartCoroutine(structureGenerator.Generate(structureMaster));
+                    }
+                    structureMaster.AddSectionToStructure(spawnedSection); //This is here so i can call the coroutines first then do the finishing touches
+
+                    length -= spawnedSection.GetLength();
                     safety--;
                 }
                 if (safety <= 0f) Debug.LogWarning("Safety == 0!");

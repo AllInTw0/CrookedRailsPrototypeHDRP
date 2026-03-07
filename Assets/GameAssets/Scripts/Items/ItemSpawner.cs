@@ -64,4 +64,11 @@ public class ItemSpawner : MonoBehaviour
             }
         }
     }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.purple;
+
+        Gizmos.DrawWireCube(transform.position, maxRandomOffset * 2f);
+    }
 }

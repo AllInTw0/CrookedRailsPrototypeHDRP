@@ -1,10 +1,10 @@
-using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 
 public class StructureGenerator : MonoBehaviour
 {
-    public virtual void Generate(StructureMaster structureMaster)
+    public virtual IEnumerator Generate(StructureMaster structureMaster)
     {
-
+        return null;
     }
 }

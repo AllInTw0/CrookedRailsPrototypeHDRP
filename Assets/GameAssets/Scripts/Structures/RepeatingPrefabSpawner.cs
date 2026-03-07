@@ -1,5 +1,6 @@
-using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 
 public class RepeatingPrefabSpawner : StructureGenerator
@@ -31,13 +32,13 @@ public class RepeatingPrefabSpawner : StructureGenerator
     {
         if (spawned == false)
             Debug.LogWarning("Spawning without StructureMaster");
-        Generate();
+        StartCoroutine((IEnumerator)Generate(null));
     }
 
-    public override void Generate(StructureMaster structureMaster = null)
+    public override IEnumerator Generate(StructureMaster structureMaster)
     {
         if (spawned)
-            return;
+            yield break;
         spawned = true;
 
         //Get Length
@@ -87,5 +88,7 @@ public class RepeatingPrefabSpawner : StructureGenerator
         //End Prefab
         if (endPrefabList.Count > 0)
             SpawnPrefab(endPrefabList[Random.Range(0, endPrefabList.Count)], length - lengthLeft, false);
+
+        yield break;
     }
 }
