@@ -10,7 +10,7 @@ public class MonitorArm : AnimationPlayer
     [SerializeField]
     private AnimationPlayer buttonAnimationPlayer;
     [SerializeField]
-    private EventInteractable buttonInteractable;
+    public EventInteractable buttonInteractable;
     [Header("Printer")]
     [SerializeField]
     public Printer printer;
@@ -18,10 +18,12 @@ public class MonitorArm : AnimationPlayer
     public UnityEvent onInteract;
 
     private bool monitorEnabled;
+    private bool buttonEnabled;
 
-    private void Start()
+    private void Awake()
     {
         if (buttonInteractable != null) buttonInteractable.interactEvent.AddListener(() => { onInteract.Invoke(); });
+        buttonEnabled = true;
         DisableButton();
     }
     public void TurnOnLight()
@@ -34,22 +36,28 @@ public class MonitorArm : AnimationPlayer
     }
     public void EnableButton()
     {
+        if (buttonEnabled) return;
+
         if (buttonAnimationPlayer != null) buttonAnimationPlayer.PlayAniamtion(buttonAnimationPlayer.animName, 1f);
         if (buttonInteractable != null) buttonInteractable.gameObject.SetActive(true);
+        buttonEnabled = true;
     }
     public void DisableButton()
     {
+        if (buttonEnabled == false) return;
+
         if (buttonAnimationPlayer != null) buttonAnimationPlayer.PlayAniamtion(buttonAnimationPlayer.animName, -1f);
         if (buttonInteractable != null) buttonInteractable.gameObject.SetActive(false);
+        buttonEnabled = false;
     }
 
-    public void EnableMonitor()
+    public void EnableMonitor(bool enableButton = true)
     {
         if (monitorEnabled == true) return;
 
         TurnOnLight();
         PlayAniamtion(animName, 1f);
-        EnableButton();
+        if(enableButton) EnableButton();
         monitorEnabled = true;
     }
     public void DisableMonitor()

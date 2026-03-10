@@ -1,7 +1,8 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ItemSpawner : MonoBehaviour
+public class ItemSpawner : StructureGenerator
 {
     [System.Serializable]
     public class ItemSpawnEntry
@@ -14,26 +15,24 @@ public class ItemSpawner : MonoBehaviour
     [SerializeField]
     private List<ItemSpawnEntry> itemSpawnEntryList;
     [SerializeField]
-    private Vector3 maxRandomOffset;
-    public void Start()
-    {
-        SpawnItems();
-    }
+    private Vector2Int minMaxCount;
 
-    public void SpawnItems()
+    public override IEnumerator Generate(StructureMaster structureMaster)
     {
-        if(itemSpawnEntryList.Count == 0)
+        if (itemSpawnEntryList.Count == 0)
         {
             Debug.LogWarning("No Items Defined!");
-            return;
+            yield break;
         }
+
+        ItemSpawnBounds[] structureItemSpawnBoundsArray =transform.GetComponentsInChildren<ItemSpawnBounds>();
 
         //Sort
         bool sorted = false;
-        while(sorted == false)
+        while (sorted == false)
         {
             sorted = true;
-            for (int i = 0; i < itemSpawnEntryList.Count-1; i++)
+            for (int i = 0; i < itemSpawnEntryList.Count - 1; i++)
             {
                 if (itemSpawnEntryList[i].probability < itemSpawnEntryList[i + 1].probability)
                 {
@@ -51,24 +50,47 @@ public class ItemSpawner : MonoBehaviour
             probabilitySum += item.probability;
         }
 
-        float randomProbability = Random.Range(0f, probabilitySum);
-
-        for (int i = 0; i < itemSpawnEntryList.Count; i++)
+        int count = Random.Range(minMaxCount.x, minMaxCount.y);
+        for (int a = 0; a < count; a++)
         {
-            randomProbability -= itemSpawnEntryList[i].probability;
-            if (randomProbability <= 0f)
+            float randomProbability = Random.Range(0f, probabilitySum);
+
+            for (int i = 0; i < itemSpawnEntryList.Count; i++)
             {
-                Vector3 pos = transform.position += new Vector3(Random.Range(-maxRandomOffset.x, maxRandomOffset.x), Random.Range(-maxRandomOffset.y, maxRandomOffset.y), Random.Range(-maxRandomOffset.z, maxRandomOffset.z));
-                Item.SpawnItem(itemSpawnEntryList[i].item, pos, Quaternion.Euler(0f, Random.Range(0f, 360f), 0f), Random.Range(itemSpawnEntryList[i].minMaxStackCount.x, itemSpawnEntryList[i].minMaxStackCount.y));
-                break;
+                randomProbability -= itemSpawnEntryList[i].probability;
+                if (randomProbability <= 0f)
+                {
+                    ItemSO itemSO = itemSpawnEntryList[i].item;
+
+                    //Get valid spawns points
+                    List<ItemSpawnBounds> itemSpawnBoundsList = new List<ItemSpawnBounds>(structureItemSpawnBoundsArray);
+                    for (int b = 0; b < itemSpawnBoundsList.Count; b++)
+                    {
+                        if (itemSpawnBoundsList[b].CanSpawnItem(itemSO) == false)
+                        {
+                            itemSpawnBoundsList.RemoveAt(b);
+                            b--;
+                        }
+                    }
+
+                    if (itemSpawnBoundsList.Count == 0)
+                    {
+                        Debug.Log("No valid bounds. Spawning next item in probability list? Is this a good idea?");
+                    }
+                    else
+                    {
+                        ItemSpawnBounds chosenBounds = itemSpawnBoundsList[Random.Range(0, itemSpawnBoundsList.Count)];
+                        Vector3 pos = chosenBounds.transform.position + chosenBounds.transform.right * Random.Range(-chosenBounds.maxRandomOffset.x, chosenBounds.maxRandomOffset.x) + chosenBounds.transform.up * Random.Range(-chosenBounds.maxRandomOffset.y, chosenBounds.maxRandomOffset.y) + chosenBounds.transform.forward * Random.Range(-chosenBounds.maxRandomOffset.z, chosenBounds.maxRandomOffset.z);
+                        Item spawnedItem = Item.SpawnItem(itemSO, pos, Quaternion.Euler(0f, Random.Range(0f, 360f), 0f), Random.Range(itemSpawnEntryList[i].minMaxStackCount.x, itemSpawnEntryList[i].minMaxStackCount.y));
+                        spawnedItem.transform.SetParent(transform);
+                        chosenBounds.AddItem(spawnedItem);
+                        yield return new WaitForSeconds(0.05f);
+                        break;
+                    }
+                }
             }
         }
-    }
 
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.purple;
-
-        Gizmos.DrawWireCube(transform.position, maxRandomOffset * 2f);
+        yield break;
     }
 }

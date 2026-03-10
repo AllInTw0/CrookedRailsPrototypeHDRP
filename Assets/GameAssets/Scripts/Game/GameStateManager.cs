@@ -1,5 +1,14 @@
+using System.Collections.Generic;
 using UnityEngine;
 
+
+[System.Serializable]
+public class UnlockEntry
+{
+    public ShopItemSO targetShopItem;
+    public List<ShopItemSO> neededShopItemList;
+    public bool isUnlocked;
+}
 public class GameStateManager : MonoBehaviour
 {
     //Serialized
@@ -20,9 +29,35 @@ public class GameStateManager : MonoBehaviour
         }
     }
 
+    public static List<ShopItemSO> boughtItemList = new List<ShopItemSO>();
 
+    public static List<UnlockEntry> unlockList;
+    [SerializeField]
+    private List<UnlockEntry> _unlockList;
     private void Start()
     {
+        unlockList = _unlockList;
         Money.SetStartingMoney();
+    }
+
+    public static bool IsItemUnlocked(ShopItemSO shopItem)
+    {
+        foreach (ShopItemSO neededBoughtItem in shopItem.neededBoughtItems)
+        {
+            if(boughtItemList.Contains(neededBoughtItem) == false)
+            {
+                return false;
+            }
+        }
+
+        foreach (UnlockEntry unlockEntry in unlockList)
+        {
+            if(unlockEntry.targetShopItem == shopItem && unlockEntry.isUnlocked == false)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

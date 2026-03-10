@@ -22,6 +22,7 @@ public class Connection
     public List<string> validConnectionNameList;
     public List<GameObject> endPrefabList;
     public bool dontConnect;
+    public bool ignoreConnections; // Able to connect to connections that are already connected
 
     //Nonserializeable
     [HideInInspector]
@@ -236,7 +237,7 @@ public class StructureMaster : MonoBehaviour
         List<Connection> connectionList = new List<Connection>();
         foreach (Connection otherConnection in structureConnectionList)
         {
-            if (otherConnection.connectedConnection == null && DoesStringListMatch(connection.validConnectionNameList, otherConnection.connectionTransform.name))
+            if (((otherConnection.connectedConnection == null && connection.ignoreConnections == false) || connection.ignoreConnections) && DoesStringListMatch(connection.validConnectionNameList, otherConnection.connectionTransform.name))
             {
                 connectionList.Add(otherConnection);
             }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ShopItemSO : ScriptableObject
@@ -6,6 +7,14 @@ public class ShopItemSO : ScriptableObject
     public string nameOverride;
     public GameObject prefab;
     public string description;
+
+    [Header("Shop Params")]
+    public AnimationCurve probabilityCurve;
+    public AnimationCurve priceCurve;
+    public AnimationCurve stockCurve;
+    public AnimationCurve randomnessCurve;
+    public AnimationCurve sellCurve;
+    public List<ShopItemSO> neededBoughtItems;
 
     [Header("Icon Rendering")]
     public Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f);
@@ -17,5 +26,26 @@ public class ShopItemSO : ScriptableObject
     public string GetName()
     {
         return nameOverride == "" ? this.name : nameOverride;
+    }
+
+
+    //Per level stat evaluation
+    [HideInInspector] public float probability;
+    [HideInInspector] public int price;
+    [HideInInspector] public int stock;
+    [HideInInspector] public int sell;
+    [HideInInspector] public float randomness;
+    private float lastEvaluation;
+    public void EvaluateCurves(float value)
+    {
+        if (value == lastEvaluation && value != 0f) return;
+
+        randomness = randomnessCurve.Evaluate(value);
+
+        probability = probabilityCurve.Evaluate(value) * (Random.value * randomness + 1f);
+        price = Mathf.RoundToInt(Mathf.Clamp(priceCurve.Evaluate(value) + (Random.value * randomness * 20f), 1f, float.MaxValue));
+        stock = Mathf.RoundToInt(Mathf.Clamp(stockCurve.Evaluate(value) * (Random.value * randomness * 1f + 1f), 1f, float.MaxValue));
+        sell = Mathf.RoundToInt(Mathf.Clamp(sellCurve.Evaluate(value) + (Random.value * randomness * 5f), 1f, price));
+        lastEvaluation = value;
     }
 }

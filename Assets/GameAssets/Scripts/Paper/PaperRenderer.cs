@@ -10,6 +10,7 @@ public enum OverrideType
     HaulingJobEntry,
     HaulReceipt,
     RawImageTexture,
+    SellReceipt,
 }
 public class Override
 {
@@ -19,6 +20,7 @@ public class Override
     public HaulingJob haulingJobOverride;
     public List<CargoInfo> cargoListOverride;
     public Texture2D textureOverride;
+    public List<Sell.SellEntry> sellReceiptOverride;
     public Override(string targetName, OverrideType overrideType, string stringOverride = "")
     {
         this.targetName = targetName;
@@ -155,6 +157,29 @@ public class PaperRenderer : MonoBehaviour
                     }
                     OverrideEntry sumOverride = paper.FindOverrideEntry("Sum");
                     sumOverride.objectRefrence.GetComponent<TMP_Text>().text = "Sum: " + sum + "$";
+
+                    for (int i = 0; i < overrideEntry.objectRefrence.childCount; i++)
+                    {
+                        destroyList.Add(overrideEntry.objectRefrence.GetChild(i).gameObject);
+                    }
+                }
+                else if (overrideInfo.overrideType == OverrideType.SellReceipt)
+                {
+                    float listHeight = 6.5f; //Hard coded is bad but whatever
+                    float heigth = Mathf.Clamp(listHeight / overrideInfo.sellReceiptOverride.Count, 0f, 1f);
+
+                    foreach (Sell.SellEntry entry in overrideInfo.sellReceiptOverride)
+                    {
+                        Transform copy = Instantiate(overrideEntry.objectRefrence2);
+                        copy.SetParent(overrideEntry.objectRefrence);
+                        ((RectTransform)copy).localPosition = Vector3.zero;
+                        ((RectTransform)copy).sizeDelta = new Vector2(((RectTransform)copy).sizeDelta.x, heigth);
+
+                        copy.Find("Item").GetComponent<TMP_Text>().text = "(" + entry.count + "x" + entry.GetSingleItemValue() +"$) " + entry.itemSO.GetName();
+                        copy.Find("Pay").GetComponent<TMP_Text>().text = entry.GetAllItemValue() + "$";
+                        copy.Find("Icon").GetComponent<RawImage>().texture = entry.itemSO.icon;
+                        ((RectTransform)copy.Find("Icon").transform).sizeDelta = Vector2.one * heigth;
+                    }
 
                     for (int i = 0; i < overrideEntry.objectRefrence.childCount; i++)
                     {

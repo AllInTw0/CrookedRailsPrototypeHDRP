@@ -35,9 +35,11 @@ public class PlayerMovement : MonoBehaviour
     private float colliderCrouchHeight;
     [SerializeField]
     private float cameraCrouchHeight;
-    [Header("Stamina")]
+    [Header("Max Distance From Objects")]
     [SerializeField]
     private float maxDistancefromTrain;
+    [SerializeField]
+    private bool maxDistanceLimitEnabled;
     [Header("Stamina")] 
     [SerializeField] 
     private float maxStamina;
@@ -287,7 +289,7 @@ public class PlayerMovement : MonoBehaviour
 
 
             //Max Distance 
-            if (Train.playerTrain != null)
+            if (maxDistanceLimitEnabled && Train.playerTrain != null)
             {
                 float dist = Train.playerTrain.GetClosestDistanceToPos(transform.position);
                 if (dist >= maxDistancefromTrain && Train.playerTrain.GetClosestDistanceToPos(transform.position + projectedVector) > dist)

@@ -6,15 +6,27 @@ public class Trigger : MonoBehaviour
     public UnityEvent onEnterOnce;
     public UnityEvent onExit;
 
+    [SerializeField]
+    private LayerMask layerFiler;
+
     private bool triggered = false;
+    
     private void OnTriggerEnter(Collider other)
     {
-        if (triggered == false) onEnterOnce.Invoke();
-        onEnter.Invoke();
-        triggered = true;
+        //( mask & (1 << layer)) != 0 returns true if mask has the layer
+        if ((layerFiler & (1 << other.gameObject.layer)) != 0)
+        {
+            if (triggered == false) onEnterOnce.Invoke();
+            onEnter.Invoke();
+            triggered = true;
+        }
     }
     private void OnTriggerExit(Collider other)
     {
-        onExit.Invoke();
+        //( mask & (1 << layer)) != 0 returns true if mask has the layer
+        if ((layerFiler & (1 << other.gameObject.layer)) != 0)
+        {
+            onExit.Invoke();
+        }
     }
 }

@@ -17,6 +17,8 @@ public class PropSpawner : StructureGenerator
     [SerializeField]
     private List<PropEntry> serializedPropEntryList = new List<PropEntry>();
     [SerializeField]
+    private LayerMask overlapCheckLayerMask;
+    [SerializeField]
     private int maxPropCount;
     [SerializeField]
     private int maxSpawnTries;
@@ -44,7 +46,7 @@ public class PropSpawner : StructureGenerator
             List<PropSpawnBoundingBox> propSpawnList = new List<PropSpawnBoundingBox>(propSpawnArray);
             for (int i = 0; i < propSpawnList.Count; i++)
             {
-                if (DoseBoxFitInBox(propSpawnList[i].boundingBox, propBoundingBox) == false)
+                if (propSpawnList[i].DoseBoundingBoxFit(propBoundingBox) == false || DoseBoxFitInBox(propSpawnList[i].boundingBox, propBoundingBox) == false)
                 {
                     Debug.Log("Dosent fit");
                     propSpawnList.RemoveAt(i);
@@ -72,6 +74,8 @@ public class PropSpawner : StructureGenerator
                 float propHypotenuseRot = Mathf.Rad2Deg * Mathf.Asin(Mathf.Min(prop2DBounds.x, prop2DBounds.y) / prop2DHypotenuse); // īsākā katete / hipotenūzu
                 rotLimit -= propHypotenuseRot;
 
+
+                Vector2 maxOffset;
                 if (rotLimit is float.NaN) //If rot limit is NaN then there is no limit
                 {
                     Debug.Log("Rot is nan");
@@ -80,11 +84,17 @@ public class PropSpawner : StructureGenerator
 
 
                 float randomRot = Random.Range(-rotLimit, rotLimit);
+                float calcRot = randomRot;
+                while (calcRot >= 90f || calcRot <= -90f)
+                {
+                    if (calcRot < 0) calcRot += 90f;
+                    else calcRot -= 90f;
+                }
 
-                Vector2 maxOffset1 = new Vector2(target2DBounds.x - Mathf.Cos((propHypotenuseRot + Mathf.Abs(randomRot)) * Mathf.Deg2Rad) * prop2DHypotenuse, target2DBounds.y - Mathf.Sin((propHypotenuseRot + Mathf.Abs(randomRot)) * Mathf.Deg2Rad) * prop2DHypotenuse);
-                Vector2 maxOffset2 = new Vector2(target2DBounds.x - Mathf.Cos((propHypotenuseRot - Mathf.Abs(randomRot)) * Mathf.Deg2Rad) * prop2DHypotenuse, target2DBounds.y - Mathf.Sin((propHypotenuseRot - Mathf.Abs(randomRot)) * Mathf.Deg2Rad) * prop2DHypotenuse);
-                Vector2 maxOffset = new Vector2(Mathf.Min(maxOffset1.x, maxOffset2.x) * 0.5f, Mathf.Min(maxOffset1.y, maxOffset2.y) * 0.5f);
-                Debug.Log("rotLimit: " + rotLimit + ", randomRot: " + randomRot + ", maxOffset: " + maxOffset);
+                Vector2 maxOffset1 = new Vector2(target2DBounds.x - Mathf.Cos((propHypotenuseRot + Mathf.Abs(calcRot)) * Mathf.Deg2Rad) * prop2DHypotenuse, target2DBounds.y - Mathf.Sin((propHypotenuseRot + Mathf.Abs(calcRot)) * Mathf.Deg2Rad) * prop2DHypotenuse);
+                Vector2 maxOffset2 = new Vector2(target2DBounds.x - Mathf.Cos((propHypotenuseRot - Mathf.Abs(calcRot)) * Mathf.Deg2Rad) * prop2DHypotenuse, target2DBounds.y - Mathf.Sin((propHypotenuseRot - Mathf.Abs(calcRot)) * Mathf.Deg2Rad) * prop2DHypotenuse);
+                maxOffset = new Vector2(Mathf.Min(maxOffset1.x, maxOffset2.x) * 0.5f, Mathf.Min(maxOffset1.y, maxOffset2.y) * 0.5f);
+                Debug.Log("rotLimit: " + rotLimit + ", randomRot: " + randomRot + ", calcRot: " + calcRot + ", maxOffset: " + maxOffset);
 
                 Vector2 offset = new Vector2(Random.Range(-maxOffset.x, maxOffset.x), Random.Range(-maxOffset.y, maxOffset.y));
 
@@ -92,40 +102,54 @@ public class PropSpawner : StructureGenerator
                 GameObject propCopy = Instantiate(chosenProp.propPrefab, targetBoundingBox.transform);
 
                 //A little spaghety but it works
-                void SetPos(bool case1)
+                void SetPos(bool case1, bool case2)
                 {
-                    if (case1)
+                    if (case1 == false)
                     {
                         propCopy.transform.localPosition = new Vector3(offset.x, 0, offset.y);
-                        propCopy.transform.localRotation = Quaternion.Euler(0, randomRot, 0);
+                        propCopy.transform.localRotation = Quaternion.Euler(0, randomRot + 90, 0);
+
+                        Debug.DrawLine(targetBoundingBox.transform.position, propCopy.transform.position, case2 ? Color.green : Color.red, 60f);
                     }
                     else
                     {
                         propCopy.transform.localPosition = new Vector3(offset.y, 0, offset.x);
-                        propCopy.transform.localRotation = Quaternion.Euler(0, randomRot + 90, 0);
+                        propCopy.transform.localRotation = Quaternion.Euler(0, randomRot, 0);
+
+                        Debug.DrawLine(targetBoundingBox.transform.position, propCopy.transform.position, case2 ? Color.white : Color.black,60f);
                     }
                 }
                 if(targetBoundingBox.size.x >= targetBoundingBox.size.z)
                 {
-                    SetPos(propBoundingBox.size.x >= propBoundingBox.size.z);
+                    SetPos(propBoundingBox.size.x >= propBoundingBox.size.z,true);
                 }
                 else
                 {
-                    SetPos(propBoundingBox.size.x <= propBoundingBox.size.z);
+                    SetPos(propBoundingBox.size.x <= propBoundingBox.size.z,false);
                 }
-                
 
 
-                chosenProp.count++;
-                spawnedPropCount++;
-
-                if(chosenProp.count > chosenProp.maxCount)
+                if (DoesPropOverlap(propCopy.GetComponent<BoxCollider>()))
                 {
-                    propEntryList.Remove(chosenProp);
+                    yield return new WaitForSeconds(0.01f);
+                    DestroyImmediate(propCopy);
+                }
+                else
+                {
+                    chosenProp.count++;
+                    spawnedPropCount++;
+
+                    targetBoundingBoxScript.AddBoundingBox(propBoundingBox);
+
+                    if (chosenProp.count > chosenProp.maxCount)
+                    {
+                        propEntryList.Remove(chosenProp);
+                    }
                 }
             }
 
             spawnTries++;
+            yield return new WaitForSeconds(0.01f);
         }
 
         yield break;
@@ -139,5 +163,17 @@ public class PropSpawner : StructureGenerator
         if (Mathf.Max(box.size.x, box.size.z) > Mathf.Max(bounds.size.x, bounds.size.z)) return false;
 
         return true;
+    }
+    public bool DoesPropOverlap(BoxCollider propCollider)
+    {
+        Collider[] overlapingColiderArray = Util.PhysicsBoxColliderOverlap(propCollider, overlapCheckLayerMask);
+        foreach (Collider collider in overlapingColiderArray)
+        {
+            if (collider != propCollider)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

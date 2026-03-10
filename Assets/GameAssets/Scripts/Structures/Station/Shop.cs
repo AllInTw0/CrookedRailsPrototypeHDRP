@@ -10,36 +10,12 @@ public class ShopItem
 
     public Shop linkedShop;
 
-
     public ShopItem(ShopItemSO itemInfo, int price, int stock, Shop linkedShop)
     {
         this.itemInfo = itemInfo;
         this.price = price;
         this.linkedShop = linkedShop;
         this.stock = stock;
-    }
-}
-[System.Serializable]
-public class ShopItemEntry
-{
-    public ShopItemSO itemInfo;
-    [Header("Params")]
-    public AnimationCurve probabilityCurve;
-    public AnimationCurve priceCurve;
-    public AnimationCurve stockCurve;
-    public AnimationCurve randomnessCurve;
-
-    [HideInInspector] public float probability;
-    [HideInInspector] public int price;
-    [HideInInspector] public int stock;
-    [HideInInspector] public float randomness;
-    public void EvaluateCurves(float value)
-    {
-        randomness = randomnessCurve.Evaluate(value);
-
-        probability = probabilityCurve.Evaluate(value) * (Random.value * randomness + 1f);
-        price = Mathf.RoundToInt(Mathf.Clamp(priceCurve.Evaluate(value) + (Random.value * randomness * 20f), 1f, float.MaxValue));
-        stock = Mathf.RoundToInt(Mathf.Clamp(stockCurve.Evaluate(value) * (Random.value * randomness * 1f + 1f), 1f, float.MaxValue));
     }
 }
 public class Shop : MonoBehaviour
@@ -55,7 +31,7 @@ public class Shop : MonoBehaviour
     private Flickerer shopLight;
     [Header("Items")]
     [SerializeField]
-    private List<ShopItemEntry> shopItemEntryList;
+    private List<ShopItemSO> shopItemEntryList;
     [Header("Missing")]
     [SerializeField]
     private Texture2D missingIcon;
@@ -73,7 +49,8 @@ public class Shop : MonoBehaviour
             {
                 if (selectedShopItem.stock > 0 && Money.CanAfford(selectedShopItem.price))
                 {
-                    if (selectedShopItem.itemInfo is ItemSO) {
+                    if (selectedShopItem.itemInfo is ItemSO) 
+                    {
                         Vector3 pos = itemSpawnPos.position + new Vector3(Random.Range(-0.4f, 0.4f), 0, Random.Range(-0.4f, 0.4f));
                         Quaternion rot = Quaternion.Euler(Random.Range(-90f, 90), Random.Range(-90f, 90), Random.Range(-90f, 90));
                         Item.SpawnItem((ItemSO)selectedShopItem.itemInfo, pos, rot);
@@ -82,6 +59,9 @@ public class Shop : MonoBehaviour
                     {
                         TrainUpgradeHandler.active.AddUpgrade((UpgradeSO)selectedShopItem.itemInfo);
                     }
+
+                    if(GameStateManager.boughtItemList.Contains(selectedShopItem.itemInfo) == false)
+                        GameStateManager.boughtItemList.Add(selectedShopItem.itemInfo);
 
                     selectedShopItem.stock--;
                     Money.AddMoney(-selectedShopItem.price);
@@ -100,21 +80,26 @@ public class Shop : MonoBehaviour
                 Debug.LogWarning("No selected item");
             }
         });
+
+        shopItemList = new List<ShopItem>();
     }
     public void Initialize()
     {
+        if (shopItemEntryList.Count == 0) return;
+
         float probabilitySum = 0f;
         for (int i = 0; i < shopItemEntryList.Count; i++)
         {
             shopItemEntryList[i].EvaluateCurves(GameStateManager.currentLevel);
             if(shopItemEntryList[i].probability > 0)
-            probabilitySum += shopItemEntryList[i].probability;
+                probabilitySum += shopItemEntryList[i].probability;
         }
 
         //Sort list based on probability
-        while (true)
+        bool sorted = false;
+        while (sorted == false)
         {
-            bool swaped = false;
+            sorted = true;
 
             for (int i = 0; i < shopItemEntryList.Count-1; i++)
             {
@@ -123,56 +108,53 @@ public class Shop : MonoBehaviour
                     var temp = shopItemEntryList[i];
                     shopItemEntryList[i] = shopItemEntryList[i + 1];
                     shopItemEntryList[i + 1] = temp;
-                    swaped = true;
+                    sorted = false;
                 }
             }
-
-            if (swaped == false) break;
         }
 
+        //Debug
         string str = "";
         for (int i = 0; i < shopItemEntryList.Count; i++)
         {
-            str += shopItemEntryList[i].itemInfo + ":" + shopItemEntryList[i].probability + ", ";
+            str += shopItemEntryList[i] + ":" + shopItemEntryList[i].probability + ", ";
         }
         Debug.Log("Shop probbability [" + GameStateManager.currentLevel +"]: " + str);
 
-        //Generate Shop Item List
-        shopItemList = new List<ShopItem>();
-        List<ShopItemEntry> shopItemEntryListCopy = new List<ShopItemEntry>(shopItemEntryList);
+        //Pick Items
+        List<ShopItemSO> shopItemEntryListCopy = new List<ShopItemSO>(shopItemEntryList);
         for (int i = 0; i < shopStandList.Count; i++)
         {
-            float probability = Random.Range(0f, probabilitySum);
-            ShopItemEntry randomEntry = null;
+            float randomProbability = Random.Range(0f, probabilitySum);
             for (int j = 0; j < shopItemEntryListCopy.Count; j++)
             {
                 if (shopItemEntryListCopy[j].probability <= 0) continue;
 
-                if(probability - shopItemEntryListCopy[j].probability <= 0)
+                randomProbability -= shopItemEntryListCopy[j].probability;
+                if (randomProbability <= 0)
                 {
-                    randomEntry = shopItemEntryListCopy[j];
-                    probabilitySum -= randomEntry.probability;
+                    probabilitySum -= shopItemEntryListCopy[j].probability;
+                    AddItemToShop(shopItemEntryListCopy[j]);
                     shopItemEntryListCopy.RemoveAt(j);
-                    j--;
                     break;
                 }
-
-                probability -= shopItemEntryListCopy[j].probability;
             }
-
-            if (randomEntry != null)
-                shopItemList.Add(new ShopItem(randomEntry.itemInfo, randomEntry.price, randomEntry.stock, this));
-            else
-                Debug.LogWarning("No available items above 0 probability");
-        }
-
-        for (int i = 0; i < shopStandList.Count; i++)
-        {
-            if(i < shopItemList.Count)
-                shopStandList[i].Intialize(shopItemList[i]);
         }
     }
 
+    public void AddItemToShop(ShopItemSO shopItem)
+    {
+        if(shopItemList.Count < shopStandList.Count)
+        {
+            shopItem.EvaluateCurves(GameStateManager.currentLevel);
+            shopItemList.Add(new ShopItem(shopItem, shopItem.price, shopItem.stock, this));
+            shopStandList[shopItemList.Count - 1].Intialize(shopItemList[shopItemList.Count - 1]);
+        }
+        else
+        {
+            Debug.LogWarning("Cant add item to shop!");
+        }
+    }
     public void SelectShopItem(ShopItem shopItem)
     {
         selectedShopItem = shopItem;

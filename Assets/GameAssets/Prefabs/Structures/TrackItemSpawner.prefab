@@ -1,5 +1,52 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3081258017113344497
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1637617757341712448}
+  - component: {fileID: 4384720411708142480}
+  m_Layer: 0
+  m_Name: Bounds
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1637617757341712448
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3081258017113344497}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6100849223977403625}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4384720411708142480
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3081258017113344497}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f30ecf1b13b59cb4fa796831ea755fee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSpawnBounds
+  maxRandomOffset: {x: 0.6, y: 0, z: 0.2}
+  itemFilter: []
+  maxItemCount: -1
 --- !u!1 &4014718741200987973
 GameObject:
   m_ObjectHideFlags: 0
@@ -9,6 +56,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6100849223977403625}
+  - component: {fileID: 7625606126004920515}
   - component: {fileID: 3023825391315765784}
   m_Layer: 0
   m_Name: TrackItemSpawner
@@ -29,9 +77,34 @@ Transform:
   m_LocalPosition: {x: 4, y: 0.3, z: 3.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1637617757341712448}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7625606126004920515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4014718741200987973}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13bffc8333ee6fe4b9088a6d76711fc8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StructureMaster
+  structureList:
+  - {fileID: 3023825391315765784}
+  structureType: 0
+  startConnection:
+    connectionTransform: {fileID: 0}
+    validConnectionNameList: []
+    endPrefabList: []
+    dontConnect: 0
+    ignoreConnections: 0
+  overlapCheckLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!114 &3023825391315765784
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -51,4 +124,4 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 37b28eef436127340b96cf8afef5fc0a, type: 2}
     probability: 0.5
     minMaxStackCount: {x: 2, y: 4}
-  maxRandomOffset: {x: 0.15, y: 0, z: 0.15}
+  minMaxCount: {x: 1, y: 1}

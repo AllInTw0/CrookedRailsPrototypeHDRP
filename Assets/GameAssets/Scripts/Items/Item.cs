@@ -126,11 +126,13 @@ public class Item : Interactable
     }
     public void BecomeInvisible()
     {
+        transform.position = new Vector3(0f, -50f, 0f); //Look below
         foreach (var mesh in meshRenderers)
         {
             mesh.enabled = false;
         }
-        interactableCollider.enabled = false;
+        //This is done so triggers can detect if an item has exited it when picked up by the player
+        //interactableCollider.enabled = false;
         falling = false;
     }
     public void BecomeVisible()
