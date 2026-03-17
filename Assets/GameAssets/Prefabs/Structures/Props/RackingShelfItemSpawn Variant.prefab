@@ -46,7 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemSpawnBounds
   maxRandomOffset: {x: 0.2, y: 1, z: 0.8}
   itemFilter: []
-  maxItemCount: 2
+  maxItemCount: 4
 --- !u!1001 &4384945075064446126
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -61,15 +61,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6088298997134454932, guid: 4c0909c6d993074409bbe9ca9acebe60, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 30.005255
+      value: 52.043285
       objectReference: {fileID: 0}
     - target: {fileID: 6088298997134454932, guid: 4c0909c6d993074409bbe9ca9acebe60, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.00000026088992
+      value: -0.0000006319541
       objectReference: {fileID: 0}
     - target: {fileID: 6088298997134454932, guid: 4c0909c6d993074409bbe9ca9acebe60, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 88.24097
+      value: -31.4354
       objectReference: {fileID: 0}
     - target: {fileID: 6088298997134454932, guid: 4c0909c6d993074409bbe9ca9acebe60, type: 3}
       propertyPath: m_LocalRotation.w

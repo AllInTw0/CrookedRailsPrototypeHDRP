@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.AI.Navigation;
 using UnityEngine;
+using static Util;
 using Random = UnityEngine.Random;
 
 public class GenerationManager : MonoBehaviour
@@ -32,7 +33,23 @@ public class GenerationManager : MonoBehaviour
     private StructureSO stationSO;
     [SerializeField]
     private StructureSO preStationSO;
+    [Header("Foliage")]
+    [SerializeField]
+    private List<ProbabilityListElement<GameObject>> foliageProbabilityElementList = new List<ProbabilityListElement<GameObject>>();
+    [SerializeField]
+    private int chunkSize;
+    [SerializeField]
+    private int foliageDensity;
+    [SerializeField]
+    private AnimationCurve foliageSpawnProbability_DistanceFromTrack;
+    [SerializeField]
+    private LayerMask foliageRaycastLayerMask;
+    [SerializeField]
+    private LayerMask foliageSpawnLayerMask;
+    private List<Vector2> foliageFilledChunkList = new List<Vector2>();
 
+
+    private ProbabilityList<GameObject> foliageProbabilityList;
     public enum StructureDistanceType
     {
         setDistance,
@@ -93,6 +110,7 @@ public class GenerationManager : MonoBehaviour
     private void Start()
     {
         active = this;
+        foliageProbabilityList = new ProbabilityList<GameObject>(foliageProbabilityElementList);
         ResetGeneration();
         GenerateStart();
     }
@@ -176,6 +194,8 @@ public class GenerationManager : MonoBehaviour
             lastSection.SetNextSection(generatedSection);
             lastSection = generatedSection;
             lastPoint = nextPoint;
+
+            StartCoroutine(GenerateFoliageAroundPoint(generatedSection.pointA.position));
         }
         else
         {
@@ -285,5 +305,76 @@ public class GenerationManager : MonoBehaviour
         lastPoint = nextPoint;
 
         return generatedSection;
+    }
+
+    public IEnumerator GenerateFoliageAroundPoint(Vector3 position, int radius = 3)
+    {
+        if (GameStateManager.isStartingLocationSpawned == false)
+            yield return new WaitForSeconds(5f);
+
+        Vector2 pos = new Vector2(position.x, position.z);
+
+        Vector2Int chunkPos = new Vector2Int(Mathf.FloorToInt(pos.x / chunkSize), Mathf.FloorToInt(pos.y / chunkSize));
+        List<Vector2Int> chunkList = new List<Vector2Int>();
+
+        void AddChunk(Vector2Int chunk)
+        {
+            if (foliageFilledChunkList.Contains(chunk) == false)
+            {
+                chunkList.Add(chunk);
+                foliageFilledChunkList.Add(chunk);
+            }
+        }
+        for (int x = chunkPos.x - radius; x < chunkPos.x + radius; x++)
+        {
+            for (int y = chunkPos.y - radius; y < chunkPos.y + radius; y++)
+            {
+                AddChunk(new Vector2Int(x, y));
+            }
+        }
+
+
+        foreach (Vector2Int chunk in chunkList)
+        {
+            Vector3 cornerWorldPos = new Vector3(chunk.x * chunkSize, 0, chunk.y * chunkSize);
+            float increment = chunkSize / foliageDensity;
+            for (int x = 0; x < foliageDensity; x++)
+            {
+                for (int y = 0; y < foliageDensity; y++)
+                {
+                    if(GameStateManager.isStartingLocationSpawned == false)
+                        yield return new WaitForSeconds(0.05f);
+                    SpawnFoliage(cornerWorldPos + new Vector3(x * increment, 0, y * increment));
+                }
+            }
+        }
+    }
+    private void SpawnFoliage(Vector3 pos)
+    {
+        GameObject prefab = foliageProbabilityList.PickNext();
+        if (prefab == null) return;
+
+        TrackManager.active.GetClosestTrackSection(pos, out TrackSection trackSection, out float distance);
+        float dist = TrackManager.active.GetDistanceFromPath(trackSection.path, pos);
+        if (Random.Range(0f, 1f) > foliageSpawnProbability_DistanceFromTrack.Evaluate(dist))
+            return;
+
+        Debug.DrawLine(pos, pos + Vector3.up * 20f, Color.coral, 60f);
+        Vector2 randomDir = Random.insideUnitCircle;
+        pos += new Vector3(randomDir.x * foliageDensity, 0, randomDir.y * foliageDensity);
+
+        if (Physics.SphereCast(new Vector3(pos.x, 50f, pos.z), 2.5f, Vector3.down,out RaycastHit hit, 75f, foliageRaycastLayerMask))
+        {
+            if ((foliageSpawnLayerMask & (1 << hit.transform.gameObject.layer)) != 0)
+            {
+                Transform copy = Instantiate(prefab).transform;
+                copy.position = hit.point - new Vector3(0f,0.1f,0f);
+                copy.rotation = Quaternion.Euler(Random.Range(-5f, 5f), Random.Range(0f, 360f), Random.Range(-5f, 5f));
+            }
+            else
+            {
+                Debug.DrawLine(pos, pos + Vector3.up * 20f, Color.red, 60f);
+            }
+        }
     }
 }

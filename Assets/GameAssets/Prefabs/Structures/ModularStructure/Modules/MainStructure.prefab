@@ -343,6 +343,7 @@ Transform:
   - {fileID: 4294394733239319442}
   - {fileID: 1177314954327252051}
   - {fileID: 7482696330605712093}
+  - {fileID: 3879319098813906196}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &662805138916376965
@@ -906,6 +907,124 @@ Transform:
   m_Children: []
   m_Father: {fileID: 508231092078630449}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7754007515422521787
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3879319098813906196}
+  - component: {fileID: 160039372224923947}
+  - component: {fileID: 1024977094940157874}
+  - component: {fileID: 8698840927397601745}
+  m_Layer: 0
+  m_Name: WaveSpawn
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3879319098813906196
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7754007515422521787}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7997927068410350868}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &160039372224923947
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7754007515422521787}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 15, y: 5, z: 15}
+  m_Center: {x: 0, y: 0, z: -2}
+--- !u!114 &1024977094940157874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7754007515422521787}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d81361e522e3f9c43961d2eccfda6fa4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Trigger
+  onEnter:
+    m_PersistentCalls:
+      m_Calls: []
+  onEnterOnce:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8698840927397601745}
+        m_TargetAssemblyTypeName: EnemyWaveTrigger, Assembly-CSharp
+        m_MethodName: Trigger
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onExit:
+    m_PersistentCalls:
+      m_Calls: []
+  layerFiler:
+    serializedVersion: 2
+    m_Bits: 64
+--- !u!114 &8698840927397601745
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7754007515422521787}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53361c9e3ee232e44b6d93bd8af6eba5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyWaveTrigger
+  wave:
+    name: triggerWave
+    minMaxTargetDangerPrecent: {x: 0.5, y: 0.5}
+    minMaxSpawnDangerAtOnce: {x: 2, y: 4}
+    minMaxSpawnCooldown: {x: 3, y: 10}
+    minMaxDistance: {x: 15, y: 20}
+    minMaxRot: {x: -120, y: 120}
+    minMaxWaveCooldown: {x: 15, y: 20}
+    minMaxTravelDistanceCooldown: {x: 30, y: 60}
+    minDistanceTravelled: 0
+    probability: 0
+    canRepeat: 0
+    spawnedDanger: 0
+    targetSpawnedDanger: 0
+    distanceTravelled: 0
 --- !u!1 &7762317827644942471
 GameObject:
   m_ObjectHideFlags: 0

@@ -15,6 +15,37 @@ MonoBehaviour:
   nameOverride: 
   prefab: {fileID: 6153546570169836682, guid: a73b97cfa6a210c45bea00860957688f, type: 3}
   description: Ammo for the Grenade Launcher.
+  probabilityCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  priceCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  stockCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  randomnessCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  sellCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  neededBoughtItems: []
   offset: {x: 0.15, y: 0.2, z: 0.25}
   origin: {x: -0.02, y: 0.08, z: 0.035}
   rotation: {x: 0, y: 0, z: 0}
@@ -22,6 +53,11 @@ MonoBehaviour:
   renderLayer:
     serializedVersion: 2
     m_Bits: 256
+  probability: 0
+  price: 1
+  stock: 1
+  sell: 1
+  randomness: 0
   slotCount: 1
-  maxCount: 10
+  maxCount: 20
   isTool: 0

@@ -155,7 +155,7 @@ MonoBehaviour:
       m_PostInfinity: 0
       m_RotationOrder: 0
   - sectionPrefabList:
-    - {fileID: 3211963792748113132, guid: 15b1c0813cc511141b046b11651b41a7, type: 3}
+    - {fileID: 3211963792748113132, guid: f9231a3cae873de44847cbd45b1ec47b, type: 3}
     countType: 0
     minMaxCount: {x: 1, y: 1}
     lengthType: 0
@@ -178,19 +178,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f42cd77c2d8e114b8af3c08f658897d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PropSpawner
-  serializedPropEntryList:
-  - propPrefab: {fileID: 3455371132266965207, guid: 278ed4a35cd971c468ab7742c842f4a4, type: 3}
+  propProbabilityList:
+  - element: {fileID: 3018761946558244021, guid: e7ff3f933410c82478e1bcfab988bd9d, type: 3}
+    probability: 1
     maxCount: 20
-    count: 6
-  - propPrefab: {fileID: 3018761946558244021, guid: e7ff3f933410c82478e1bcfab988bd9d, type: 3}
+    pickCount: 4
+  - element: {fileID: 3455371132266965207, guid: 278ed4a35cd971c468ab7742c842f4a4, type: 3}
+    probability: 1
     maxCount: 20
-    count: 4
-  - propPrefab: {fileID: 5665030851727382187, guid: 4c0909c6d993074409bbe9ca9acebe60, type: 3}
-    maxCount: 20
-    count: 8
-  - propPrefab: {fileID: 8233793823709743621, guid: 9f01320a72e4d0c4e918565a2e493d37, type: 3}
-    maxCount: 20
-    count: 3
+    pickCount: 4
+  - element: {fileID: 8233793823709743621, guid: 9f01320a72e4d0c4e918565a2e493d37, type: 3}
+    probability: 1
+    maxCount: 10
+    pickCount: 10
+  - element: {fileID: 5665030851727382187, guid: 4c0909c6d993074409bbe9ca9acebe60, type: 3}
+    probability: 1
+    maxCount: 3
+    pickCount: 3
   overlapCheckLayerMask:
     serializedVersion: 2
     m_Bits: 2097152
@@ -209,13 +213,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemSpawner
   itemSpawnEntryList:
-  - item: {fileID: 11400000, guid: fba5de258cb318342bb90a8d0b6bf548, type: 2}
-    probability: 1
-    minMaxStackCount: {x: 2, y: 3}
-  - item: {fileID: 11400000, guid: eace34aab063c944ab7933acb4427aa0, type: 2}
+  - element:
+      item: {fileID: 11400000, guid: fba5de258cb318342bb90a8d0b6bf548, type: 2}
+      minMaxStackCount: {x: 1, y: 3}
+    probability: 0.65
+    maxCount: 16
+    pickCount: 8
+  - element:
+      item: {fileID: 11400000, guid: 37b28eef436127340b96cf8afef5fc0a, type: 2}
+      minMaxStackCount: {x: 3, y: 6}
     probability: 0.3
-    minMaxStackCount: {x: 2, y: 3}
-  - item: {fileID: 11400000, guid: 37b28eef436127340b96cf8afef5fc0a, type: 2}
+    maxCount: -1
+    pickCount: 7
+  - element:
+      item: {fileID: 11400000, guid: eace34aab063c944ab7933acb4427aa0, type: 2}
+      minMaxStackCount: {x: 3, y: 6}
     probability: 0.3
-    minMaxStackCount: {x: 2, y: 3}
+    maxCount: -1
+    pickCount: 5
   minMaxCount: {x: 20, y: 30}

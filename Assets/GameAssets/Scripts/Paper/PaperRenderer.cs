@@ -11,6 +11,7 @@ public enum OverrideType
     HaulReceipt,
     RawImageTexture,
     SellReceipt,
+    UnlockList
 }
 public class Override
 {
@@ -21,6 +22,7 @@ public class Override
     public List<CargoInfo> cargoListOverride;
     public Texture2D textureOverride;
     public List<Sell.SellEntry> sellReceiptOverride;
+    public List<UnlockEntry> unlockListOverride;
     public Override(string targetName, OverrideType overrideType, string stringOverride = "")
     {
         this.targetName = targetName;
@@ -65,6 +67,8 @@ public class PaperRenderer : MonoBehaviour
     //Variables
     [SerializeField]
     private Camera renderCamera;
+    [SerializeField]
+    private RectTransform rawImagePrefab;
     [SerializeField]
     public List<Paper> paperList;
 
@@ -179,6 +183,42 @@ public class PaperRenderer : MonoBehaviour
                         copy.Find("Pay").GetComponent<TMP_Text>().text = entry.GetAllItemValue() + "$";
                         copy.Find("Icon").GetComponent<RawImage>().texture = entry.itemSO.icon;
                         ((RectTransform)copy.Find("Icon").transform).sizeDelta = Vector2.one * heigth;
+                    }
+
+                    for (int i = 0; i < overrideEntry.objectRefrence.childCount; i++)
+                    {
+                        destroyList.Add(overrideEntry.objectRefrence.GetChild(i).gameObject);
+                    }
+                }
+                else if (overrideInfo.overrideType == OverrideType.UnlockList)
+                {
+                    float listHeight = 6.5f; //Hard coded is bad but whatever
+                    float heigth = Mathf.Clamp(listHeight / overrideInfo.unlockListOverride.Count, 0f, 1f);
+
+                    foreach (UnlockEntry entry in overrideInfo.unlockListOverride)
+                    {
+                        Transform copy = Instantiate(overrideEntry.objectRefrence2);
+                        copy.SetParent(overrideEntry.objectRefrence);
+                        ((RectTransform)copy).localPosition = Vector3.zero;
+                        ((RectTransform)copy).sizeDelta = new Vector2(((RectTransform)copy).sizeDelta.x, heigth);
+
+                        copy.Find("UnlockedText").gameObject.SetActive(entry.isUnlocked);
+
+                        void AddIcon(Transform parent,Texture2D icon)
+                        {
+                            RectTransform copyImage = Instantiate(rawImagePrefab,parent);
+                            copyImage.sizeDelta = Vector2.one * heigth;
+                            RawImage rawImage = copyImage.GetComponent<RawImage>();
+                            rawImage.texture = icon;
+                            rawImage.color = new Color(0.2f, 0.2f, 0.2f);
+                        }
+
+                        Transform parent = copy.Find("NeededItemList");
+                        foreach (ShopItemSO shopItem in entry.neededShopItemList)
+                        {
+                            AddIcon(parent, shopItem.icon);
+                        }
+                        AddIcon(copy.Find("UnlockItemList"), entry.targetShopItem.icon);
                     }
 
                     for (int i = 0; i < overrideEntry.objectRefrence.childCount; i++)

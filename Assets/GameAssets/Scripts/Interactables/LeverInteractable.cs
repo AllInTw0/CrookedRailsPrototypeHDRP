@@ -22,7 +22,7 @@ public class LeverInteractable : Interactable
     [SerializeField] 
     private bool displayNotches = true;
     //RunTime
-    [NonSerialized] 
+    [Header("Start Notch")]
     public int currentNotch;
     private bool locked = false;
     private void Update()

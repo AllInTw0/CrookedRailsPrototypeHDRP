@@ -130,3 +130,8 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 8e01826c370bfbc4daefafa0b9f6a34f, type: 3}
     volume: 1
     pitch: {x: 1, y: 1.3}
+  - name: Train - Chuff
+    AudioClips:
+    - {fileID: 8300000, guid: fd2d165da2fd2fc409d9c6c04190b87b, type: 3}
+    volume: 0.8
+    pitch: {x: 0.9, y: 1.1}

@@ -12,6 +12,7 @@ public class RunningGear : MonoBehaviour
     [HideInInspector]
     public float wheelCircumference;
 
+    private float rotationTravelled;
     private void Start()
     {
         wheelCircumference = 2 * Mathf.PI * wheelRadius;
@@ -36,9 +37,14 @@ public class RunningGear : MonoBehaviour
         {
             wheelAnimator.speed = (distanceTravelled / Time.deltaTime) / wheelCircumference;
         }
+        rotationTravelled = (distanceTravelled / wheelCircumference) * 360f;
         foreach (Transform wheelTransform in wheelTransformList)
         {
-            wheelTransform.localRotation *= Quaternion.Euler((distanceTravelled / wheelCircumference) * 360f, 0, 0);
+            wheelTransform.localRotation *= Quaternion.Euler(rotationTravelled, 0, 0);
         }
+    }
+    public float GetRotationTravelled()
+    {
+        return rotationTravelled;
     }
 }

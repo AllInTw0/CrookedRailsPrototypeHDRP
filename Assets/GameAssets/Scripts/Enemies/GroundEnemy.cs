@@ -3,6 +3,7 @@ using UnityEngine.AI;
 
 public class GroundEnemy : Enemy
 {
+    public float playerDistFromTrainToAttackTrain = 15f;
 
     //Behaviour
     public enum State
@@ -118,7 +119,7 @@ public class GroundEnemy : Enemy
         {
             foreach (Health health in EnemyManager.active.healthTypeArray[(int)healthWeight.healthType])
             {
-                if (health == this.health || health.health <= 0f)
+                if (health == this.health || health.health <= 0f || (healthWeight.healthType == HealthType.Train && Train.playerTrain.GetPlayerDist() > playerDistFromTrainToAttackTrain))
                     continue;
 
                 float distance = Vector3.Distance(transformPos, health.transform.position);

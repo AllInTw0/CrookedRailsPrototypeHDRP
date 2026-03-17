@@ -15,7 +15,7 @@ public class SoundManager : MonoBehaviour
         active = this;
     }
 
-    public void PlayAtPos(Vector3 pos, string soundName)
+    public void PlayAtPos(Vector3 pos, string soundName, float spatialBlend = 1f)
     {
         SoundInfo soundInfo = GetSoundInfo(soundName);
         if (soundInfo != null)
@@ -29,7 +29,7 @@ public class SoundManager : MonoBehaviour
             source.volume = soundInfo.volume;
             source.pitch = Random.Range(soundInfo.pitch.x, soundInfo.pitch.y);
 
-            source.spatialBlend = 1f;
+            source.spatialBlend = spatialBlend;
 
             source.Play();
             
@@ -40,7 +40,30 @@ public class SoundManager : MonoBehaviour
             Debug.LogWarning("Sound Not Found: " + soundName);
         }
     }
+    public void Play(string soundName)
+    {
+        SoundInfo soundInfo = GetSoundInfo(soundName);
+        if (soundInfo != null)
+        {
+            GameObject soundObject = new GameObject(soundName);
 
+            AudioSource source = soundObject.AddComponent<AudioSource>();
+
+            source.clip = soundInfo.AudioClips[Random.Range(0, soundInfo.AudioClips.Count - 1)];
+            source.volume = soundInfo.volume;
+            source.pitch = Random.Range(soundInfo.pitch.x, soundInfo.pitch.y);
+
+            source.spatialBlend = 0f;
+
+            source.Play();
+
+            Destroy(soundObject, source.clip.length);
+        }
+        else
+        {
+            Debug.LogWarning("Sound Not Found: " + soundName);
+        }
+    }
     private SoundInfo GetSoundInfo(string soundName)
     {
         for (int i = 0; i < soundInfoSO.soundList.Count; i++)

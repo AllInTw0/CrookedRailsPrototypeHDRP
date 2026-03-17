@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class CargoInfo
@@ -47,13 +45,25 @@ public class RailCar : MonoBehaviour
     [Header("Cargo")]
     [SerializeField]
     private Transform cargoOrigin;
-
+    [Header("Sway")]
+    [SerializeField]
+    private Transform swayParent;
+    public float swayApplyMult = 5f;
+    public float swaySpring = 0.2f;
+    public float swayDrag = 0.025f;
+    public float swayMaxAngle = 5f;
     //Run Time
     //[NonSerialized]
     //public TrackSection currentFrontSection;
-    public bool derailed;
+    [Header("Run Time")] public bool derailed;
     private float derailTime;
     private CargoInfo currentCargo;
+
+    private float speed;
+    //sway
+    private float swayVelocity;
+    private float swayRot;
+    private float railCarLastRotY;
 
     private void Awake()
     {
@@ -65,9 +75,16 @@ public class RailCar : MonoBehaviour
     {
         derailTime += derailed ? Time.deltaTime : -Time.deltaTime;
         derailTime = Mathf.Clamp01(derailTime);
+
+        UpdateSway();
+    }
+    private void FixedUpdate()
+    {
+        UpdateSwaySpring();
     }
     public void UpdateRailCar(float sectionProgress, TrackSection trackSection, float distanceTravelled)
     {
+        speed = distanceTravelled / Time.deltaTime;
         foreach (RunningGear runningGear in railCarRunningGearList)
         {
             runningGear.UpdateRunningGearPosition(sectionProgress, trackSection);
@@ -79,6 +96,30 @@ public class RailCar : MonoBehaviour
             transform.RotateAround(transform.position, transform.forward, derailTime * -derailVisualAngle);
             transform.position += (transform.forward * derailVisualOffset.z + transform.right * derailVisualOffset.x + transform.up * derailVisualOffset.y) * derailTime;
         }
+    }
+    private void UpdateSway()
+    {
+        if(swayParent != null)
+        {
+            float rotDiff = railCarLastRotY - swayParent.transform.eulerAngles.y;
+            swayRot += swayVelocity * Time.deltaTime;
+            //if (swayVelocity > 0)
+            //    swayVelocity -= rotDiff * swayApplyMult; 
+            //else
+            //    swayVelocity += rotDiff * swayApplyMult;
+            swayVelocity -= rotDiff * swayApplyMult;
+
+            swayVelocity = Mathf.Clamp(swayVelocity, -10f, 10f);
+            swayRot = Mathf.Clamp(swayRot, -swayMaxAngle, swayMaxAngle);
+
+            swayParent.localRotation = Quaternion.Euler(0f, 0f, swayRot);
+            railCarLastRotY = swayParent.transform.eulerAngles.y;
+        }
+    }
+    private void UpdateSwaySpring()
+    {
+        swayVelocity += -swayRot * swaySpring;
+        swayVelocity -= swayVelocity * swayDrag;
     }
     public CargoInfo GetCargoInfo()
     {

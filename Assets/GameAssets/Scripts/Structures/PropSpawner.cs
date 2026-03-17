@@ -1,21 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static ItemSpawner;
+using static Util;
 
 public class PropSpawner : StructureGenerator
 {
-    [System.Serializable]
-    public class PropEntry
-    {
-        public GameObject propPrefab;
-        public int maxCount;
-
-        [HideInInspector]
-        public int count;
-    }
-
     [SerializeField]
-    private List<PropEntry> serializedPropEntryList = new List<PropEntry>();
+    private List<ProbabilityListElement<GameObject>> propProbabilityList = new List<ProbabilityListElement<GameObject>>();
     [SerializeField]
     private LayerMask overlapCheckLayerMask;
     [SerializeField]
@@ -28,19 +20,15 @@ public class PropSpawner : StructureGenerator
         int spawnedPropCount = 0;
         int spawnTries = 0;
 
-        List<PropEntry> propEntryList = new List<PropEntry>(serializedPropEntryList);
-        foreach (PropEntry entry in propEntryList)
-        {
-            entry.count = 0;
-        }
+        ProbabilityList<GameObject> probabilityList = new ProbabilityList<GameObject>(propProbabilityList);
 
         PropSpawnBoundingBox[] propSpawnArray = transform.GetComponentsInChildren<PropSpawnBoundingBox>();
 
-        while (spawnTries < maxSpawnTries && spawnedPropCount < maxPropCount && propEntryList.Count > 0)
+        while (spawnTries < maxSpawnTries && spawnedPropCount < maxPropCount && probabilityList.HasItemsLeft())
         {
             //Spawn prop
-            PropEntry chosenProp = propEntryList[Random.Range(0, propEntryList.Count)];
-            BoxCollider propBoundingBox = chosenProp.propPrefab.GetComponent<BoxCollider>();
+            GameObject chosenProp = probabilityList.PickNext(false);
+            BoxCollider propBoundingBox = chosenProp.GetComponent<BoxCollider>();
 
             //Get list of boundingBoxes the prop fits in
             List<PropSpawnBoundingBox> propSpawnList = new List<PropSpawnBoundingBox>(propSpawnArray);
@@ -48,7 +36,7 @@ public class PropSpawner : StructureGenerator
             {
                 if (propSpawnList[i].DoseBoundingBoxFit(propBoundingBox) == false || DoseBoxFitInBox(propSpawnList[i].boundingBox, propBoundingBox) == false)
                 {
-                    Debug.Log("Dosent fit");
+                    //Debug.Log("Dosent fit");
                     propSpawnList.RemoveAt(i);
                     i--;
                 } 
@@ -56,7 +44,7 @@ public class PropSpawner : StructureGenerator
 
             if(propSpawnList.Count == 0)
             {
-                Debug.LogWarning(chosenProp.propPrefab + " dosent fit");
+                Debug.LogWarning(chosenProp + " dosent fit");
             }
             else
             {
@@ -78,7 +66,7 @@ public class PropSpawner : StructureGenerator
                 Vector2 maxOffset;
                 if (rotLimit is float.NaN) //If rot limit is NaN then there is no limit
                 {
-                    Debug.Log("Rot is nan");
+                    //Debug.Log("Rot is nan");
                     rotLimit = 180f;
                 }
 
@@ -94,12 +82,12 @@ public class PropSpawner : StructureGenerator
                 Vector2 maxOffset1 = new Vector2(target2DBounds.x - Mathf.Cos((propHypotenuseRot + Mathf.Abs(calcRot)) * Mathf.Deg2Rad) * prop2DHypotenuse, target2DBounds.y - Mathf.Sin((propHypotenuseRot + Mathf.Abs(calcRot)) * Mathf.Deg2Rad) * prop2DHypotenuse);
                 Vector2 maxOffset2 = new Vector2(target2DBounds.x - Mathf.Cos((propHypotenuseRot - Mathf.Abs(calcRot)) * Mathf.Deg2Rad) * prop2DHypotenuse, target2DBounds.y - Mathf.Sin((propHypotenuseRot - Mathf.Abs(calcRot)) * Mathf.Deg2Rad) * prop2DHypotenuse);
                 maxOffset = new Vector2(Mathf.Min(maxOffset1.x, maxOffset2.x) * 0.5f, Mathf.Min(maxOffset1.y, maxOffset2.y) * 0.5f);
-                Debug.Log("rotLimit: " + rotLimit + ", randomRot: " + randomRot + ", calcRot: " + calcRot + ", maxOffset: " + maxOffset);
+                //Debug.Log("rotLimit: " + rotLimit + ", randomRot: " + randomRot + ", calcRot: " + calcRot + ", maxOffset: " + maxOffset);
 
                 Vector2 offset = new Vector2(Random.Range(-maxOffset.x, maxOffset.x), Random.Range(-maxOffset.y, maxOffset.y));
 
                 //Spawn prop
-                GameObject propCopy = Instantiate(chosenProp.propPrefab, targetBoundingBox.transform);
+                GameObject propCopy = Instantiate(chosenProp, targetBoundingBox.transform);
 
                 //A little spaghety but it works
                 void SetPos(bool case1, bool case2)
@@ -136,15 +124,10 @@ public class PropSpawner : StructureGenerator
                 }
                 else
                 {
-                    chosenProp.count++;
+                    probabilityList.IncreasePickCount();
+
                     spawnedPropCount++;
-
                     targetBoundingBoxScript.AddBoundingBox(propBoundingBox);
-
-                    if (chosenProp.count > chosenProp.maxCount)
-                    {
-                        propEntryList.Remove(chosenProp);
-                    }
                 }
             }
 

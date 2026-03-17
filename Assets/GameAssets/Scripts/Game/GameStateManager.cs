@@ -21,6 +21,8 @@ public class GameStateManager : MonoBehaviour
 
     public static int currentLevel = 1;
 
+    public static float distanceTravelled = 0f;
+
     public static bool canEnemiesSpawn
     {
         get
@@ -28,6 +30,7 @@ public class GameStateManager : MonoBehaviour
             return !(isStartingLocationSpawned || isStationSpawned);
         }
     }
+    public static List<DistanceWaypoint> waypointList = new List<DistanceWaypoint>();
 
     public static List<ShopItemSO> boughtItemList = new List<ShopItemSO>();
 

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7c17cfe7ec5b6245b9d76b9f71d52ae, type: 3}
   m_Name: Enemy
   m_EditorClassIdentifier: Assembly-CSharp::EnemySO
+  prefab: {fileID: 6631932380828592750, guid: d56d93cadd6fc0b45b67c4f380b0c7ab, type: 3}
   speed: 3
   acceleration: 10
   deceleration: 10
@@ -24,4 +25,5 @@ MonoBehaviour:
     sightDistance: 50
     importanceWeight: 0.5
   sightDistance: 35
+  dangerValue: 1
   gravityForce: 10

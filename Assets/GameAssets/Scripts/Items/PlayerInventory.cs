@@ -93,6 +93,7 @@ public class PlayerInventory : MonoBehaviour
     private void EquipAsTool(Item item)
     {
         tool = item;
+        item.transform.SetParent(null);
         item.BecomeInvisible();
         PlayerAvatar.active.EquipTool(item);
         Debug.Log(item + " Equipped As Tool");
@@ -103,7 +104,8 @@ public class PlayerInventory : MonoBehaviour
     {
         items.Add(item);
         filledSlots += item.itemInfo.slotCount;
-        
+
+        item.transform.SetParent(null);
         item.BecomeInvisible();
         Debug.Log(item + " Equipped As Item");
         

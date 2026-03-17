@@ -44,21 +44,16 @@ public class EnemyManager : MonoBehaviour
     [Header("Temp")]
     [SerializeField] 
     private GameObject enemyPrefab;
-    [FormerlySerializedAs("enemyCount")] [SerializeField] 
+    [SerializeField] 
     private int enemyCount_Debug;
-    [FormerlySerializedAs("targetEnemyCount")] [SerializeField] 
+    [SerializeField] 
     private int targetEnemyCount_Debug;
+    [Header("Enemy List")]
+    [SerializeField]
+    private List<EnemySO> inGameEnemyList;
     [Header("Updating")]
     [SerializeField] 
     public float behaviourRefreshRate = 0.5f;
-    [Header("Spawning Area")] 
-    [SerializeField] 
-    private Vector2 minMaxSpawnAreaRot;
-    [SerializeField] 
-    private Vector2 minMaxSpawnAreaDistance;
-    [Header("Spawning Interval")] 
-    [SerializeField]
-    private float spawnCoolDown;
     [Header("Enemy Code Refrences")]
     [SerializeField]
     public LayerMask groundLayer;
@@ -118,32 +113,6 @@ public class EnemyManager : MonoBehaviour
             enemyList.Add(Instantiate(enemyPrefab, new Vector3(Random.Range(-3f,3f),Random.Range(0f,0f),Random.Range(-3f,3f)), Quaternion.identity).transform.GetComponent<Enemy>());
         }
         
-        //Spawning
-        spawnCoolDownTime -= Time.deltaTime;
-        if (spawnCoolDownTime <= 0f && GameStateManager.canEnemiesSpawn)
-        {
-            for (int i = 0; i < Random.Range(5,15); i++)
-            {
-                float distance = Random.Range(minMaxSpawnAreaDistance.x, minMaxSpawnAreaDistance.y);
-                float rot = Random.Range(minMaxSpawnAreaRot.x, minMaxSpawnAreaRot.y);
-
-                RailCar frontRailCar = GenerationManager.active.playerTrain.GetRailCarAtIndex(0);
-                rot += frontRailCar.transform.eulerAngles.y;
-
-                Vector3 dir = Quaternion.AngleAxis(rot, Vector3.up) * Vector3.forward;
-                if (Physics.Raycast(frontRailCar.transform.position + Vector3.up * 50f + dir * distance, Vector3.down, out RaycastHit hit, 100f))
-                {
-                    //Spawn Enemy
-                    Debug.DrawRay(frontRailCar.transform.position + Vector3.up * 50f + dir * distance,Vector3.down*100f,Color.blueViolet,60f);
-                    SpawnEnemy(enemyPrefab,hit.point,Quaternion.identity);
-                }
-                else
-                    i++;
-            }
-            
-            spawnCoolDownTime = spawnCoolDown;
-        }
-
         //Pack spawning
         packSpawnCheckTimer -= Time.deltaTime;
         if(packSpawnCheckTimer <= 0)
@@ -203,11 +172,18 @@ public class EnemyManager : MonoBehaviour
     {
         return enemyList.ToArray();
     }
-
+    public EnemySO[] GetInGameEnemies()
+    {
+        return inGameEnemyList.ToArray();
+    }
     public void SpawnEnemy(GameObject prefab, Vector3 position, Quaternion rotation)
     {
         GameObject enemy = Instantiate(enemyPrefab, position, rotation);
         enemyList.Add(enemy.transform.GetComponent<Enemy>());
+    }
+    public int GetEnemyCount()
+    {
+        return enemyList.Count;
     }
 
     public void OnDrawGizmos()

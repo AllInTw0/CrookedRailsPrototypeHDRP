@@ -12,12 +12,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b1fea353dc6f1b448e5869dc3e90a7a, type: 3}
   m_Name: Shotgun Ammo
   m_EditorClassIdentifier: Assembly-CSharp::ItemSO
-  itemName: Shotgun Ammo
+  nameOverride: 
   prefab: {fileID: 6153546570169836682, guid: 6dcda7e325502854ba28300c1ffedd06, type: 3}
-  slotCount: 1
-  maxCount: 10
-  isTool: 0
   description: Ammo for the shotgun.
+  probabilityCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  priceCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  stockCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  randomnessCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  sellCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  neededBoughtItems: []
   offset: {x: 0.1, y: 0.2, z: 0.2}
   origin: {x: -0.02, y: 0.05, z: 0}
   rotation: {x: 0, y: 0, z: 0}
@@ -25,3 +53,11 @@ MonoBehaviour:
   renderLayer:
     serializedVersion: 2
     m_Bits: 256
+  probability: 0
+  price: 1
+  stock: 1
+  sell: 1
+  randomness: 0
+  slotCount: 1
+  maxCount: 20
+  isTool: 0

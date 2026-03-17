@@ -25,6 +25,7 @@ public class Item : Interactable
 
     private Rigidbody rb;
     private bool physicsEnabled;
+    private bool dropSilently;
     private void Awake()
     {
         if (TryGetComponent(out Rigidbody rigidbody))
@@ -96,16 +97,21 @@ public class Item : Interactable
                 falling = false;
                 transform.position = new Vector3(transform.position.x, targetY, transform.position.z);
                 transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
-                SoundManager.active.PlayAtPos(transform.position, "Item - Drop");
+
+                if (dropSilently == false)
+                    SoundManager.active.PlayAtPos(transform.position, "Item - Drop");
+                else
+                    dropSilently = false;
             }
         }
     }
-    public void DropFromPos(Vector3 startPos)
+    public void DropFromPos(Vector3 startPos, bool hasSound = true)
     {
         transform.position = startPos;
         falling = true;
         velocity = 0;
         rotVelocity = Random.Range(-35f, 35f);
+        if (hasSound == false) dropSilently = true;
         if (Physics.Raycast(startPos + new Vector3(0f,0.05f,0f), Vector3.down, out RaycastHit hit, 100f, ItemManager.itemDropLayerMask))
         {
             targetY = hit.point.y;
@@ -171,12 +177,13 @@ public class Item : Interactable
     {
         return physicsEnabled;
     }
-    public static Item SpawnItem(ItemSO itemSO, Vector3 pos, Quaternion rot, int stackCount = 1)
+    public static Item SpawnItem(ItemSO itemSO, Vector3 pos, Quaternion rot, int stackCount = 1, bool dropSound = true)
     {
+        
         Transform copy = Instantiate(itemSO.prefab,pos,rot).transform;
 
         Item item = copy.GetComponent<Item>();
-        item.DropFromPos(pos);
+        item.DropFromPos(pos, dropSound);
         item.count = Mathf.Clamp(stackCount, 1, item.itemInfo.maxCount);
 
         return item;

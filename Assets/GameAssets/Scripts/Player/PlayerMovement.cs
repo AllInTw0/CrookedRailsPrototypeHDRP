@@ -7,7 +7,7 @@ public class PlayerMovement : MonoBehaviour
     public static PlayerMovement active;
     //Variables
     [SerializeField]
-    private Transform orientation;
+    public Transform orientation;
     [Header("Walking")]
     [SerializeField]
     private float walkingSpeed = 1f;
@@ -291,22 +291,57 @@ public class PlayerMovement : MonoBehaviour
             //Max Distance 
             if (maxDistanceLimitEnabled && Train.playerTrain != null)
             {
-                float dist = Train.playerTrain.GetClosestDistanceToPos(transform.position);
-                if (dist >= maxDistancefromTrain && Train.playerTrain.GetClosestDistanceToPos(transform.position + projectedVector) > dist)
+                DistanceWaypoint closestWaypoint = null;
+                float distanceToWaypoint = float.MaxValue;
+                foreach (DistanceWaypoint waypoint in GameStateManager.waypointList)
                 {
-                    Debug.Log("Walking away from the train!");
-                    targetSpeed = 0f;
-                    if (tooFarFromTrain == false)
+                    float d = Vector3.Distance(transform.position, waypoint.transform.position);
+                    if(d < distanceToWaypoint)
                     {
-                        Override title = new Override("Title", OverrideType.Text, "WARNING");
-                        Override message = new Override("Message", OverrideType.Text, "You're to far from the train! You may NOT go FURTHER!");
-                        Override subText = new Override("SubText", OverrideType.Text, Mathf.Round(dist) + "m");
-                        MiniPrinter.active.AddNotification(PaperRenderer.active.RenderPaper("Message", new List<Override>() { title, message, subText }));
+                        closestWaypoint = waypoint;
+                        distanceToWaypoint = d;
                     }
-                    tooFarFromTrain = true;
                 }
-                else if (dist < maxDistancefromTrain - 2f)
-                    tooFarFromTrain = false;
+
+                float trainDist = Train.playerTrain.GetClosestDistanceToPos(transform.position);
+
+                if (closestWaypoint != null && trainDist > distanceToWaypoint)
+                {
+
+                    if (distanceToWaypoint > closestWaypoint.maxDistance && Vector3.Distance(transform.position + projectedVector, closestWaypoint.transform.position) > distanceToWaypoint)
+                    {
+                        Debug.Log("Walking away from a waypoint!");
+                        targetSpeed = 0f;
+                        if (tooFarFromTrain == false)
+                        {
+                            Override title = new Override("Title", OverrideType.Text, "WARNING");
+                            Override message = new Override("Message", OverrideType.Text, "You're to far from the structure! You may NOT go FURTHER!");
+                            Override subText = new Override("SubText", OverrideType.Text, Mathf.Round(distanceToWaypoint) + "m");
+                            MiniPrinter.active.AddNotification(PaperRenderer.active.RenderPaper("Message", new List<Override>() { title, message, subText }));
+                        }
+                        tooFarFromTrain = true;
+                    }
+                    else if (distanceToWaypoint < closestWaypoint.maxDistance - 2f)
+                        tooFarFromTrain = false;
+                }
+                else
+                {
+                    if (trainDist >= maxDistancefromTrain && Train.playerTrain.GetClosestDistanceToPos(transform.position + projectedVector) > trainDist)
+                    {
+                        Debug.Log("Walking away from the train!");
+                        targetSpeed = 0f;
+                        if (tooFarFromTrain == false)
+                        {
+                            Override title = new Override("Title", OverrideType.Text, "WARNING");
+                            Override message = new Override("Message", OverrideType.Text, "You're to far from the train! You may NOT go FURTHER!");
+                            Override subText = new Override("SubText", OverrideType.Text, Mathf.Round(trainDist) + "m");
+                            MiniPrinter.active.AddNotification(PaperRenderer.active.RenderPaper("Message", new List<Override>() { title, message, subText }));
+                        }
+                        tooFarFromTrain = true;
+                    }
+                    else if (trainDist < maxDistancefromTrain - 2f)
+                        tooFarFromTrain = false;
+                }
             }
 
             rb.AddForce(projectedVector * ((targetSpeed / walkingSpeed) * acceleration));

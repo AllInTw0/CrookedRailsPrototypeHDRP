@@ -14,7 +14,7 @@ public class Wrench : ItemMelee
     private bool attack2Released;
     private void Update()
     {
-        if (InputManager.attack2Action.IsPressed())
+        if (InputManager.attack2Action.IsPressed() && PlayerInventory.active.tool == this)
         {
             if (attack2Released)
             {

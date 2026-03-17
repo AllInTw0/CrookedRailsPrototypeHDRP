@@ -312,7 +312,7 @@ public class TrackManager : MonoBehaviour
                 time += increment;
         }
 
-        Debug.Log("PointDist: " + pathLenght + " SplineDist: " + splineLenght);
+        //Debug.Log("PointDist: " + pathLenght + " SplineDist: " + splineLenght);
     }
     static public void CalculatePath(List<PathPoint> path, out List<PathPoint> newPath, float resolution = 1f)
     {
@@ -344,7 +344,77 @@ public class TrackManager : MonoBehaviour
                 progress += increment;
         }
 
-        Debug.Log("OldPathLenght: " + pathLenght + " NewPathLenght: " + newPathLenght);
+        //Debug.Log("OldPathLenght: " + pathLenght + " NewPathLenght: " + newPathLenght);
+    }
+    public void GetClosestTrackSection(Vector3 pos, out TrackSection trackSection, out float distance)
+    {
+        Vector2 pos2D = new Vector2(pos.x, pos.z);
+        trackSection = null;
+        distance = float.MaxValue;
+
+        foreach (TrackSection section in trackSectionList)
+        {
+            Vector3 middlePoint = section.path[section.path.Count / 2].position;
+            float dist = Vector2.Distance(pos2D, new Vector2(middlePoint.x, middlePoint.z));
+            if(dist < distance)
+            {
+                trackSection = section;
+                distance = dist;
+            }
+        }
+    }
+    public float GetDistanceFromPath(List<PathPoint> path, Vector3 pos)
+    {
+        float distance = float.MaxValue;
+
+        int failCount = 0;
+        for (int i = 0; i < path.Count; i++)
+        {
+            float dist = Vector3.Distance(path[i].position, pos);
+            if(dist < distance)
+            {
+                distance = dist;
+            }
+            else
+            {
+                failCount++;
+                if(failCount > 3)
+                {
+                    //Distance is growing
+                    Debug.DrawLine(path[i].position, pos);
+                    break;
+                }
+            }
+        }
+        return distance;
+    }
+    public bool IsLeftOfPath(List<PathPoint> path, Vector3 pos)
+    {
+        float distance = float.MaxValue;
+
+        int failCount = 0;
+        int index = 0;
+        for (int i = 0; i < path.Count; i++)
+        {
+            float dist = Vector3.Distance(path[i].position, pos);
+            if (dist < distance)
+            {
+                distance = dist;
+                index = i;
+            }
+            else
+            {
+                failCount++;
+                if (failCount > 3)
+                {
+                    //Distance is growing
+                    Debug.DrawLine(path[i].position, pos);
+                    break;
+                }
+            }
+        }
+        //Debug.Log(pos.x + ", " + path[index].position.x);
+        return pos.x < path[index].position.x;
     }
     //Debug Functions
     private void DEBUG_DrawPath(List<PathPoint> path, float duration = 60f)

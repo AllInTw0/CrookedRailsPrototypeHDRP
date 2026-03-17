@@ -23,7 +23,8 @@ public class Health : MonoBehaviour
     }
     public void AddHealthToGlobalList()
     {
-        EnemyManager.active.healthTypeArray[(int)healthType].Add(this);
+        if(EnemyManager.active != null)
+            EnemyManager.active.healthTypeArray[(int)healthType].Add(this);
     }
     private void Update()
     {

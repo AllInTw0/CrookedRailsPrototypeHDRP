@@ -85,6 +85,7 @@ MonoBehaviour:
     validConnectionNameList: []
     endPrefabList: []
     dontConnect: 0
+    ignoreConnections: 0
   overlapCheckLayerMask:
     serializedVersion: 2
     m_Bits: 1064960
@@ -163,6 +164,30 @@ MonoBehaviour:
       m_RotationOrder: 4
   - sectionPrefabList:
     - {fileID: 5770510200677921166, guid: a59cfd568ea9c6240b80301fe4a20b95, type: 3}
+    countType: 0
+    minMaxCount: {x: 1, y: 1}
+    lengthType: 2
+    lengthAddition: 0
+    countCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 4
+  - sectionPrefabList:
+    - {fileID: 1747217957745850429, guid: 0ced4a707c678a141a976ce01c3fb48b, type: 3}
+    countType: 0
+    minMaxCount: {x: 1, y: 1}
+    lengthType: 2
+    lengthAddition: 0
+    countCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 4
+  - sectionPrefabList:
+    - {fileID: 4706443940158993255, guid: 0bf67e90dc3e79345ac9dd20d4763d29, type: 3}
     countType: 0
     minMaxCount: {x: 1, y: 1}
     lengthType: 2

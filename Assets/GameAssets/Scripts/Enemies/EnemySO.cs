@@ -12,6 +12,9 @@ public class EnemySO : ScriptableObject
         public float importanceWeight;
     }
 
+    [Header("Enemy")]
+    public GameObject prefab;
+
     [Header("Speed")]
     public float speed = 1f;
     public float acceleration = 1f;
@@ -22,6 +25,11 @@ public class EnemySO : ScriptableObject
     public List<HealthWeightParams> HealthWeightParamsList = new List<HealthWeightParams>();
     public float sightDistance = 5f;
 
+    [Header("Spawning")]
+    public float dangerValue;
+
     [Header("Misc")]
     public float gravityForce = 10f;
+
+    
 }

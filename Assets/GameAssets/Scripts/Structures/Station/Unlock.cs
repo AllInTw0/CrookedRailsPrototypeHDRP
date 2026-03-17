@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
 
 public class Unlock : MonoBehaviour
 {
@@ -14,7 +15,6 @@ public class Unlock : MonoBehaviour
         {
             CheckForUnlocks();
         });
-        unlockMonitor.EnableMonitor(true);
     }
 
     private void CheckForUnlocks()
@@ -50,6 +50,8 @@ public class Unlock : MonoBehaviour
                 targetUnlockShop.AddItemToShop(unlockEntry.targetShopItem);
                 unlockEntry.isUnlocked = true;
                 unlockMonitor.buttonInteractable.SetActionNameOverride("Unlocked " + unlockEntry.targetShopItem.GetName() + "!", 2f);
+
+                UpdateMonitor();
                 return;
             }
 
@@ -57,5 +59,26 @@ public class Unlock : MonoBehaviour
 
         unlockMonitor.buttonInteractable.InteractionFailed();
         unlockMonitor.buttonInteractable.SetActionNameOverride("No items match", 2f);
+    }
+    public void PlayerEntered() 
+    {
+        unlockMonitor.EnableMonitor(true);
+        UpdateMonitor();
+    }
+
+    public void PlayerExited()
+    {
+        unlockMonitor.DisableMonitor();
+        unlockMonitor.printer.ClearNotifications();
+    }
+
+    private void UpdateMonitor()
+    {
+        unlockMonitor.printer.ClearNotifications();
+
+        Override unlockListOverride = new Override("UnlockList", OverrideType.UnlockList);
+        unlockListOverride.unlockListOverride = GameStateManager.unlockList;
+
+        unlockMonitor.printer.AddNotification(PaperRenderer.active.RenderPaper("UnlockList", new List<Override>() { unlockListOverride }), float.MaxValue);
     }
 }

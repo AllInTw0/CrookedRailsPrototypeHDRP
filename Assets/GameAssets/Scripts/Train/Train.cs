@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -62,6 +61,8 @@ public class Train : MonoBehaviour
 
     private float maxAutoStopOffset;
     private AutoStop currentAutoBreakingStop;
+
+    private float playerDistFromTrain;
     private void Awake()
     {
         if (isPlayerTrain)
@@ -87,16 +88,19 @@ public class Train : MonoBehaviour
         }
 
         //Player dist
-        float playerDist = GetClosestDistanceToPos(PlayerMovement.active.transform.position);
-        if (autoStopPlayerDist > 0 && playerDist >= autoStopPlayerDist && deceleration == 0)
+        if (PlayerMovement.active != null)
         {
-            Debug.Log("Player Is To Far! Engaging breaks!");
-            Override title = new Override("Title",OverrideType.Text,"WARNING");
-            Override message = new Override("Message", OverrideType.Text, "You're to far from the train! Engaging breaks!");
-            Override subText = new Override("SubText", OverrideType.Text, Mathf.Round(playerDist) + "m");
-            MiniPrinter.active.AddNotification(PaperRenderer.active.RenderPaper("Message", new List<Override>(){ title, message, subText }));
+            playerDistFromTrain = GetClosestDistanceToPos(PlayerMovement.active.transform.position);
+            if (autoStopPlayerDist > 0 && playerDistFromTrain >= autoStopPlayerDist && deceleration == 0)
+            {
+                Debug.Log("Player Is To Far! Engaging breaks!");
+                Override title = new Override("Title", OverrideType.Text, "WARNING");
+                Override message = new Override("Message", OverrideType.Text, "You're to far from the train! Engaging breaks!");
+                Override subText = new Override("SubText", OverrideType.Text, Mathf.Round(playerDistFromTrain) + "m");
+                MiniPrinter.active.AddNotification(PaperRenderer.active.RenderPaper("Message", new List<Override>() { title, message, subText }));
 
-            controlls.Break();
+                controlls.Break();
+            }
         }
 
         //Handle AutoStops
@@ -198,6 +202,9 @@ public class Train : MonoBehaviour
         float distanceTravelled = speed * Time.deltaTime;
         sectionProgress += distanceTravelled;
 
+        if(isPlayerTrain) 
+            GameStateManager.distanceTravelled += distanceTravelled;
+
         //Check front
         if (TrackManager.active.GetTrackSectionFromProgress(sectionProgress, frontTrackSection, out newSection, out newSectionProgress))
         {
@@ -261,7 +268,7 @@ public class Train : MonoBehaviour
                         consist[0].Derail();
 
                         Override title = new Override("Title", OverrideType.Text, "WARNING");
-                        Override message = new Override("Message", OverrideType.Text, "Trin DERAILED! Due to object on track!");
+                        Override message = new Override("Message", OverrideType.Text, "Train DERAILED! Due to object on track!");
                         Override subText = new Override("SubText", OverrideType.Text, "Locomotive");
                         MiniPrinter.active.AddNotification(PaperRenderer.active.RenderPaper("Message", new List<Override>() { title, message, subText }));
 
@@ -457,5 +464,10 @@ public class Train : MonoBehaviour
         }
 
         return minDist;
+    }
+
+    public float GetPlayerDist()
+    {
+        return playerDistFromTrain;
     }
 }
