@@ -1,9 +1,10 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Grenade : Bullet
 {
     [SerializeField]
-    private float velocity;
+    public float velocity;
     [SerializeField]
     private Rigidbody rb;
     [Header("Explosion trigger")]
@@ -20,6 +21,8 @@ public class Grenade : Bullet
     private float force;
     [SerializeField]
     private float damage;
+    [SerializeField]
+    private List<HealthType> healthTypeFilter = new List<HealthType>();
 
     private bool colliding = false;
     public override void Initialize()
@@ -56,7 +59,7 @@ public class Grenade : Bullet
     }
     private void Explode(Transform hitTransform = null)
     {
-        BulletManager.active.SpawnExplosion(transform.position, damage, range, force, hitTransform);
+        BulletManager.active.SpawnExplosion(transform.position, damage, range, force, hitTransform, healthTypeFilter);
         Destroy(gameObject);
     }
 }

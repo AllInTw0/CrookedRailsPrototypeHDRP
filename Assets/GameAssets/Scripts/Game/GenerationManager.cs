@@ -17,6 +17,10 @@ public class GenerationManager : MonoBehaviour
     [SerializeField]
     private int generatedSectionsAheadOfPlayer = 2;
     [SerializeField]
+    private int sectionsStructureSpawnDelay = 2;
+    [SerializeField]
+    private int sectionsFoliageSpawnDelay = 2;
+    [SerializeField]
     private int generatedSectionsBehindPlayer = 2;
     [SerializeField]
     private Vector2 angleClampMinMax;
@@ -33,9 +37,10 @@ public class GenerationManager : MonoBehaviour
     private StructureSO stationSO;
     [SerializeField]
     private StructureSO preStationSO;
+
     [Header("Foliage")]
     [SerializeField]
-    private List<ProbabilityListElement<GameObject>> foliageProbabilityElementList = new List<ProbabilityListElement<GameObject>>();
+    private List<ProbabilityListElement<ObjectPool>> foliageProbabilityElementList = new List<ProbabilityListElement<ObjectPool>>();
     [SerializeField]
     private int chunkSize;
     [SerializeField]
@@ -49,7 +54,7 @@ public class GenerationManager : MonoBehaviour
     private List<Vector2> foliageFilledChunkList = new List<Vector2>();
 
 
-    private ProbabilityList<GameObject> foliageProbabilityList;
+    private ProbabilityList<ObjectPool> foliageProbabilityList;
     public enum StructureDistanceType
     {
         setDistance,
@@ -110,11 +115,16 @@ public class GenerationManager : MonoBehaviour
     private void Start()
     {
         active = this;
-        foliageProbabilityList = new ProbabilityList<GameObject>(foliageProbabilityElementList);
+
+        foreach (ProbabilityListElement<ObjectPool> entry in foliageProbabilityElementList)
+        {
+            entry.element.Init(entry.element.maxCapacity, entry.element.defaultCapacity);
+        }
+
+        foliageProbabilityList = new ProbabilityList<ObjectPool>(foliageProbabilityElementList);
         ResetGeneration();
         GenerateStart();
     }
-
     private IEnumerator BuildNavMesh()
     {
         yield return new WaitForEndOfFrame();
@@ -185,7 +195,7 @@ public class GenerationManager : MonoBehaviour
             Spline.DEBUG_DrawPointGizmos(nextPoint);
 
             TrackSection generatedSection = TrackManager.active.CreateTrackSection(lastPoint, nextPoint);
-            UpdateStructureDistances(generatedSection);
+
             distanceLeftTillNextStation -= generatedSection.length;
             //Debug.Log("Distance Left: " + distanceLeftTillNextStation);
 
@@ -195,10 +205,32 @@ public class GenerationManager : MonoBehaviour
             lastSection = generatedSection;
             lastPoint = nextPoint;
 
-            StartCoroutine(GenerateFoliageAroundPoint(generatedSection.pointA.position));
+            TrackSection previousSection = generatedSection;
+            for (int i = 1; i < sectionsFoliageSpawnDelay; i++)
+            {
+                if(previousSection.previousSection != null)
+                {
+                    previousSection = previousSection.previousSection;
+
+                    if (i == sectionsStructureSpawnDelay-1)
+                        UpdateStructureDistances(previousSection);
+                    if (i == sectionsFoliageSpawnDelay-1)
+                        StartCoroutine(GenerateFoliageAroundPoint(previousSection.pointA.position));
+                }
+            }
         }
         else
         {
+            //Spawn rest of the foliage
+            TrackSection previousSection = lastSection;
+            for (int i = 1; i < sectionsFoliageSpawnDelay; i++)
+            {
+                if (previousSection.previousSection != null)
+                {
+                    StartCoroutine(GenerateFoliageAroundPoint(previousSection.pointA.position));
+                    previousSection = previousSection.previousSection;
+                }
+            }
             GenerateStation();
         }
 
@@ -307,9 +339,9 @@ public class GenerationManager : MonoBehaviour
         return generatedSection;
     }
 
-    public IEnumerator GenerateFoliageAroundPoint(Vector3 position, int radius = 3)
+    public IEnumerator GenerateFoliageAroundPoint(Vector3 position, int radius = 5)
     {
-        if (GameStateManager.isStartingLocationSpawned == false)
+        if (position.z > 100f)
             yield return new WaitForSeconds(5f);
 
         Vector2 pos = new Vector2(position.x, position.z);
@@ -342,7 +374,7 @@ public class GenerationManager : MonoBehaviour
             {
                 for (int y = 0; y < foliageDensity; y++)
                 {
-                    if(GameStateManager.isStartingLocationSpawned == false)
+                    if (position.z > 100f)
                         yield return new WaitForSeconds(0.05f);
                     SpawnFoliage(cornerWorldPos + new Vector3(x * increment, 0, y * increment));
                 }
@@ -351,8 +383,8 @@ public class GenerationManager : MonoBehaviour
     }
     private void SpawnFoliage(Vector3 pos)
     {
-        GameObject prefab = foliageProbabilityList.PickNext();
-        if (prefab == null) return;
+        ObjectPool prefabPool = foliageProbabilityList.PickNext();
+        if (prefabPool == null) return;
 
         TrackManager.active.GetClosestTrackSection(pos, out TrackSection trackSection, out float distance);
         float dist = TrackManager.active.GetDistanceFromPath(trackSection.path, pos);
@@ -367,9 +399,11 @@ public class GenerationManager : MonoBehaviour
         {
             if ((foliageSpawnLayerMask & (1 << hit.transform.gameObject.layer)) != 0)
             {
-                Transform copy = Instantiate(prefab).transform;
+                Transform copy = prefabPool.Get().transform;
                 copy.position = hit.point - new Vector3(0f,0.1f,0f);
                 copy.rotation = Quaternion.Euler(Random.Range(-5f, 5f), Random.Range(0f, 360f), Random.Range(-5f, 5f));
+
+                trackSection.AddObject(prefabPool, copy.gameObject);
             }
             else
             {

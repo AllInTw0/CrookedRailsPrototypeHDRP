@@ -8,10 +8,12 @@ public class DistanceWaypoint : MonoBehaviour
     void Start()
     {
         GameStateManager.waypointList.Add(this);
+    }
+    public void SpawnFoliage()
+    {
         if (spawnFoliage)
             StartCoroutine(GenerationManager.active.GenerateFoliageAroundPoint(transform.position));
     }
-
     private void OnDestroy()
     {
         GameStateManager.waypointList.Remove(this);

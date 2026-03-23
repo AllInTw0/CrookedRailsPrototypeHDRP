@@ -64,6 +64,7 @@ Transform:
   m_Children:
   - {fileID: 5151379111426292331}
   - {fileID: 3393518248826940694}
+  - {fileID: 785947679325297544}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &688646902558513639
@@ -78,22 +79,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ad331f5a68fffd4d8d156ddabca93c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Section
+  globalEndPrefabList: []
+  globalConnectedPrefabList: []
   connectionList:
   - connectionTransform: {fileID: 4685379354861666457}
     validConnectionNameList:
     - start
     - b*
     endPrefabList: []
+    connectedPrefabList: []
+    useGlobalEnds: 0
+    dontConnect: 0
+    ignoreConnections: 0
+    section: {fileID: 0}
   - connectionTransform: {fileID: 1142386753785865625}
     validConnectionNameList:
     - f*
     endPrefabList: []
+    connectedPrefabList: []
+    useGlobalEnds: 0
+    dontConnect: 0
+    ignoreConnections: 0
+    section: {fileID: 0}
   - connectionTransform: {fileID: 6128462463020987254}
     validConnectionNameList: []
     endPrefabList: []
+    connectedPrefabList: []
+    useGlobalEnds: 0
+    dontConnect: 0
+    ignoreConnections: 0
+    section: {fileID: 0}
   length: 6
   connectingConnectionList: []
   nonConnectingConnectionList: []
+  isOverlapping: 0
 --- !u!65 &1194788701068189795
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -180,6 +199,52 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3393518248826940694}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6969128574325581424
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 785947679325297544}
+  - component: {fileID: 6114595843374453896}
+  m_Layer: 20
+  m_Name: waypoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &785947679325297544
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6969128574325581424}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1346384834663888480}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6114595843374453896
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6969128574325581424}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6132999823c9db34ab7ceda678bba08d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DistanceWaypoint
+  maxDistance: 30
+  spawnFoliage: 1
 --- !u!1 &7177036246828296535
 GameObject:
   m_ObjectHideFlags: 0

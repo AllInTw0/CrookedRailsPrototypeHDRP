@@ -380,6 +380,10 @@ MonoBehaviour:
   health: 500
   maxHealth: 500
   audioOnDamageTaken: 
+  origin: {fileID: 0}
+  onTakeDamage:
+    m_PersistentCalls:
+      m_Calls: []
   linkedRailCar: {fileID: 6874858873742985183}
   rerailInteractableList:
   - {fileID: 2206058177773510537}
@@ -1071,6 +1075,10 @@ MonoBehaviour:
   health: 100
   maxHealth: 100
   audioOnDamageTaken: 
+  origin: {fileID: 0}
+  onTakeDamage:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &1016498038599362914
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1084,13 +1092,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HealthDisplay
   healthTarget: {fileID: 1368701742405669976}
-  displayTransform: {fileID: 7957587857091096808}
-  displayType: 1
-  disableTransformOnZero: 1
-  startTransform: {fileID: 0}
-  endTransform: {fileID: 0}
-  startSize: {x: 1, y: 0.2, z: 1}
-  endSize: {x: 1, y: 1, z: 1}
+  displayEntryList:
+  - displayType: 1
+    targetTransform: {fileID: 7957587857091096808}
+    startTransform: {fileID: 0}
+    endTransform: {fileID: 0}
+    startSize: {x: 1, y: 0.2, z: 1}
+    endSize: {x: 1, y: 1, z: 1}
+    healthRange: {x: 0, y: 0}
 --- !u!1 &5396899459512847479
 GameObject:
   m_ObjectHideFlags: 0
@@ -1385,7 +1394,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6829916163831001656}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -11.5, y: 0, z: -22}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1777,6 +1786,10 @@ MonoBehaviour:
   health: 4600
   maxHealth: 5000
   audioOnDamageTaken: 
+  origin: {fileID: 0}
+  onTakeDamage:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &6461879822977823728
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1790,13 +1803,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HealthDisplay
   healthTarget: {fileID: 5604679585866004875}
-  displayTransform: {fileID: 8289301053714063310}
-  displayType: 0
-  disableTransformOnZero: 1
-  startTransform: {fileID: 1835575050866390812}
-  endTransform: {fileID: 6285778044272005439}
-  startSize: {x: 0, y: 0, z: 0}
-  endSize: {x: 0, y: 0, z: 0}
+  displayEntryList:
+  - displayType: 0
+    targetTransform: {fileID: 8289301053714063310}
+    startTransform: {fileID: 1835575050866390812}
+    endTransform: {fileID: 6285778044272005439}
+    startSize: {x: 0, y: 0, z: 0}
+    endSize: {x: 0, y: 0, z: 0}
+    healthRange: {x: 0, y: 0}
 --- !u!65 &1620418329087259591
 BoxCollider:
   m_ObjectHideFlags: 0

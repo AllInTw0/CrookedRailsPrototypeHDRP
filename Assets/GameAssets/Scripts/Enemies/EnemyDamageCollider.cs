@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -13,15 +15,14 @@ public class EnemyDamageCollider : MonoBehaviour
     private float freezeTime = 0.1f;
     [SerializeField] 
     private float attackDelay = 0.1f;
-    [SerializeField] 
-    private float playerAttackDamage = 5f;
     [SerializeField]
-    private float trainAttackDamage = 5f;
+    private float attackDamage = 5f;
     [SerializeField] 
     private string attackSoundName;
     [SerializeField] 
     private string attackImpactSoundName;
-    
+    [SerializeField]
+    private List<HealthType> healthTypeFilterList;
     //Run Time
     private float coolDownTime;
 
@@ -37,7 +38,7 @@ public class EnemyDamageCollider : MonoBehaviour
         if (coolDownTime < 0f)
         {
             Health healthScript = other.GetComponent<Health>();
-            if (healthScript != null && healthScript.health > 0f && (healthScript.healthType == HealthType.Player || healthScript.healthType == HealthType.Train))
+            if (healthScript != null && healthScript.health > 0f && healthTypeFilterList.Contains(healthScript.healthType))
             {
                 SoundManager.active.PlayAtPos(transform.position,attackSoundName);
 
@@ -48,7 +49,7 @@ public class EnemyDamageCollider : MonoBehaviour
                 
                 Invoke(nameof(UnFreeze),freezeTime);
 
-                StartCoroutine(DamageDelayed(healthScript, healthScript.healthType == HealthType.Player ? playerAttackDamage : trainAttackDamage, attackDelay));
+                StartCoroutine(DamageDelayed(healthScript, attackDamage, attackDelay));
             }
         }
     }

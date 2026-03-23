@@ -12,7 +12,55 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b1fea353dc6f1b448e5869dc3e90a7a, type: 3}
   m_Name: TestCube2Slot
   m_EditorClassIdentifier: Assembly-CSharp::ItemSO
-  itemName: Cube
-  isTool: 0
+  nameOverride: 
+  prefab: {fileID: 0}
+  description: 
+  probabilityCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  priceCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  stockCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  randomnessCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  sellCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  neededBoughtItems: []
+  maxCountBought: -1
+  offset: {x: 0.5, y: 0.5, z: 0.5}
+  origin: {x: 0, y: 0, z: 0}
+  rotation: {x: 0, y: 0, z: 0}
+  icon: {fileID: 0}
+  renderLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  probability: 0
+  price: 0
+  stock: 0
+  sell: 0
+  randomness: 0
   slotCount: 2
   maxCount: 1
+  randomYRot: 1
+  dropOffset: {x: 0, y: 0, z: 0}
+  isTool: 0

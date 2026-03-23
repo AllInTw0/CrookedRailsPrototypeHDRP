@@ -26,7 +26,7 @@ public class Train : MonoBehaviour
     private List<FuelSource> fuelSourceList;
     [Header("Speed")]
     [SerializeField]
-    private LocomotiveControls controlls;
+    public LocomotiveControls controlls;
     [SerializeField]
     private float drag = 0.25f;
     [SerializeField]
@@ -53,14 +53,14 @@ public class Train : MonoBehaviour
     public float deceleration;
     [HideInInspector]
     public float maxSpeed;
-    
-    private float speed;
-    private TrackSection frontTrackSection;
-    private float sectionProgress;
-    private float consistLength;
 
-    private float maxAutoStopOffset;
-    private AutoStop currentAutoBreakingStop;
+    [HideInInspector]
+    public float speed;
+    [HideInInspector]
+    public TrackSection frontTrackSection;
+    [HideInInspector]
+    public float sectionProgress;
+    private float consistLength;
 
     private float playerDistFromTrain;
     private void Awake()
@@ -69,13 +69,6 @@ public class Train : MonoBehaviour
             playerTrain = this;
 
         RecalculateConsistLength();
-
-        foreach (AutoStopType type in System.Enum.GetValues(typeof(AutoStopType)))
-        {
-            float offset = GetAutoStopTypeOffset(type);
-            if (offset > maxAutoStopOffset)
-                maxAutoStopOffset = offset;
-        }
     }
 
     private void Update()
@@ -100,52 +93,6 @@ public class Train : MonoBehaviour
                 MiniPrinter.active.AddNotification(PaperRenderer.active.RenderPaper("Message", new List<Override>() { title, message, subText }));
 
                 controlls.Break();
-            }
-        }
-
-        //Handle AutoStops
-        TrackManager.active.GetTrackSectionFromProgress(sectionProgress - maxAutoStopOffset, frontTrackSection, out TrackSection newSection, out float newSectionProgress);
-        if (deceleration == 0f && TrackManager.active.GetNearestAutoStop(newSectionProgress, newSection, 3, out AutoStop nearestAutoStop, out float distanceToAutoStop))
-        {
-            TrackManager.active.GetTrackPositionFromProgress(newSectionProgress, newSection, out Vector3 pos1);
-            TrackManager.active.GetTrackPositionFromProgress(newSectionProgress + distanceToAutoStop, newSection, out Vector3 pos2);
-            Debug.DrawLine(pos1 + Vector3.up, pos2 + Vector3.up, Color.violetRed);
-
-            float distanceToStop = (speed * speed) / (2 * controlls.GetDeceleration()); //v^2 - v0^2 = 2as
-
-            //Handle diffrent types of autostop type distances
-            float autoStopOffset = GetAutoStopTypeOffset(nearestAutoStop.stopType);
-            distanceToAutoStop -= maxAutoStopOffset - autoStopOffset;
-
-            //Debug.Log("Distance to stop: " + distanceToStop + ", distance: " + distanceToAutoStop);
-
-            if(distanceToAutoStop <= distanceToStop)
-            {
-                Debug.Log("Engaging breaks! Detected autostop");
-                if (nearestAutoStop.stopType == AutoStopType.Supersonic || nearestAutoStop.stopType == AutoStopType.Station)
-                {
-                    controlls.LockControlls();
-                }
-                else
-                {
-                    controlls.Break();
-                }
-                currentAutoBreakingStop = nearestAutoStop;
-                nearestAutoStop.ignore = true;
-            }
-        }
-        if (Mathf.Abs(speed) < 0.01f) 
-        {
-            if (currentAutoBreakingStop != null)
-            {
-                if (currentAutoBreakingStop.stopType == AutoStopType.Supersonic || currentAutoBreakingStop.stopType == AutoStopType.Station)
-                {
-                    controlls.ActivateSupersonic();
-                    if (currentAutoBreakingStop.stopType == AutoStopType.Station) controlls.onSetOffTriggerGenerationReset = true;
-                }
-                currentAutoBreakingStop = null;
-                //Unfreze players if the train was supersonic
-                PlayerMovement.active.UnFreeze();
             }
         }
 
@@ -206,7 +153,7 @@ public class Train : MonoBehaviour
             GameStateManager.distanceTravelled += distanceTravelled;
 
         //Check front
-        if (TrackManager.active.GetTrackSectionFromProgress(sectionProgress, frontTrackSection, out newSection, out newSectionProgress))
+        if (TrackManager.active.GetTrackSectionFromProgress(sectionProgress, frontTrackSection, out TrackSection newSection, out float newSectionProgress))
         {
             //Update section
             sectionProgress = newSectionProgress;
@@ -365,25 +312,6 @@ public class Train : MonoBehaviour
         }
         return sum;
     }
-    public float GetAutoStopTypeOffset(AutoStopType type)
-    {
-        if (type == AutoStopType.Front || type == AutoStopType.Supersonic)
-            return 0f;
-        else if(type == AutoStopType.TenderHatch)
-        {
-            float offset = 0f;
-            for (int i = 0; i < consist.Count; i++)
-            {
-                offset += consist[i].frontLength;
-                if (consist[i].TryGetComponent(out Tender tender))
-                {
-                    return offset += tender.waterHatchOffset;
-                }
-                offset += consist[i].backLength;
-            }
-        }
-        return 0f;
-    }
 
     public List<CargoInfo> GetConsistCargoInfo()
     {
@@ -395,6 +323,10 @@ public class Train : MonoBehaviour
         }
 
         return cargoInfoList;
+    }
+    public List<RailCar> GetConsist()
+    {
+        return consist;
     }
     public RailCar AddRailCar(RailCarSO railCarInfo, int index)
     {

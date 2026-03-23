@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
@@ -30,7 +32,7 @@ public class BulletManager : MonoBehaviour
         active = this;
     }
     
-    public void ShootBullets(Vector3 start, Vector3 dir, int count,float bulletDamage, float spread)
+    public void ShootBullets(Vector3 start, Vector3 dir, int count,float bulletDamage, float spread, List<HealthType> healthTypeFilterList = null)
     {
         
         SpawnBurstEffect(start,dir);
@@ -42,8 +44,7 @@ public class BulletManager : MonoBehaviour
                 SpawnBulletEffect(start,hit.point,hit.distance);
                 
 
-                Health healthScript = hit.transform.GetComponent<Health>();
-                if (healthScript != null)
+                if (hit.transform.TryGetComponent(out Health healthScript) && (healthTypeFilterList == null || healthTypeFilterList.Contains(healthScript.healthType)))
                 {
                     HitSound.active.HandleHitSound(healthScript, healthScript.TakeDamage(bulletDamage, spreadDir.normalized * (bulletDamage * forcePerDamage)), hit.point);
                     SpawnImpactEffect(hit.point,hit.normal,true);
@@ -95,7 +96,7 @@ public class BulletManager : MonoBehaviour
         return new RaycastHit();
     }
 
-    public void SpawnExplosion(Vector3 position, float damage, float range, float force, Transform hitTransform = null)
+    public void SpawnExplosion(Vector3 position, float damage, float range, float force, Transform hitTransform = null, List<HealthType> healthTypeFilterList = null)
     {
         GameObject explosion = Instantiate(explosionParticle);
         explosion.transform.position = position;
@@ -108,7 +109,7 @@ public class BulletManager : MonoBehaviour
         foreach (Collider collider in colliderArray)
         {
             Vector3 dir = collider.transform.position - position;
-            if (collider.TryGetComponent(out Health health))
+            if (collider.TryGetComponent(out Health health) && (healthTypeFilterList == null || healthTypeFilterList.Contains(health.healthType)))
             {
                 float dist = 0f;
                 if (hitTransform != collider.transform) {

@@ -1,11 +1,13 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 public enum HealthType
 {
     None,
     Player,
     Train,
-    Enemy
+    Enemy,
+    Sentry
 }
 
 public class Health : MonoBehaviour
@@ -15,8 +17,16 @@ public class Health : MonoBehaviour
     public float health = 100;
     public float maxHealth = 100;
     public string audioOnDamageTaken;
+    [Header("Origin")]
+    public Transform origin;
 
     private Vector3 forceSum;
+
+    public UnityEvent onTakeDamage;
+    private void Awake()
+    {
+        onTakeDamage = new UnityEvent();
+    }
     private void Start()
     {
         AddHealthToGlobalList();
@@ -39,7 +49,7 @@ public class Health : MonoBehaviour
         if (health == 0 && damage > 0)
             return 0;
 
-        if(audioOnDamageTaken != "")
+        if (audioOnDamageTaken != "")
             SoundManager.active.PlayAtPos(transform.position,audioOnDamageTaken);
         
         health -= damage;
@@ -49,16 +59,19 @@ public class Health : MonoBehaviour
             HealthReachedZero(forceSum);
             damage += health;
             health = 0;
+            onTakeDamage.Invoke();
             return damage;
         }
         else if (health > maxHealth)
         {
             damage = damage + health - maxHealth;
             health = maxHealth;
+            onTakeDamage.Invoke();
             return damage;
         }
         else
         {
+            onTakeDamage.Invoke();
             return damage;
         }
     }
@@ -101,5 +114,11 @@ public class Health : MonoBehaviour
         }
 
         return ragdoll;
+    }
+    public Vector3 GetOrigin()
+    {
+        if (origin)
+            return origin.position;
+        return transform.position;
     }
 }

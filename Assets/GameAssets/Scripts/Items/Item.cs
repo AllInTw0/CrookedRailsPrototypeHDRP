@@ -12,12 +12,13 @@ public class Item : Interactable
     [SerializeField] 
     private List<MeshRenderer> meshRenderers;
     [SerializeField] 
-    private Collider interactableCollider;
+    public Collider interactableCollider;
 
     public int count = 1;
-    
+
     //Run time
-    private bool falling;
+    [HideInInspector]
+    public bool falling;
     private float targetY;
     private float distance;
     private float velocity;

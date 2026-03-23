@@ -84,15 +84,18 @@ public class PlayerInteract : MonoBehaviour
         if (Physics.SphereCast(transform.position,raycastRadius, transform.forward, out RaycastHit hit, range, raycastLayer))
         {
             //( mask & (1 << layer)) != 0 returns true if mask has the layer
-            if ((interactableLayer & (1 << hit.transform.gameObject.layer)) != 0)
+            if ((interactableLayer & (1 << hit.collider.gameObject.layer)) != 0)
             {
-                if (currentTarget != hit.transform)
+                if (currentTarget != hit.collider.transform)
                 {
+                    //hit.collider - collider componenet that was hit
+                    //hit.transform - transform of the rigidbody component which way not be the same as the colider's
                     //Different or a new object
-                    Interactable interactable = hit.transform.GetComponent<Interactable>();
-                    if(interactable != null)
+                    if(hit.collider.transform.TryGetComponent(out Interactable interactable))
                     {
-                        currentTarget = hit.transform;
+                        //Debug.Log(hit.transform + " : " + interactable.transform + " : " + hit.collider.transform);
+
+                        currentTarget = hit.collider.transform;
                         currentInteractable = interactable;
                         
                         InteractIcon.active.Enable(currentInteractable);

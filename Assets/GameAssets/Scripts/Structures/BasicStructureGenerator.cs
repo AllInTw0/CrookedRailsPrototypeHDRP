@@ -18,32 +18,38 @@ public class BasicStructureGenerator : StructureGenerator
                 {
                     //Spawn section
                     GameObject randomPrefab = generationEntry.sectionPrefabList[Random.Range(0, generationEntry.sectionPrefabList.Count)];
-                    Section spawnedSection = structureMaster.SpawnSection(randomPrefab);
-                    //Invoke section scripts
-                    foreach (StructureGenerator structureGenerator in spawnedSection.GetComponents<StructureGenerator>())
+
+                    int sectionCountBefore = structureMaster.structureSectionList.Count;
+                    yield return structureMaster.SpawnSection(randomPrefab);
+                    if(generationEntry.obligatory && sectionCountBefore == structureMaster.structureSectionList.Count)
                     {
-                        yield return StartCoroutine(structureGenerator.Generate(structureMaster));
+                        structureMaster.RestartGeneration();
+                        yield break;
                     }
-                    structureMaster.AddSectionToStructure(spawnedSection); //This is here so i can call the coroutines first then do the finishing touches
                 }
             }
             else if (generationEntry.countType == GenerationEntry.CountType.fillLenght)
             {
                 float length = structureMaster.GetLength(generationEntry.lengthType) + generationEntry.lengthAddition;
+                structureMaster.onSectionAdded.AddListener((Section section) =>
+                {
+                    length -= section.GetLength();
+                });
+
                 int safety = 30;
                 while (length > 0 && safety > 0)
                 {
                     //Spawn section
                     GameObject randomPrefab = generationEntry.sectionPrefabList[Random.Range(0, generationEntry.sectionPrefabList.Count)];
-                    Section spawnedSection = structureMaster.SpawnSection(randomPrefab);
-                    //Invoke section scripts
-                    foreach (StructureGenerator structureGenerator in spawnedSection.GetComponents<StructureGenerator>())
-                    {
-                        yield return StartCoroutine(structureGenerator.Generate(structureMaster));
-                    }
-                    structureMaster.AddSectionToStructure(spawnedSection); //This is here so i can call the coroutines first then do the finishing touches
 
-                    length -= spawnedSection.GetLength();
+                    int sectionCountBefore = structureMaster.structureSectionList.Count;
+                    yield return structureMaster.SpawnSection(randomPrefab);
+                    if (generationEntry.obligatory && sectionCountBefore == structureMaster.structureSectionList.Count)
+                    {
+                        structureMaster.RestartGeneration();
+                        yield break;
+                    }
+
                     safety--;
                 }
                 if (safety <= 0f) Debug.LogWarning("Safety == 0!");
@@ -51,5 +57,11 @@ public class BasicStructureGenerator : StructureGenerator
             yield return new WaitForSeconds(0.4f);
         }
         structureMaster.SpawnEndPrefabs();
+
+        DistanceWaypoint[] distanceWaypoints = transform.GetComponentsInChildren<DistanceWaypoint>();
+        foreach (DistanceWaypoint distWaypoint in distanceWaypoints)
+        {
+            distWaypoint.SpawnFoliage();
+        }
     }
 }

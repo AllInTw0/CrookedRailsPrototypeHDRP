@@ -6,7 +6,11 @@ public class ItemSO : ShopItemSO
     [Header("Inventory")]
     public int slotCount = 1;
     public int maxCount = 1;
-    
-    [Header("Tool Only")]
+
+    [Header("Dropping")]
+    public bool randomYRot;
+    public Vector3 dropOffset;
+
+    [Header("Tool Params")]
     public bool isTool;
 }

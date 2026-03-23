@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ItemGun : Item
@@ -25,8 +26,9 @@ public class ItemGun : Item
     [SerializeField] 
     private string failedSound;
     [SerializeField]
-    private GameObject bulletPrefab;
-
+    public GameObject bulletPrefab;
+    [SerializeField]
+    public List<HealthType> healthTypeFilter = new List<HealthType>();
     //Run Time
     private int clip;
     private float coolDown;
@@ -52,48 +54,82 @@ public class ItemGun : Item
        UpdateItem();
     }
 
-    private void Shoot()
+    public void Shoot(bool ingoreClipSize = false, Transform bulletSpawnOverride = null)
     {
-        if (clip > 0)
+        if ((clip > 0 || ingoreClipSize) && coolDown <= 0f)
         {
-            Transform bulletSpawn = PlayerAvatar.active.GetAnimationInfo().bulletSpawn;
-            Vector3 startPos = bulletSpawn.position;
-            Vector3 dir = (PlayerCamera.active.GetRaycastPos() - startPos).normalized;
+            Vector3 startPos;
+            Vector3 dir;
+            if (bulletSpawnOverride == null)
+            {
+                //Triggered by player
+                startPos = GetBulletOrigin();
+                dir = (PlayerCamera.active.GetRaycastPos() - startPos).normalized;
+                PlayerAvatar.active.animator.SetTrigger("Shoot");
+            }
+            else
+            {
+                //Triggered by sentry
+                startPos = bulletSpawnOverride.position;
+                dir = bulletSpawnOverride.forward;
+            }
 
             if (bulletPrefab == null)
-                BulletManager.active.ShootBullets(startPos, dir, bulletCount, bulletDamage, spread);
+                BulletManager.active.ShootBullets(startPos, dir, bulletCount, bulletDamage, spread, healthTypeFilter);
             else
                 BulletManager.active.ShootPrefab(startPos, dir, bulletPrefab, bulletCount, spread);
 
-            SoundManager.active.PlayAtPos(PlayerAvatar.active.GetAnimationInfo().bulletSpawn.position, shootSound);
-            PlayerAvatar.active.animator.SetTrigger("Shoot");
+            SoundManager.active.PlayAtPos(startPos, shootSound);   
 
             coolDown = shootCoolDown;
             clip--;
         }
-        else
+        else if(coolDown <= 0f)
         {
-            SoundManager.active.PlayAtPos(PlayerAvatar.active.GetAnimationInfo().bulletSpawn.position, failedSound);
+            if(bulletSpawnOverride == null)
+                //Triggered by player
+                SoundManager.active.PlayAtPos(GetBulletOrigin(), failedSound);
+            else
+                //Triggered by sentry
+                SoundManager.active.PlayAtPos(bulletSpawnOverride.position, failedSound);
+
+            coolDown = shootCoolDown;
         }
     }
 
-    private void Reload()
+    public void Reload(int ammoCountOverride = -1, Transform bulletSpawnOverride = null)
     {
-        if (PlayerInventory.active.RemoveItem(ammoItem, out int itemCountRemoved, clipSize - clip))
+        int itemCountRemoved = ammoCountOverride;
+        if (ammoCountOverride > 0 || PlayerInventory.active.RemoveItem(ammoItem, out itemCountRemoved, clipSize - clip))
         {
-            SoundManager.active.PlayAtPos(PlayerAvatar.active.GetAnimationInfo().animatedObject.transform.position, reloadSound);
-            PlayerAvatar.active.animator.SetTrigger("Reload");
+            if (bulletSpawnOverride)
+                //Triggered by sentry
+                SoundManager.active.PlayAtPos(bulletSpawnOverride.position, reloadSound);
+            else
+            {
+                //Triggered by player
+                SoundManager.active.PlayAtPos(GetBulletOrigin(), reloadSound);
+                PlayerAvatar.active.animator.SetTrigger("Reload");
+            }
             coolDown = reloadCoolDown;
             clip += itemCountRemoved;
         }
         else
         {
-            SoundManager.active.PlayAtPos(PlayerAvatar.active.GetAnimationInfo().animatedObject.transform.position, failedSound);
+            SoundManager.active.PlayAtPos(GetBulletOrigin(), failedSound);
         }
     }
-
+    public bool HasAmmoInClip()
+    {
+        return clip > 0;
+    }
     private void UpdateText()
     {
         InventoryUI.active.SetToolText("Clip:"+clip+"/"+clipSize);
+    }
+
+    private Vector3 GetBulletOrigin()
+    {
+        return PlayerAvatar.active.GetAnimationInfo().animatedObject.transform.position;
     }
 }

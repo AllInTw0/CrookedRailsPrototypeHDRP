@@ -84,6 +84,7 @@ MonoBehaviour:
   range: 3
   force: 700
   damage: 25
+  healthTypeFilter: 03000000
 --- !u!65 &2726935511616930317
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using Random = UnityEngine.Random;
 
 public enum LengthType
@@ -21,12 +22,17 @@ public class Connection
     public Transform connectionTransform;
     public List<string> validConnectionNameList;
     public List<GameObject> endPrefabList;
+    public List<GameObject> connectedPrefabList;
+
+    public bool useGlobalEnds;
     public bool dontConnect;
     public bool ignoreConnections; // Able to connect to connections that are already connected
 
     //Nonserializeable
     [HideInInspector]
     public Connection connectedConnection;
+    [HideInInspector]
+    public Section section;
 }
 [System.Serializable]
 public class GenerationEntry
@@ -45,6 +51,8 @@ public class GenerationEntry
     public LengthType lengthType;
     public float lengthAddition;
     public AnimationCurve countCurve;
+    [Header("Other")]
+    public bool obligatory;
 }
 public class StructureMaster : MonoBehaviour
 {
@@ -53,9 +61,14 @@ public class StructureMaster : MonoBehaviour
     public Connection startConnection;
     public LayerMask overlapCheckLayerMask;
 
-    private List<Connection> structureConnectionList;
-    private List<Section> structureSectionList;
+    [HideInInspector]
+    public List<Connection> structureConnectionList;
+    [HideInInspector]
+    public List<Section> structureSectionList;
     private int count;
+
+    [HideInInspector]
+    public UnityEvent<Section> onSectionAdded;
     public void Generate()
     {
         structureConnectionList = new List<Connection>();
@@ -63,6 +76,8 @@ public class StructureMaster : MonoBehaviour
         structureConnectionList.Add(startConnection);
         structureSectionList = new List<Section>();
         count = 0;
+
+        onSectionAdded = new UnityEvent<Section>();
 
         StartCoroutine(GenerateIEnumerable());
 
@@ -94,6 +109,12 @@ public class StructureMaster : MonoBehaviour
             DestroyImmediate(section.gameObject);
         }
     }
+    public void RestartGeneration()
+    {
+        Debug.LogWarning("Restarting Generation: " + transform.name);
+        DestroyStructure();
+        Generate();
+    }
     public float GetLength(LengthType lengthType)
     {
         if (lengthType == LengthType.PlayerTrainLength)
@@ -116,16 +137,28 @@ public class StructureMaster : MonoBehaviour
     {
         foreach (Connection connection in structureConnectionList)
         {
-            if((connection.connectedConnection == null || connection.connectedConnection == startConnection) && connection.endPrefabList.Count > 0)
+            List<GameObject> endList = connection.useGlobalEnds ? connection.section.globalEndPrefabList : connection.endPrefabList;
+            List<GameObject> connectedList = connection.useGlobalEnds ? connection.section.globalConnectedPrefabList : connection.connectedPrefabList;
+
+            Transform copy = null;
+            if((connection.connectedConnection == null || connection.connectedConnection == startConnection) && endList.Count > 0)
             {
-                Transform copy = Instantiate(connection.endPrefabList[Random.Range(0, connection.endPrefabList.Count)]).transform;
-                copy.SetParent(connection.connectionTransform);
-                copy.localPosition = Vector3.zero;
-                copy.localRotation = Quaternion.identity;
+                copy = Instantiate(endList[Random.Range(0, endList.Count)]).transform;
+
+            } 
+            else if (connectedList.Count > 0)
+            {
+                copy = Instantiate(connectedList[Random.Range(0, connectedList.Count)]).transform;
             }
+            else 
+                continue;
+
+            copy.SetParent(connection.connectionTransform);
+            copy.localPosition = Vector3.zero;
+            copy.localRotation = Quaternion.identity;
         }
     }
-    public Section SpawnSection(GameObject prefab)
+    public IEnumerator SpawnSection(GameObject prefab)
     {
         GameObject sectionObject = Instantiate(prefab, transform);
         Transform sectionTransform = sectionObject.transform;
@@ -153,7 +186,8 @@ public class StructureMaster : MonoBehaviour
         if(validConnectionList.Count == 0)
         {
             Debug.LogWarning("Cant find valid connection: validConnectionList.Count == 0, " + sectionObject.name +", sectionCount: " + structureSectionList.Count + ", connectionCount: " + structureConnectionList.Count);
-            return sectionScript;
+            DestroyImmediate(sectionObject);
+            yield break;
         }
         while (sectionConnectionList.Count > 0 && validConnectionList.Count > 0)
         {
@@ -168,11 +202,33 @@ public class StructureMaster : MonoBehaviour
             sectionTransform.localRotation = Quaternion.identity;
             sectionTransform.localPosition = -sectionConnection.connectionTransform.localPosition;
             sectionTransform.RotateAround(sectionConnection.connectionTransform.position, Vector3.up, otherSectionConnection.connectionTransform.eulerAngles.y - sectionConnection.connectionTransform.eulerAngles.y + 180f);
+            sectionTransform.SetParent(transform);
+
+            //Reset overlapping bool
+            sectionScript.isOverlapping = false;
+
+            //Rename strings
+            count++;
+            foreach (Connection connection in sectionScript.GetAllConnectionList())
+            {
+                //rename
+                connection.connectionTransform.name = RenameString(connection.connectionTransform.name, count);
+            }
+
+            //Connect only this section
+            if (otherSectionConnection.dontConnect == false)
+                sectionConnection.connectedConnection = otherSectionConnection;
+
+            foreach (StructureGenerator structureGenerator in sectionScript.GetComponents<StructureGenerator>())
+            {
+                yield return structureGenerator.Generate(this);
+            }
 
             //Check overlap
             if (DoesSectionOverlap(sectionScript))
             {
                 //try another connection
+
                 validConnectionList[connectionListIndex].RemoveAt(connectionIndex);
                 if(validConnectionList[connectionListIndex].Count == 0)
                 {
@@ -182,37 +238,24 @@ public class StructureMaster : MonoBehaviour
 
                 if(sectionConnectionList.Count == 0 || validConnectionList.Count == 0)
                 {
-                    DestroyImmediate(sectionObject);
                     Debug.Log("Couldnt spawn " + sectionObject.name);
-                    return null;
+                    DestroyImmediate(sectionObject);
+                    yield break; //return;
                 }
+                sectionConnection.connectedConnection = null;
                 continue;
             }
 
-            //Connect section
-            if (otherSectionConnection.dontConnect == false)
-                sectionConnection.connectedConnection = otherSectionConnection;
+            //Connect other section
             if (sectionConnection.dontConnect == false)
                 otherSectionConnection.connectedConnection = sectionConnection;
+
             break;
         }
         //Debug.DrawLine(sectionConnection.connectionTransform.position, otherSectionConnection.connectionTransform.position, Color.purple, 60f);
         //Debug.DrawRay(sectionConnection.connectionTransform.position, Vector3.up, Color.purple, 60f);
 
-        sectionTransform.SetParent(transform);
 
-        //Rename strings
-        count++;
-        foreach (Connection connection in sectionScript.GetAllConnectionList())
-        {
-            //rename
-            connection.connectionTransform.name = RenameString(connection.connectionTransform.name, count);
-        }
-
-        return sectionScript;
-    }
-    public void AddSectionToStructure(Section sectionScript)
-    {
         //Connect connections close to each other
         foreach (Connection connection in sectionScript.GetAllConnectionList())
         {
@@ -231,6 +274,9 @@ public class StructureMaster : MonoBehaviour
 
         structureConnectionList.AddRange(sectionScript.GetAllConnectionList());
         structureSectionList.Add(sectionScript);
+
+
+        onSectionAdded.Invoke(sectionScript); //return sectionScript;
     }
     public List<Connection> GetValidConnectionsForConnection(Connection connection)
     {
@@ -246,10 +292,15 @@ public class StructureMaster : MonoBehaviour
     }
     public bool DoesSectionOverlap(Section section)
     {
+        //This is set to true by section's scripts
+        if (section.isOverlapping) return true;
+
         BoxCollider[] boxColliderArray = section.GetBoxColliderArray();
         foreach (BoxCollider boxCollider in boxColliderArray)
         {
-            Collider[] overlapingColiderArray = Util.PhysicsBoxColliderOverlap(boxCollider, overlapCheckLayerMask);
+            LayerMask modifiedLayerMask = ~boxCollider.excludeLayers & (overlapCheckLayerMask | boxCollider.includeLayers);
+            
+            Collider[] overlapingColiderArray = Util.PhysicsBoxColliderOverlap(boxCollider, modifiedLayerMask);
             foreach (Collider collider in overlapingColiderArray)
             {
                 foreach (BoxCollider sectionBoxCollider in boxColliderArray)
@@ -270,7 +321,7 @@ public class StructureMaster : MonoBehaviour
         foreach (string str in stringList)
         {
             bool stringsMatch = DoStringsMatch(str, targetString);
-            Debug.Log(str + ", " + targetString + " : " + stringsMatch);
+            //Debug.Log(str + ", " + targetString + " : " + stringsMatch);
 
             if (stringsMatch) return true;
         }

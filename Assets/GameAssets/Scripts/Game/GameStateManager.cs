@@ -61,6 +61,16 @@ public class GameStateManager : MonoBehaviour
             }
         }
 
+        if(shopItem.maxCountBought >= 0)
+        {
+            int countFound = 0;
+            for (int i = 0; i < boughtItemList.Count; i++)
+            {
+                if (boughtItemList[i] == shopItem) countFound++;
+            }
+            if (countFound >= shopItem.maxCountBought)
+                return false;
+        }
         return true;
     }
 }

@@ -118,6 +118,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   neededBoughtItems: []
+  maxCountBought: -1
   offset: {x: -0.95, y: 0, z: 0.065}
   origin: {x: 0, y: 0, z: 0.065}
   rotation: {x: -25, y: 0, z: 0}
@@ -132,4 +133,6 @@ MonoBehaviour:
   randomness: 0
   slotCount: 2
   maxCount: 1
+  randomYRot: 1
+  dropOffset: {x: 0, y: 0, z: 0}
   isTool: 1

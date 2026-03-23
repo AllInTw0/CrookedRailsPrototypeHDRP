@@ -217,6 +217,11 @@ public class Enemy : MonoBehaviour
             case TargetType.Position:
                 return targetPosition;
             case TargetType.Transform:
+                if (targetTransform == null)
+                {
+                    SetTarget(transform.position + transform.forward);
+                    return GetTargetPosition();
+                }
                 return targetTransform.position;
             case TargetType.Pack:
                 return targetPack.centerPos + targetPosition; // + offset

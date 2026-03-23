@@ -12,6 +12,11 @@ public class EnemyHealth : Health
     [SerializeField]
     private GameObject ragdollPrefab;
 
+    private void Start()
+    {
+        AddHealthToGlobalList();
+    }
+
     private void Update()
     {
         UpdateCall();

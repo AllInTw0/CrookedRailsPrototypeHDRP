@@ -19,8 +19,6 @@ public class SplineGenerator : StructureGenerator
     [SerializeField]
     private float noiseFrequency;
     [SerializeField]
-    private float noiseStepBasedOnDistance;
-    [SerializeField]
     private Vector2 minMaxTargetOffset;
     [Header("Path End Randomness")]
     [SerializeField]
@@ -29,7 +27,14 @@ public class SplineGenerator : StructureGenerator
     private Vector2 minMaxDistanceRight;
     [SerializeField]
     private Vector2 minMaxRotOffset;
-
+    [Header("SphereCheck")]
+    [SerializeField]
+    private float sphereCheckRadius = -1;
+    [SerializeField]
+    private Vector3 sphereCheckOffset;
+    [Header("Min Length")]
+    [SerializeField]
+    private float minLength = -1f;
     public override IEnumerator Generate(StructureMaster structureMaster)
     {
         Connection startConnection = null;
@@ -86,16 +91,15 @@ public class SplineGenerator : StructureGenerator
         TrackManager.CalculatePath(splinePath, out List<PathPoint> path, 4f);
 
         //Modify path
-        float randomness = Random.value;
+        float randomness = Random.value * 100f;
         float[] offsetValues = new float[path.Count];
         float maxValue = 0f;
         float pathDist = path[0].distance;
         for (int i = 1; i < path.Count - 1; i++)
         {
             pathDist += path[i].distance;
-            float time = pathDist * noiseStepBasedOnDistance;
-            float noise = (Mathf.PerlinNoise1D(((time + randomness) * 0.5f) * noiseFrequency) * 2f - 1f) * offsetMultAlongPathLength.Evaluate(time);
-            //Debug.Log(i + " : " + noise + " : " + time);
+            float noise = (Mathf.PerlinNoise1D(pathDist * noiseFrequency + randomness) * 2f - 1f) * offsetMultAlongPathLength.Evaluate(i / path.Count);
+            //Debug.Log(i + " : " + noise + " : " + pathDist * noiseFrequency);
             if (Mathf.Abs(noise) > maxValue)
                 maxValue = Mathf.Abs(noise);
             offsetValues[i] = noise;
@@ -123,6 +127,12 @@ public class SplineGenerator : StructureGenerator
 
         TrackManager.CalculatePath(path, out List<PathPoint> meshPath, 1.5f);
 
+        if (DoesPathOverlap(meshPath))
+        {
+            linkedSection.isOverlapping = true;
+            return;
+        }
+
         foreach (SplineVisualizer splineVisualizer in splineVisualizerList)
         {
             splineVisualizer.Visualize(meshPath);
@@ -132,5 +142,26 @@ public class SplineGenerator : StructureGenerator
         //{
         //    Debug.DrawLine(Spline.CalculateSplinePosition(startPoint, endPoint, i), Spline.CalculateSplinePosition(startPoint, endPoint, i+ 0.05f), Color.purple,30f);
         //}
+    }
+
+    public bool DoesPathOverlap(List<PathPoint> path)
+    {
+        if (sphereCheckRadius <= 0 || (path[^1].distance <= minLength && minLength > 0)) return false;
+
+        float pathLength = path[^1].distance;
+        float distance = 0.1f + sphereCheckRadius;
+
+        while (distance < pathLength - sphereCheckRadius)
+        {
+            if(Physics.CheckSphere(TrackManager.GetPathPosition(path,distance) + sphereCheckOffset, sphereCheckRadius))
+            {
+                Debug.DrawRay(TrackManager.GetPathPosition(path, distance) + sphereCheckOffset, Vector3.up * sphereCheckRadius, Color.orangeRed, 60f);
+                Debug.LogWarning("Spline Overlapping");
+                return true;
+            }
+            distance += sphereCheckRadius;
+        }
+
+        return false;
     }
 }

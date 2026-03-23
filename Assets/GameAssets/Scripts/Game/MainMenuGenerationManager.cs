@@ -12,7 +12,7 @@ public class MainMenuGenerationManager : MonoBehaviour
     private int generatedSectionsBehindTrain = 2;
     [Header("Foliage")]
     [SerializeField]
-    private List<ProbabilityListElement<GameObject>> foliageProbabilityElementList = new List<ProbabilityListElement<GameObject>>();
+    private List<ProbabilityListElement<ObjectPool>> foliageProbabilityElementList = new List<ProbabilityListElement<ObjectPool>>();
     [SerializeField]
     private int chunkSize;
     [SerializeField]
@@ -25,7 +25,7 @@ public class MainMenuGenerationManager : MonoBehaviour
     private LayerMask foliageSpawnLayerMask;
     private List<Vector2> foliageFilledChunkList = new List<Vector2>();
 
-    private ProbabilityList<GameObject> foliageProbabilityList;
+    private ProbabilityList<ObjectPool> foliageProbabilityList;
 
     private Point lastPoint;
     private TrackSection lastSection;
@@ -42,7 +42,13 @@ public class MainMenuGenerationManager : MonoBehaviour
         lastSection = section;
         lastPoint = pointB;
 
-        foliageProbabilityList = new ProbabilityList<GameObject>(foliageProbabilityElementList);
+
+        foreach (ProbabilityListElement<ObjectPool> entry in foliageProbabilityElementList)
+        {
+            entry.element.Init(entry.element.maxCapacity, entry.element.defaultCapacity);
+        }
+
+        foliageProbabilityList = new ProbabilityList<ObjectPool>(foliageProbabilityElementList);
     }
     private void Update()
     {
@@ -147,8 +153,8 @@ public class MainMenuGenerationManager : MonoBehaviour
     }
     private void SpawnFoliage(Vector3 pos)
     {
-        GameObject prefab = foliageProbabilityList.PickNext();
-        if (prefab == null) return;
+        ObjectPool prefabPool = foliageProbabilityList.PickNext();
+        if (prefabPool == null) return;
 
         TrackManager.active.GetClosestTrackSection(pos, out TrackSection trackSection, out float distance);
         float dist = TrackManager.active.GetDistanceFromPath(trackSection.path, pos);
@@ -164,11 +170,11 @@ public class MainMenuGenerationManager : MonoBehaviour
         {
             if ((foliageSpawnLayerMask & (1 << hit.transform.gameObject.layer)) != 0)
             {
-                Transform copy = Instantiate(prefab).transform;
+                Transform copy = prefabPool.Get().transform;
                 copy.position = hit.point - new Vector3(0f, 0.1f, 0f);
                 copy.rotation = Quaternion.Euler(Random.Range(-5f, 5f), Random.Range(0f, 360f), Random.Range(-5f, 5f));
 
-                trackSection.AddObject(copy.gameObject);
+                trackSection.AddObject(prefabPool, copy.gameObject);
             }
             else
             {

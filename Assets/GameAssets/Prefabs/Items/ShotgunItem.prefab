@@ -239,6 +239,7 @@ MonoBehaviour:
   - {fileID: 225197199145686361}
   interactableCollider: {fileID: 2258730159228095168}
   count: 1
+  falling: 0
   clipSize: 2
   ammoItem: {fileID: 11400000, guid: 37b28eef436127340b96cf8afef5fc0a, type: 2}
   bulletCount: 5
@@ -250,3 +251,4 @@ MonoBehaviour:
   shootSound: Shotgun Shot
   failedSound: Shotgun Failed
   bulletPrefab: {fileID: 0}
+  healthTypeFilter: 03000000

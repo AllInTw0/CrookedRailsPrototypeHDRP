@@ -135,3 +135,8 @@ MonoBehaviour:
     - {fileID: 8300000, guid: fd2d165da2fd2fc409d9c6c04190b87b, type: 3}
     volume: 0.8
     pitch: {x: 0.9, y: 1.1}
+  - name: Sentry - Break
+    AudioClips:
+    - {fileID: 8300000, guid: 42e96607ab7bc0147a5a438eaedda595, type: 3}
+    volume: 1
+    pitch: {x: 0.9, y: 1.1}

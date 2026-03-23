@@ -15,6 +15,38 @@ MonoBehaviour:
   nameOverride: 
   prefab: {fileID: 4029657645876044969, guid: 3a53d566f5e7f2d42a691d8c1bfde19e, type: 3}
   description: A powerfull starter weapon.
+  probabilityCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  priceCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  stockCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  randomnessCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  sellCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  neededBoughtItems: []
+  maxCountBought: -1
   offset: {x: 0.35, y: 0.6, z: 0.35}
   origin: {x: 0, y: 0.27, z: 0}
   rotation: {x: 5, y: -90, z: 5}
@@ -22,6 +54,13 @@ MonoBehaviour:
   renderLayer:
     serializedVersion: 2
     m_Bits: 256
+  probability: 0
+  price: 0
+  stock: 0
+  sell: 0
+  randomness: 0
   slotCount: 2
   maxCount: 1
+  randomYRot: 1
+  dropOffset: {x: 0, y: 0, z: 0}
   isTool: 1

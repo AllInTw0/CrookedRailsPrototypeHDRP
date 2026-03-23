@@ -1,9 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using TMPro;
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -132,7 +129,7 @@ public class Settings : MonoBehaviour
 
         sectionList = new List<RectTransform>();
 
-        //Section graphicsSection = new Section("Graphics");
+        Section graphicsSection = new Section("Graphics");
         Section controlsSection = new Section("Controls");
         graphicsSection.AddCheckbox("Test Checkbox", true).onValueChanged.AddListener((float newValue) =>
         {
@@ -238,7 +235,7 @@ public class Settings : MonoBehaviour
     {
         settingsFade.FadeTo(0f, closeTime);
         if (closeTime == 0f)
-            yield return new WaitForNextFrameUnit();
+            yield return new WaitForEndOfFrame();
         else
             yield return new WaitForSecondsRealtime(closeTime);
         settingsFade.gameObject.SetActive(false);

@@ -1102,7 +1102,7 @@ MeshRenderer:
   m_RenderingLayerMask: 513
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 37d108abc47a34c4f9705d811fb652a0, type: 2}
+  - {fileID: 2100000, guid: 35bd319ce96e8e141b59459702eacdee, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2749,10 +2749,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuGenerationManager
   train: {fileID: 354012476}
-  generatedSectionsAheadOfTrain: 1
+  generatedSectionsAheadOfTrain: 2
   generatedSectionsBehindTrain: 1
   foliageProbabilityElementList:
-  - element: {fileID: 4678816662777774821, guid: be172fb86ace6c741883ec9d07e17393, type: 3}
+  - element:
+      prefab: {fileID: 4678816662777774821, guid: be172fb86ace6c741883ec9d07e17393, type: 3}
+      maxCapacity: 500
+      defaultCapacity: 200
     probability: 1
     maxCount: -1
     pickCount: 0
@@ -3636,6 +3639,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1824627962}
     m_Modifications:
+    - target: {fileID: 1476537147032863188, guid: 0874344c4be734f40a4580b5f9eb3fe2, type: 3}
+      propertyPath: m_fontSize
+      value: 35.45
+      objectReference: {fileID: 0}
     - target: {fileID: 3065916048030152090, guid: 0874344c4be734f40a4580b5f9eb3fe2, type: 3}
       propertyPath: m_Name
       value: Settings

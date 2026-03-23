@@ -14,6 +14,7 @@ public struct SplineMeshInfo
     public Mesh mainMesh;
     public List<Mesh> repeatingMeshList;
     public float repeatingMeshInterval;
+    public float repeatingMeshMinDistanceFromTrack;
     public Material material;
     public int layer;
     public Vector3 scale;
@@ -341,6 +342,7 @@ public class Spline : MonoBehaviour
         if (toProgress < 0f)
             toProgress = path[^1].distance;
 
+
         Mesh segmentMesh = new Mesh();
         int last_vert_count = 0;
         List<Vector3> vert_list = new List<Vector3>();
@@ -405,8 +407,13 @@ public class Spline : MonoBehaviour
             float meshTimeIncrement = 1f / (float)meshCount;
             for (int a = 0; a < meshCount; a++)
             {
-                instance.mesh = splineMesh.repeatingMeshList[Random.Range(0, splineMesh.repeatingMeshList.Count - 1)];
                 Vector3 pos = TrackManager.GetPathPosition(path, startProgress + meshTimeIncrement * a * increment);
+                if (splineMesh.repeatingMeshMinDistanceFromTrack > 0 && TrackManager.active.GetDistanceFromTrack(pos) < splineMesh.repeatingMeshMinDistanceFromTrack)
+                {
+                    continue;
+                }
+
+                instance.mesh = splineMesh.repeatingMeshList[Random.Range(0, splineMesh.repeatingMeshList.Count - 1)];
                 Vector3 dirZ = TrackManager.GetPathDirectionVector(path, startProgress + meshTimeIncrement * a * increment);
                 objTransform.position = pos;
                 objTransform.rotation = Quaternion.LookRotation(dirZ, Vector3.up);

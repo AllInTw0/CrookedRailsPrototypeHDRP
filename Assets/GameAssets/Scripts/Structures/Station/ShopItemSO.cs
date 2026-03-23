@@ -15,6 +15,7 @@ public class ShopItemSO : ScriptableObject
     public AnimationCurve randomnessCurve;
     public AnimationCurve sellCurve;
     public List<ShopItemSO> neededBoughtItems;
+    public int maxCountBought = -1;
 
     [Header("Icon Rendering")]
     public Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f);

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -19,7 +20,8 @@ public enum AutoStopType
     Front,
     TenderHatch,
     Supersonic,
-    Station
+    Station,
+    Structure
 }
 public class AutoStop
 {
@@ -53,10 +55,24 @@ public class TrackSection
     }
 
     public List<GameObject> associatedObjects = new List<GameObject>();
-
+    public Dictionary<ObjectPool, List<GameObject>> pooledAssociatedObjects;
     public void AddObject(GameObject obj)
     {
         associatedObjects.Add(obj);
+    }
+    public void AddObject(ObjectPool targetPool, GameObject obj)
+    {
+        if (pooledAssociatedObjects == null)
+            pooledAssociatedObjects = new Dictionary<ObjectPool, List<GameObject>>();
+
+        if(pooledAssociatedObjects.TryGetValue(targetPool, out List<GameObject> objectList))
+        {
+            objectList.Add(obj);
+        }
+        else
+        {
+            pooledAssociatedObjects.Add(targetPool, new List<GameObject>() { obj });
+        }
     }
     public void SetNextSection(TrackSection section)
     {
@@ -181,7 +197,7 @@ public class TrackManager : MonoBehaviour
 
         return true;
     }
-    public bool GetNearestAutoStop(float sectionProgress, TrackSection trackSection, int maxTrackSectionCheck, out AutoStop nearestAutoStop, out float distanceToAutoStop)
+    public bool GetNearestAutoStop(float sectionProgress, TrackSection trackSection, int maxTrackSectionCheck, out AutoStop nearestAutoStop, out float distanceToAutoStop, List<AutoStopType> filterList = null)
     {
         nearestAutoStop = null;
         distanceToAutoStop = 0f;
@@ -193,7 +209,7 @@ public class TrackManager : MonoBehaviour
 
             if(i == 0)
             {
-                if(trackSection.autoStop != null &&  trackSection.autoStop.ignore == false && trackSection.autoStop.distance >= sectionProgress)
+                if(trackSection.autoStop != null &&  trackSection.autoStop.ignore == false && trackSection.autoStop.distance >= sectionProgress && (filterList == null || filterList.Contains(trackSection.autoStop.stopType)))
                 {
                     nearestAutoStop = trackSection.autoStop;
                     distanceToAutoStop = trackSection.autoStop.distance - sectionProgress;
@@ -207,7 +223,7 @@ public class TrackManager : MonoBehaviour
             }
             else
             {
-                if (trackSection.autoStop != null && trackSection.autoStop.ignore == false)
+                if (trackSection.autoStop != null && trackSection.autoStop.ignore == false && (filterList == null || filterList.Contains(trackSection.autoStop.stopType)))
                 {
                     nearestAutoStop = trackSection.autoStop;
                     distanceToAutoStop += trackSection.autoStop.distance;
@@ -237,6 +253,16 @@ public class TrackManager : MonoBehaviour
         foreach (var obj in section.associatedObjects)
         {
             Destroy(obj);
+        }
+        if (section.pooledAssociatedObjects != null)
+        {
+            foreach (KeyValuePair<ObjectPool, List<GameObject>> poolObjectPair in section.pooledAssociatedObjects)
+            {
+                foreach (GameObject obj in poolObjectPair.Value)
+                {
+                    poolObjectPair.Key.Add(obj);
+                }
+            }
         }
     }
     //Get Position On Path
@@ -370,7 +396,7 @@ public class TrackManager : MonoBehaviour
         int failCount = 0;
         for (int i = 0; i < path.Count; i++)
         {
-            float dist = Vector3.Distance(path[i].position, pos);
+            float dist = Vector2.Distance(new Vector2(path[i].position.x, path[i].position.z), new Vector2(pos.x, pos.z));
             if(dist < distance)
             {
                 distance = dist;
@@ -387,6 +413,11 @@ public class TrackManager : MonoBehaviour
             }
         }
         return distance;
+    }
+    public float GetDistanceFromTrack(Vector3 pos)
+    {
+        GetClosestTrackSection(pos, out TrackSection section, out float estimatedDist);
+        return GetDistanceFromPath(section.path, pos);
     }
     public bool IsLeftOfPath(List<PathPoint> path, Vector3 pos)
     {

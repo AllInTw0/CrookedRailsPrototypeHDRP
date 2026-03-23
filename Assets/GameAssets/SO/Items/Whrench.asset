@@ -12,13 +12,42 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b1fea353dc6f1b448e5869dc3e90a7a, type: 3}
   m_Name: Whrench
   m_EditorClassIdentifier: Assembly-CSharp::ItemSO
-  itemName: Whrench
+  nameOverride: 
   prefab: {fileID: 564337330547355037, guid: 2606460a6214a0d47a33147017b7eb86, type: 3}
-  slotCount: 2
-  maxCount: 1
-  isTool: 1
   description: Repair broken train parts or build a sentry to defend your train.
     Can be used as a melee weapon.
+  probabilityCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  priceCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  stockCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  randomnessCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  sellCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  neededBoughtItems: []
+  maxCountBought: -1
   offset: {x: -0.4, y: 0.1, z: 0.05}
   origin: {x: 0, y: 0.1, z: 0.05}
   rotation: {x: 30, y: 0, z: 0}
@@ -26,3 +55,13 @@ MonoBehaviour:
   renderLayer:
     serializedVersion: 2
     m_Bits: 256
+  probability: 0
+  price: 0
+  stock: 0
+  sell: 0
+  randomness: 0
+  slotCount: 2
+  maxCount: 1
+  randomYRot: 1
+  dropOffset: {x: 0, y: 0, z: 0}
+  isTool: 1

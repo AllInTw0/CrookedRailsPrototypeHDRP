@@ -101,7 +101,10 @@ public class PropSpawner : StructureGenerator
                     }
                     else
                     {
-                        propCopy.transform.localPosition = new Vector3(offset.y, 0, offset.x);
+                        if(case2)
+                            propCopy.transform.localPosition = new Vector3(offset.x, 0, offset.y);
+                        else
+                            propCopy.transform.localPosition = new Vector3(offset.y, 0, offset.x);
                         propCopy.transform.localRotation = Quaternion.Euler(0, randomRot, 0);
 
                         Debug.DrawLine(targetBoundingBox.transform.position, propCopy.transform.position, case2 ? Color.white : Color.black,60f);

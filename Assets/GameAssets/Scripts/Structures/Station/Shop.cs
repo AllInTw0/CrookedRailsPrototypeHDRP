@@ -87,12 +87,18 @@ public class Shop : MonoBehaviour
     {
         if (shopItemEntryList.Count == 0) return;
 
+        List<ShopItemSO> modifiedShopItemEntryList = new List<ShopItemSO>();
+
         float probabilitySum = 0f;
         for (int i = 0; i < shopItemEntryList.Count; i++)
         {
-            shopItemEntryList[i].EvaluateCurves(GameStateManager.currentLevel);
-            if(shopItemEntryList[i].probability > 0)
+            //modifiedShopItemEntryList[i].EvaluateCurves(GameStateManager.currentLevel);
+
+            if (GameStateManager.IsItemUnlocked(shopItemEntryList[i]) && shopItemEntryList[i].probability > 0)
+            {
                 probabilitySum += shopItemEntryList[i].probability;
+                modifiedShopItemEntryList.Add(shopItemEntryList[i]);
+            }
         }
 
         //Sort list based on probability
@@ -101,13 +107,13 @@ public class Shop : MonoBehaviour
         {
             sorted = true;
 
-            for (int i = 0; i < shopItemEntryList.Count-1; i++)
+            for (int i = 0; i < modifiedShopItemEntryList.Count-1; i++)
             {
-                if (shopItemEntryList[i].probability < shopItemEntryList[i+1].probability)
+                if (modifiedShopItemEntryList[i].probability < modifiedShopItemEntryList[i+1].probability)
                 {
-                    var temp = shopItemEntryList[i];
-                    shopItemEntryList[i] = shopItemEntryList[i + 1];
-                    shopItemEntryList[i + 1] = temp;
+                    var temp = modifiedShopItemEntryList[i];
+                    modifiedShopItemEntryList[i] = modifiedShopItemEntryList[i + 1];
+                    modifiedShopItemEntryList[i + 1] = temp;
                     sorted = false;
                 }
             }
@@ -115,27 +121,26 @@ public class Shop : MonoBehaviour
 
         //Debug
         string str = "";
-        for (int i = 0; i < shopItemEntryList.Count; i++)
+        for (int i = 0; i < modifiedShopItemEntryList.Count; i++)
         {
-            str += shopItemEntryList[i] + ":" + shopItemEntryList[i].probability + ", ";
+            str += modifiedShopItemEntryList[i] + ":" + modifiedShopItemEntryList[i].probability + ", ";
         }
         Debug.Log("Shop probbability [" + GameStateManager.currentLevel +"]: " + str);
 
         //Pick Items
-        List<ShopItemSO> shopItemEntryListCopy = new List<ShopItemSO>(shopItemEntryList);
         for (int i = 0; i < shopStandList.Count; i++)
         {
             float randomProbability = Random.Range(0f, probabilitySum);
-            for (int j = 0; j < shopItemEntryListCopy.Count; j++)
+            for (int j = 0; j < modifiedShopItemEntryList.Count; j++)
             {
-                if (shopItemEntryListCopy[j].probability <= 0) continue;
+                if (modifiedShopItemEntryList[j].probability <= 0) continue;
 
-                randomProbability -= shopItemEntryListCopy[j].probability;
+                randomProbability -= modifiedShopItemEntryList[j].probability;
                 if (randomProbability <= 0)
                 {
-                    probabilitySum -= shopItemEntryListCopy[j].probability;
-                    AddItemToShop(shopItemEntryListCopy[j]);
-                    shopItemEntryListCopy.RemoveAt(j);
+                    probabilitySum -= modifiedShopItemEntryList[j].probability;
+                    AddItemToShop(modifiedShopItemEntryList[j]);
+                    modifiedShopItemEntryList.RemoveAt(j);
                     break;
                 }
             }

@@ -12,6 +12,11 @@ public class SplineMeshSplineVisualizer : SplineVisualizer
     private bool meshHasCollision;
     public override void Visualize(List<PathPoint> path)
     {
+        if(Spline.active == null)
+        {
+            Debug.Log("No Spline script");
+            return;
+        }
         SplineMeshInfo splineMeshInfoCopy = Spline.active.splineMeshList[splineMeshIndex];
         splineMeshInfoCopy.scale *= Random.Range(minMaxScale.x, minMaxScale.y);
         GameObject mesh = Spline.active.GenerateMeshAlongPath(path, splineMeshInfoCopy, addCollision : meshHasCollision);

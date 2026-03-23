@@ -16,6 +16,11 @@ public static class Util
         public float probability;
         public int maxCount;
 
+        public ProbabilityListElement(T element, float probability, int maxCount)
+        {
+            
+        }
+
         [HideInInspector]
         public int pickCount;
     }

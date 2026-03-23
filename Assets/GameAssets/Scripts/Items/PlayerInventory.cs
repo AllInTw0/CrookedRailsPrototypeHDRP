@@ -134,8 +134,11 @@ public class PlayerInventory : MonoBehaviour
         Debug.Log(item + " Equipped As Stackable Item");
         InventoryUI.active.UpdateItemIcons();
     }
-    private Item UnEquipTool()
+    public Item UnEquipTool()
     {
+        if (tool == null)
+            return null;
+
         ToolAnimationInfo animInfo = PlayerAvatar.active.GetAnimationInfo();
         
         Quaternion rot = Quaternion.identity;
@@ -165,8 +168,11 @@ public class PlayerInventory : MonoBehaviour
         filledSlots -= item.itemInfo.slotCount;
         
         item.BecomeVisible();
-        item.transform.rotation = Quaternion.Euler(Random.Range(-90f,90f),Random.Range(0f,360f),Random.Range(-90f,90f));
-        item.DropFromPos(transform.position + Vector3.up);
+
+        ItemSO itemInfo = item.itemInfo;
+        Transform orientation = PlayerMovement.active.orientation;
+        item.transform.rotation = Quaternion.Euler(Random.Range(-90f, 90f), itemInfo.randomYRot ? Random.Range(0f, 360f) : orientation.eulerAngles.y, Random.Range(-90f, 90f));
+        item.DropFromPos(transform.position + Vector3.up + orientation.forward * itemInfo.dropOffset.z + orientation.up * itemInfo.dropOffset.y + orientation.right * itemInfo.dropOffset.x);
 
         UpdateSelectIndexInterval();
         InventoryUI.active.UpdateItemIcons();
