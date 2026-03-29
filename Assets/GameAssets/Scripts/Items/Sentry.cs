@@ -237,7 +237,7 @@ public class Sentry : Item
                 if (equipedGun.HasAmmoInClip())
                 {
                     if (Vector3.Angle(rotXTransform.forward, helperTransform.forward) <= maxAngleDiff)
-                        equipedGun.Shoot(false, equipedGunVisual.bulletSpawn);
+                        equipedGun.Shoot(false, equipedGunVisual.bulletSpawn, ShooterType.Sentry);
                 }
                 else
                 {
@@ -249,7 +249,7 @@ public class Sentry : Item
                     }
                     else
                     {
-                        equipedGun.Shoot(false, equipedGunVisual.bulletSpawn);
+                        equipedGun.Shoot(false, equipedGunVisual.bulletSpawn, ShooterType.Sentry);
                     }
                 }
                 UpdateAmmoLights();

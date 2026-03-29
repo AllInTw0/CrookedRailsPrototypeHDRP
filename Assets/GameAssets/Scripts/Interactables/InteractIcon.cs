@@ -68,7 +68,10 @@ public class InteractIcon : MonoBehaviour
         actionText.text = actionTextString;
         UpdatePos(worldPos);
     }
-
+    public bool IsEnabled()
+    {
+        return mainTransform.gameObject.activeSelf;
+    }
     private void UpdatePos(Vector3 worldPos)
     {
         PlayerCamera.active.WorldPosToUI(worldPos, out Vector3 screenPos, out bool onScreen);

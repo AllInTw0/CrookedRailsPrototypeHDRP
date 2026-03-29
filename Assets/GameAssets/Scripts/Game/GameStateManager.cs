@@ -32,6 +32,7 @@ public class GameStateManager : MonoBehaviour
     }
     public static List<DistanceWaypoint> waypointList = new List<DistanceWaypoint>();
 
+    //Shop Stuff
     public static List<ShopItemSO> boughtItemList = new List<ShopItemSO>();
 
     public static List<UnlockEntry> unlockList;
@@ -40,7 +41,14 @@ public class GameStateManager : MonoBehaviour
     private void Start()
     {
         unlockList = _unlockList;
+        statisticEntryList = new List<StatisticEntry>();
         Money.SetStartingMoney();
+
+        GameOverScreen.onGameOver.AddListener(() =>
+        {
+            AddToStatistic("Train's Travelled Distance", Mathf.Round((distanceTravelled / 1000f) * 100f) / 100f, StatisticType.DistanceKilometers);
+        });
+        AddToStatistic("Train's Travelled Distance", 0f, StatisticType.DistanceKilometers);
     }
 
     public static bool IsItemUnlocked(ShopItemSO shopItem)
@@ -72,5 +80,41 @@ public class GameStateManager : MonoBehaviour
                 return false;
         }
         return true;
+    }
+
+    //Statistics
+    public enum StatisticType
+    {
+        Number,
+        Money,
+        DistanceMeters,
+        DistanceKilometers
+    }
+    public class StatisticEntry
+    {
+        public string name;
+        public float value;
+        public StatisticType type;
+        public StatisticEntry(string name, float value, StatisticType type)
+        {
+            this.name = name;
+            this.value = value;
+            this.type = type;
+        }
+    }
+
+    public static List<StatisticEntry> statisticEntryList = new List<StatisticEntry>();
+
+    public static void AddToStatistic(string name, float value, StatisticType type = StatisticType.Number)
+    {
+        foreach (StatisticEntry entry in statisticEntryList)
+        {
+            if(entry.name == name)
+            {
+                entry.value += value;
+                return;
+            }
+        }
+        statisticEntryList.Add(new StatisticEntry(name, value, type));
     }
 }

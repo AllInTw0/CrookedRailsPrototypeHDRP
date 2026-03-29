@@ -17,7 +17,8 @@ public class PlayerHealth : Health
     [SerializeField] 
     private PlayerInventory playerInventory;
     //RunTime
-    private GameObject ragdoll;
+    [NonSerialized]
+    public GameObject ragdoll;
     [NonSerialized]
     public bool isAlive = true;
     private void Start()
@@ -35,7 +36,7 @@ public class PlayerHealth : Health
 
     public override void HealthReachedZero(Vector3 force = default)
     {
-        SpawnRagdoll(playerAvatar.animator.gameObject, ragdollPrefab, force);
+        ragdoll = SpawnRagdoll(playerAvatar.animator.gameObject, ragdollPrefab, force);
         playerInventory.UnEquipAll();
         playerMovement.EnableNoclip();
         playerAvatar.Hide();
@@ -45,5 +46,7 @@ public class PlayerHealth : Health
         StatUI.active.Hide();
         
         isAlive = false;
+
+        GameOverScreen.active.StartGameOver();
     }
 }

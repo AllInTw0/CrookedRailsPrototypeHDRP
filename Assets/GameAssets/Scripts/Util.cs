@@ -9,6 +9,61 @@ public static class Util
         return Physics.OverlapBox(boxCollider.transform.TransformPoint(boxCollider.center), boxCollider.size * 0.5f, boxCollider.transform.rotation, layerMask);
     }
 
+
+    //OLD CODE FROM CASUAL INDUSTRIALIZATION GAME
+    public static Camera CreateCamera(int cullingMask = -1, CameraClearFlags clearFlags = CameraClearFlags.Skybox, bool orthographic = false)
+    {
+        GameObject cam_object = new GameObject();
+
+        Camera cam = cam_object.AddComponent<Camera>();
+
+        if (cullingMask != -1)
+            cam.cullingMask = cullingMask;
+
+        cam.clearFlags = clearFlags;
+
+        if (clearFlags == CameraClearFlags.Color)
+            cam.backgroundColor = new Color(0, 0, 0, 0);
+
+        cam.orthographic = orthographic;
+
+        return cam;
+    }
+    public static void ChangeObjectsLayer(GameObject _object, LayerMask layer)
+    {
+        var object_list = _object.GetComponentsInChildren<Transform>();
+        foreach (Transform _t in object_list)
+        {
+            _t.gameObject.layer = Mathf.FloorToInt(Mathf.Log(layer, 2));
+        }
+    }
+    public static void ToggleObjectsMeshRenderers(GameObject _object, bool enable = false)
+    {
+        var renderer_list = _object.GetComponentsInChildren<MeshRenderer>();
+        foreach (MeshRenderer _mesh in renderer_list)
+        {
+            _mesh.enabled = enable;
+        }
+    }
+
+    //Code from unity discussions
+    //(https://discussions.unity.com/t/test-to-see-if-a-vector3-point-is-within-a-boxcollider/17385)
+    public static bool PointInBox(Vector3 point, BoxCollider box)
+    {
+        point = box.transform.InverseTransformPoint(point) - box.center;
+
+        float halfX = (box.size.x * 0.5f);
+        float halfY = (box.size.y * 0.5f);
+        float halfZ = (box.size.z * 0.5f);
+
+        if (point.x <= halfX && point.x >= -halfX &&
+           point.y <= halfY && point.y >= -halfY &&
+           point.z <= halfZ && point.z >= -halfZ)
+            return true;
+        else
+            return false;
+    }
+
     [System.Serializable]
     public class ProbabilityListElement<T>
     {

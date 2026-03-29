@@ -100,7 +100,9 @@ public class GenerationManager : MonoBehaviour
     private List<StructureSpawnParams> strutureSpawnParamList;
     [SerializeField]
     private float distanceBufferBetweenStructures;
-
+    [Header("Temp")]
+    [SerializeField]
+    private bool disableNavMeshGen;
     //Run Time
     private float currentGeneratedDistance = 0f;
     private float lastAngle;
@@ -128,8 +130,11 @@ public class GenerationManager : MonoBehaviour
     private IEnumerator BuildNavMesh()
     {
         yield return new WaitForEndOfFrame();
-        navMeshSurface.BuildNavMesh();
-        Debug.Log("Building Nav Mesh");
+        if (disableNavMeshGen == false)
+        {
+            navMeshSurface.BuildNavMesh();
+            Debug.Log("Building Nav Mesh");
+        }
     }
     private void Update()
     {

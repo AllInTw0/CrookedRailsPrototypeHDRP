@@ -248,6 +248,20 @@ public class Train : MonoBehaviour
     private void RecalculateConsistLength()
     {
         consistLength = CalculateConsistLength(false);
+
+        //Reset couplers
+        for (int i = 0; i < consist.Count; i++)
+        {
+            if(i + 1 < consist.Count)
+            {
+                consist[i].backCoupler.ConnectCoupler(consist[i + 1].frontCoupler);
+            }
+
+            if (i - 1 >= 0)
+            {
+                consist[i].frontCoupler.ConnectCoupler(consist[i - 1].backCoupler);
+            }
+        }
     }
     public float CalculateConsistLength(bool onlyPlayerRailCars = false)
     {

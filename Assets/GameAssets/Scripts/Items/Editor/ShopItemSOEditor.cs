@@ -39,7 +39,7 @@ public class ShopItemSOEditor : Editor
         //Setup
         parent = new GameObject("IconRendering");
         
-        renderCam = CreateCamera(itemInfo.renderLayer, CameraClearFlags.Color);
+        renderCam = Util.CreateCamera(itemInfo.renderLayer, CameraClearFlags.Color);
         renderCam.nearClipPlane = 0.05f;
         renderCam.farClipPlane = 4f;
         //Disable Post Processing
@@ -59,7 +59,7 @@ public class ShopItemSOEditor : Editor
         
         itemObject = Instantiate(itemInfo.prefab, Vector3.zero, Quaternion.identity);
         itemObject.transform.SetParent(parent.transform);
-        ChangeObjectsLayer(itemObject,itemInfo.renderLayer);
+        Util.ChangeObjectsLayer(itemObject,itemInfo.renderLayer);
     }
     private void RenderIcon()
     {
@@ -90,37 +90,5 @@ public class ShopItemSOEditor : Editor
             renderTexture.Release();
     }
     
-    //OLD CODE FROM CASUAL INDUSTRIALIZATION GAME
-    public static Camera CreateCamera(int cullingMask = -1,CameraClearFlags clearFlags = CameraClearFlags.Skybox)
-    {
-        GameObject cam_object = new GameObject();
 
-        Camera cam = cam_object.AddComponent<Camera>();
-
-        if(cullingMask != -1)
-            cam.cullingMask = cullingMask;
-
-        cam.clearFlags = clearFlags;
-
-        if(clearFlags == CameraClearFlags.Color)
-            cam.backgroundColor = new Color(0, 0, 0, 0);
-
-        return cam;
-    }
-    public static void ChangeObjectsLayer(GameObject _object, LayerMask layer)
-    {
-        var object_list = _object.GetComponentsInChildren<Transform>();
-        foreach (Transform _t in object_list)
-        {
-            _t.gameObject.layer = Mathf.FloorToInt(Mathf.Log(layer, 2));
-        }
-    }
-    public static void ToggleObjectsMeshRenderers(GameObject _object, bool enable = false)
-    {
-        var renderer_list = _object.GetComponentsInChildren<MeshRenderer>();
-        foreach (MeshRenderer _mesh in renderer_list)
-        {
-            _mesh.enabled = enable;
-        }
-    }
 }

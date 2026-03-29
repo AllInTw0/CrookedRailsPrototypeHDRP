@@ -7,4 +7,8 @@ public class StructureGenerator : MonoBehaviour
     {
         return null;
     }
+    public void GenerateTest()
+    {
+        StartCoroutine(Generate(null));
+    }
 }

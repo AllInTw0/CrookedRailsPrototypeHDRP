@@ -8,7 +8,7 @@ public class RailCarSO : ScriptableObject
 
     [Header("Visual")]
     public GameObject prefab;
-    public Sprite icon;
+    public Texture2D icon;
 
     [Header("Params")]
     public float weight;
@@ -16,6 +16,7 @@ public class RailCarSO : ScriptableObject
     [Header("HaulingJobParams")]
     public int minLevel;
     public int maxLevel;
+
     public string GetName()
     {
         if (railCarName == "")

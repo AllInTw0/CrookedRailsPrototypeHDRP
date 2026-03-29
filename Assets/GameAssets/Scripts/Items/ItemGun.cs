@@ -54,7 +54,7 @@ public class ItemGun : Item
        UpdateItem();
     }
 
-    public void Shoot(bool ingoreClipSize = false, Transform bulletSpawnOverride = null)
+    public void Shoot(bool ingoreClipSize = false, Transform bulletSpawnOverride = null, ShooterType shooterType = ShooterType.Player)
     {
         if ((clip > 0 || ingoreClipSize) && coolDown <= 0f)
         {
@@ -75,9 +75,9 @@ public class ItemGun : Item
             }
 
             if (bulletPrefab == null)
-                BulletManager.active.ShootBullets(startPos, dir, bulletCount, bulletDamage, spread, healthTypeFilter);
+                BulletManager.active.ShootBullets(startPos, dir, bulletCount, bulletDamage, spread, healthTypeFilter, shooterType);
             else
-                BulletManager.active.ShootPrefab(startPos, dir, bulletPrefab, bulletCount, spread);
+                BulletManager.active.ShootPrefab(startPos, dir, bulletPrefab, bulletCount, spread, shooterType);
 
             SoundManager.active.PlayAtPos(startPos, shootSound);   
 

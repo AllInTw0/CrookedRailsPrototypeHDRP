@@ -5,6 +5,11 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
+public enum ShooterType
+{
+    Player,
+    Sentry
+}
 public class BulletManager : MonoBehaviour
 {
     public static BulletManager active;
@@ -32,7 +37,7 @@ public class BulletManager : MonoBehaviour
         active = this;
     }
     
-    public void ShootBullets(Vector3 start, Vector3 dir, int count,float bulletDamage, float spread, List<HealthType> healthTypeFilterList = null)
+    public void ShootBullets(Vector3 start, Vector3 dir, int count,float bulletDamage, float spread, List<HealthType> healthTypeFilterList = null, ShooterType shooterType = ShooterType.Player)
     {
         
         SpawnBurstEffect(start,dir);
@@ -46,8 +51,17 @@ public class BulletManager : MonoBehaviour
 
                 if (hit.transform.TryGetComponent(out Health healthScript) && (healthTypeFilterList == null || healthTypeFilterList.Contains(healthScript.healthType)))
                 {
-                    HitSound.active.HandleHitSound(healthScript, healthScript.TakeDamage(bulletDamage, spreadDir.normalized * (bulletDamage * forcePerDamage)), hit.point);
+                    float damageDone = healthScript.TakeDamage(bulletDamage, spreadDir.normalized * (bulletDamage * forcePerDamage));
+                    HitSound.active.HandleHitSound(healthScript, damageDone, hit.point);
                     SpawnImpactEffect(hit.point,hit.normal,true);
+                    if(damageDone > 0 && healthScript.health == 0)
+                    {
+                        Debug.Log("Killed! " + shooterType);
+                        if (shooterType == ShooterType.Player)
+                            GameStateManager.AddToStatistic("Kills (Player)", 1);
+                        else if (shooterType == ShooterType.Sentry)
+                            GameStateManager.AddToStatistic("Kills (Sentry)", 1);
+                    }
                 }
                 else
                 {
@@ -61,7 +75,7 @@ public class BulletManager : MonoBehaviour
         }
         
     }
-    public void ShootPrefab(Vector3 start, Vector3 dir, GameObject prefab, int count, float spread)
+    public void ShootPrefab(Vector3 start, Vector3 dir, GameObject prefab, int count, float spread, ShooterType shooterType = ShooterType.Player)
     {
 
         SpawnBurstEffect(start, dir);
@@ -71,7 +85,7 @@ public class BulletManager : MonoBehaviour
             GameObject copy = Instantiate(prefab);
             copy.transform.position = start;
             copy.transform.LookAt(start + spreadDir);
-            if (copy.TryGetComponent(out Bullet bulletScript)) bulletScript.Initialize();
+            if (copy.TryGetComponent(out Bullet bulletScript)) bulletScript.Initialize(shooterType);
         }
 
     }
@@ -96,7 +110,7 @@ public class BulletManager : MonoBehaviour
         return new RaycastHit();
     }
 
-    public void SpawnExplosion(Vector3 position, float damage, float range, float force, Transform hitTransform = null, List<HealthType> healthTypeFilterList = null)
+    public void SpawnExplosion(Vector3 position, float damage, float range, float force, Transform hitTransform = null, List<HealthType> healthTypeFilterList = null, ShooterType shooterType = ShooterType.Player)
     {
         GameObject explosion = Instantiate(explosionParticle);
         explosion.transform.position = position;
@@ -120,7 +134,16 @@ public class BulletManager : MonoBehaviour
                 }
                 dist = Mathf.Clamp(dist, 0f, range * 0.9f);
                 float distDamage = Mathf.Round(damage - (dist / range) * damage);
-                HitSound.active.HandleHitSound(health, health.TakeDamage(distDamage, dir.normalized * (distDamage * forcePerDamage) + Vector3.up * ((distDamage * forcePerDamage))), collider.transform.position);
+                float damageDone = health.TakeDamage(distDamage, dir.normalized * (distDamage * forcePerDamage) + Vector3.up * ((distDamage * forcePerDamage)));
+                HitSound.active.HandleHitSound(health, damageDone, collider.transform.position);
+                if (damageDone > 0 && health.health == 0)
+                {
+                    Debug.Log("Killed! " + shooterType);
+                    if (shooterType == ShooterType.Player)
+                        GameStateManager.AddToStatistic("Kills (Player)", 1);
+                    else if (shooterType == ShooterType.Sentry)
+                        GameStateManager.AddToStatistic("Kills (Sentry)", 1);
+                }
             }
             if (collider.TryGetComponent(out Rigidbody rb))
             {

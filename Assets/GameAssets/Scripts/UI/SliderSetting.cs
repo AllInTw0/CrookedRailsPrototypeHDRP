@@ -15,11 +15,14 @@ public class SliderSetting : Setting
         slider.onValueChanged.AddListener((float value) =>
         {
             UpdateInputField();
+            Settings.PlayClick();
             onValueChanged.Invoke(value);
         });
 
         inputField.onValueChanged.AddListener((string str) =>
         {
+            if (str == "0" || str == "0," || str == "0.") return;
+
             if(float.TryParse(str,out float value))
             {
                 slider.value = value;

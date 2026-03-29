@@ -33,13 +33,14 @@ public class HaulingJobManager : MonoBehaviour
 
     public static List<HaulingJob> generatedHaulingJobList = new List<HaulingJob>();
 
+    [Header("Cargo List")]
     [SerializeField]
-    private List<CargoSO> haulingCargoInfoList = new List<CargoSO>();
-
-    [Header("Temp")]
-    public float maxCargoDangerLevel; public float targetDangerLevel; public float mixedLevel; public int maxCargoCount; public int currentLevel;
-    public PaperRenderer paperRenderer;
-
+    public List<CargoSO> haulingCargoInfoList = new List<CargoSO>();
+    [Header("Railcar List")]
+    [SerializeField]
+    public List<RailCarSO> railCarInfoList = new List<RailCarSO>();
+    [Header("Icon rendering")]
+    public LayerMask renderLayer;
     private void Awake()
     {
         active = this;
@@ -51,7 +52,7 @@ public class HaulingJobManager : MonoBehaviour
 
         for (int i = 0; i < count; i++)
         {
-            haulingJobList.Add(GenerateHaulingJob(i * 0.5f, i * 1f, 0.4f, 8 - i * 2, 1));
+            haulingJobList.Add(GenerateHaulingJob(i * 0.5f, i * 1f, 0.4f, 8 - i * 2, GameStateManager.currentLevel));
         }
 
         generatedHaulingJobList = haulingJobList;

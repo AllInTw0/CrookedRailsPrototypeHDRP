@@ -198,6 +198,10 @@ public class PlayerMovement : MonoBehaviour
                 SoundManager.active.PlayAtPos(transform.position, "Jump");
             }
 
+            //Distance walked statistic
+            float distKM = (new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z).magnitude * Time.deltaTime) / 1000f;
+            GameStateManager.AddToStatistic("Distance Walked", distKM, GameStateManager.StatisticType.DistanceKilometers);
+
             //FootStep Sound
             if (grounded == false)
                 return;

@@ -8,11 +8,12 @@ public class PathPoint
 {
     public Vector3 position;
     public float distance;
-
+    public bool bridge;
     public PathPoint(Vector3 position,float distance)
     {
         this.position = position;
         this.distance = distance;
+        //bridge = false;
     }
 }
 public enum AutoStopType
@@ -340,13 +341,22 @@ public class TrackManager : MonoBehaviour
 
         //Debug.Log("PointDist: " + pathLenght + " SplineDist: " + splineLenght);
     }
-    static public void CalculatePath(List<PathPoint> path, out List<PathPoint> newPath, float resolution = 1f)
+    static public void CalculatePath(List<PathPoint> path, out List<PathPoint> newPath, float resolution = 1f, bool recalculateDistance = false)
     {
         newPath = new List<PathPoint>();
-        
+
+        if (recalculateDistance)
+        {
+            path[0].distance = 0;
+            for (int i = 1; i < path.Count; i++)
+            {
+                path[i].distance = path[i - 1].distance + Vector3.Distance(path[i].position, path[i - 1].position);
+            }
+        }
+
         //New thing I learned: ^1 = path.Count-1
         float pathLenght = path[^1].distance;
-        
+
         float increment = pathLenght / (float)Mathf.RoundToInt(pathLenght * resolution);
 
         Vector3 lastPos = path[0].position;
@@ -372,6 +382,7 @@ public class TrackManager : MonoBehaviour
 
         //Debug.Log("OldPathLenght: " + pathLenght + " NewPathLenght: " + newPathLenght);
     }
+    
     public void GetClosestTrackSection(Vector3 pos, out TrackSection trackSection, out float distance)
     {
         Vector2 pos2D = new Vector2(pos.x, pos.z);
@@ -405,6 +416,33 @@ public class TrackManager : MonoBehaviour
             {
                 failCount++;
                 if(failCount > 3)
+                {
+                    //Distance is growing
+                    Debug.DrawLine(path[i].position, pos);
+                    break;
+                }
+            }
+        }
+        return distance;
+    }
+    public float GetDistanceFromPath(List<PathPoint> path, Vector3 pos, out PathPoint pathPoint, bool getPreciseDistance = false)
+    {
+        float distance = float.MaxValue;
+
+        int failCount = 0;
+        pathPoint = null;
+        for (int i = 0; i < path.Count; i++)
+        {
+            float dist = Vector2.Distance(new Vector2(path[i].position.x, path[i].position.z), new Vector2(pos.x, pos.z));
+            if (dist < distance)
+            {
+                distance = dist;
+                pathPoint = path[i];
+            }
+            else if(getPreciseDistance == false)
+            {
+                failCount++;
+                if (failCount > 3)
                 {
                     //Distance is growing
                     Debug.DrawLine(path[i].position, pos);

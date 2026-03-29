@@ -120,7 +120,7 @@ public class PlayerInteract : MonoBehaviour
 
     public void StopInteracting()
     {
-        if (currentInteractable == null && currentTarget == null) return;
+        if (currentInteractable == null && currentTarget == null && InteractIcon.active.IsEnabled() == false) return;
 
         currentTarget = null;
         currentInteractable = null;

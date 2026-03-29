@@ -24,11 +24,12 @@ public class Grenade : Bullet
     [SerializeField]
     private List<HealthType> healthTypeFilter = new List<HealthType>();
 
+    private ShooterType shooterType;
     private bool colliding = false;
-    public override void Initialize()
+    public override void Initialize(ShooterType shooterType)
     {
-        base.Initialize();
         rb.linearVelocity = transform.forward * velocity;
+        this.shooterType = shooterType;
     }
     private void Update()
     {
@@ -59,7 +60,7 @@ public class Grenade : Bullet
     }
     private void Explode(Transform hitTransform = null)
     {
-        BulletManager.active.SpawnExplosion(transform.position, damage, range, force, hitTransform, healthTypeFilter);
+        BulletManager.active.SpawnExplosion(transform.position, damage, range, force, hitTransform, healthTypeFilter, shooterType);
         Destroy(gameObject);
     }
 }

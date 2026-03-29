@@ -11,6 +11,10 @@ public class Settings : MonoBehaviour
     [HideInInspector]
     public UnityEvent onClose;
 
+    //Values
+    public static float sensitivity;
+    public static bool invertedY;
+
     [Header("Fade")]
     public Fade settingsFade;
     [Header("Prefabs")]
@@ -36,7 +40,7 @@ public class Settings : MonoBehaviour
     private RectTransform _titlePrefab; private static RectTransform titlePrefab;
     [Header("Sound")]
     [SerializeField]
-    private string clickSoundString = "Click";
+    private string _clickSoundString = "Click"; private static string clickSoundString;
 
     private static List<RectTransform> sectionList = new List<RectTransform>();
     public class Section
@@ -63,6 +67,7 @@ public class Settings : MonoBehaviour
 
             sectionButton.GetComponent<Button>().onClick.AddListener(() =>
             {
+                SoundManager.active.Play(clickSoundString);
                 OpenSection();
             });
         }
@@ -115,9 +120,7 @@ public class Settings : MonoBehaviour
     {
         active = this;
         onClose = new UnityEvent();
-    }
-    private void Start()
-    {
+
         sectionButtonPrefab = _sectionButtonPrefab;
         sectionPrefab = _sectionPrefab;
         sectionButtonParent = _sectionButtonParent;
@@ -126,21 +129,13 @@ public class Settings : MonoBehaviour
         sliderPrefab = _sliderPrefab;
         dropdownPrefab = _dropdownPrefab;
         titlePrefab = _titlePrefab;
+        clickSoundString = _clickSoundString;
 
         sectionList = new List<RectTransform>();
-
+    }
+    private void Start()
+    {
         Section graphicsSection = new Section("Graphics");
-        Section controlsSection = new Section("Controls");
-        graphicsSection.AddCheckbox("Test Checkbox", true).onValueChanged.AddListener((float newValue) =>
-        {
-            PlayClick();
-            bool ticked = newValue == 1f;
-            Debug.Log("vSync: " + ticked);
-        });
-        controlsSection.AddSlider("Sensitivity", 0f,50f,5f).onValueChanged.AddListener((float newValue) =>
-        {
-            Debug.Log("Sensitivity: " + newValue);
-        });
 
         bool fullscreen = Screen.fullScreen;
         Resolution currentResolution = Screen.currentResolution;
@@ -156,18 +151,36 @@ public class Settings : MonoBehaviour
         graphicsSection.AddTitle("Resolution");
         graphicsSection.AddCheckbox("Fullscreen", fullscreen).onValueChanged.AddListener((float newValue) =>
         {
-            PlayClick();
             fullscreen = newValue == 1f;
             Screen.SetResolution(currentResolution.width, currentResolution.height, fullscreen);
         });
         graphicsSection.AddDropdown("Resolution", new List<string>(strResolutionList), currentResolutionIndex).onValueChanged.AddListener((float newValue) =>
         {
-            PlayClick();
             currentResolutionIndex = Mathf.RoundToInt(newValue);
             currentResolution = resolutionArray[currentResolutionIndex];
             Screen.SetResolution(currentResolution.width, currentResolution.height, fullscreen);
         });
 
+
+
+        Section controlsSection = new Section("Controls");
+
+        controlsSection.AddTitle("Mouse");
+        sensitivity = PlayerPrefs.GetFloat("sensitivity", 0.2f);
+        controlsSection.AddSlider("Sensitivity", 0f, 10f, sensitivity).onValueChanged.AddListener((float newValue) =>
+        {
+            sensitivity = newValue;
+            PlayerPrefs.SetFloat("sensitivity", sensitivity);
+        });
+        invertedY = PlayerPrefs.GetInt("invertedY", 0) == 1;
+        controlsSection.AddCheckbox("Inverted Y", invertedY).onValueChanged.AddListener((float newValue) =>
+        {
+            invertedY = newValue == 1;
+            PlayerPrefs.SetInt("invertedY", Mathf.RoundToInt(newValue));
+        });
+
+
+        //Other
         graphicsSection.OpenSection();
 
         backButton.onClick.AddListener(() =>
@@ -240,7 +253,7 @@ public class Settings : MonoBehaviour
             yield return new WaitForSecondsRealtime(closeTime);
         settingsFade.gameObject.SetActive(false);
     }
-    private void PlayClick()
+    public static void PlayClick()
     {
         SoundManager.active.Play(clickSoundString);
     }

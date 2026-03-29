@@ -23,6 +23,7 @@ public class CheckboxSetting : Setting
 
         checkMarkGraphic.color = new Color(1f, 1f, 1f, GetValue());
 
+        Settings.PlayClick();
         onValueChanged.Invoke(GetValue());
     }
     private void LateUpdate()

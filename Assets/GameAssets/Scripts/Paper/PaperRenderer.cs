@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public enum OverrideType
 {
@@ -11,7 +12,8 @@ public enum OverrideType
     HaulReceipt,
     RawImageTexture,
     SellReceipt,
-    UnlockList
+    UnlockList,
+    StatisticList
 }
 public class Override
 {
@@ -115,7 +117,7 @@ public class PaperRenderer : MonoBehaviour
                         sum += entry.pay;
 
                         if (entry.railCar.icon != null)
-                            copy.Find("Icon").GetComponent<Image>().sprite = entry.railCar.icon;
+                            copy.Find("Icon").GetComponent<RawImage>().texture = entry.cargo.GetIcon(entry.railCar);
                     }
 
                     OverrideEntry infoOverride = paper.FindOverrideEntry("Info");
@@ -139,12 +141,9 @@ public class PaperRenderer : MonoBehaviour
                         ((RectTransform)copy).localPosition = Vector3.zero;
                         ((RectTransform)copy).sizeDelta = new Vector2(((RectTransform)copy).sizeDelta.x, heigth);
 
-                        if (cargoInfo.cargoInfo != null)
-                            copy.Find("CargoHealth").GetComponent<TMP_Text>().text = Mathf.Round((cargoInfo.cargoHealth.health / cargoInfo.cargoHealth.maxHealth) * 100f) + "%";
-                        else
-                            copy.Find("CargoHealth").GetComponent<TMP_Text>().text = "-";
+                        copy.Find("CargoHealth").GetComponent<TMP_Text>().text = cargoInfo.GetCargoHealthPrecentString();
 
-                        copy.Find("RailCarHealth").GetComponent<TMP_Text>().text = Mathf.Round((cargoInfo.railCarHealth.health / cargoInfo.railCarHealth.maxHealth) * 100f) + "%";
+                        copy.Find("RailCarHealth").GetComponent<TMP_Text>().text = cargoInfo.GetRailCarHealthPrecentString();
 
                         if (cargoInfo.GetValueSum() != 0)
                         {
@@ -154,10 +153,12 @@ public class PaperRenderer : MonoBehaviour
                         else
                             copy.Find("Pay").GetComponent<TMP_Text>().text = "-";
 
-                        if (cargoInfo.railCarRefrence.railCarSO.icon != null)
-                            copy.Find("Icon").GetComponent<Image>().sprite = cargoInfo.railCarRefrence.railCarSO.icon;
+                        if (cargoInfo.cargoInfo != null)
+                            copy.Find("Icon").GetComponent<RawImage>().texture = cargoInfo.cargoInfo.GetIcon(cargoInfo.railCarRefrence.railCarSO);
+                        else
+                            copy.Find("Icon").GetComponent<RawImage>().texture = cargoInfo.railCarRefrence.railCarSO.icon;
 
-                        
+
                     }
                     OverrideEntry sumOverride = paper.FindOverrideEntry("Sum");
                     sumOverride.objectRefrence.GetComponent<TMP_Text>().text = "Sum: " + sum + "$";
@@ -219,6 +220,37 @@ public class PaperRenderer : MonoBehaviour
                             AddIcon(parent, shopItem.icon);
                         }
                         AddIcon(copy.Find("UnlockItemList"), entry.targetShopItem.icon);
+                    }
+
+                    for (int i = 0; i < overrideEntry.objectRefrence.childCount; i++)
+                    {
+                        destroyList.Add(overrideEntry.objectRefrence.GetChild(i).gameObject);
+                    }
+                }
+                else if (overrideInfo.overrideType == OverrideType.StatisticList)
+                {
+                    float listHeight = 6.5f; //Hard coded is bad but whatever
+                    float heigth = Mathf.Clamp(listHeight / GameStateManager.statisticEntryList.Count, 0f, 1f);
+
+                    foreach (GameStateManager.StatisticEntry entry in GameStateManager.statisticEntryList)
+                    {
+                        Transform copy = Instantiate(overrideEntry.objectRefrence2);
+                        copy.SetParent(overrideEntry.objectRefrence);
+                        ((RectTransform)copy).localPosition = Vector3.zero;
+                        ((RectTransform)copy).sizeDelta = new Vector2(((RectTransform)copy).sizeDelta.x, heigth);
+
+                        copy.Find("Name").GetComponent<TMP_Text>().text = entry.name;
+
+                        float value = Mathf.Round(entry.value * 100f) / 100f;
+                        string str = value.ToString();
+                        if (entry.type == GameStateManager.StatisticType.Money)
+                            str += "$";
+                        else if (entry.type == GameStateManager.StatisticType.DistanceMeters)
+                            str += " m";
+                        else if (entry.type == GameStateManager.StatisticType.DistanceKilometers)
+                            str += " km";
+                        copy.Find("Value").GetComponent<TMP_Text>().text = str;
+
                     }
 
                     for (int i = 0; i < overrideEntry.objectRefrence.childCount; i++)

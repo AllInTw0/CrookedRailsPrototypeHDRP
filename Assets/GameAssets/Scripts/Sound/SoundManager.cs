@@ -10,7 +10,7 @@ public class SoundManager : MonoBehaviour
     [SerializeField] 
     private SoundInfoSO soundInfoSO;
 
-    private void Start()
+    private void Awake()
     {
         active = this;
     }

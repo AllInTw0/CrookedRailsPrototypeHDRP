@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class CargoInfo
@@ -18,9 +19,30 @@ public class CargoInfo
     {
         return cargoValue + railCarValue;
     }
+    public string GetCargoHealthPrecentString()
+    {
+        if (cargoInfo != null)
+            if (cargoHealth != null)
+                return Mathf.Round((cargoHealth.health / cargoHealth.maxHealth) * 100f) + "%";
+            else
+                return Mathf.Round((railCarHealth.health / railCarHealth.maxHealth) * 100f) + "%*";
+        else
+            return "-";
+    }
+    public string GetRailCarHealthPrecentString()
+    {
+        return Mathf.Round((railCarHealth.health / railCarHealth.maxHealth) * 100f) + "%";
+    }
     public float GetExpensesSum()
     {
-        return GetValueSum() * (2f - (cargoHealth.health / cargoHealth.maxHealth) - (railCarHealth.health / railCarHealth.maxHealth));
+        if (cargoHealth != null)
+        {
+            return GetValueSum() * (2f - (cargoHealth.health / cargoHealth.maxHealth) - (railCarHealth.health / railCarHealth.maxHealth));
+        }
+        else
+        {
+            return GetValueSum() * (2f - 2f * (railCarHealth.health / railCarHealth.maxHealth));
+        }
     }
     public float GetPaySum()
     {
@@ -32,8 +54,20 @@ public class RailCar : MonoBehaviour
     //Variables
     [Header("Parameters")]
     public RailCarSO railCarSO;
-    public float frontLength = 5f;
-    public float backLength = 5f;
+    public float frontLength
+    {
+        get
+        {
+            return frontCoupler.transform.localPosition.z;
+        }
+    }
+    public float backLength
+    {
+        get
+        {
+            return -backCoupler.transform.localPosition.z;
+        }
+    }
     public bool isPlayerRailCar;
     public float derailVisualAngle = 5f;
     public Vector3 derailVisualOffset = new Vector3(0.18f,-0.09f,0f);
@@ -45,6 +79,11 @@ public class RailCar : MonoBehaviour
     [Header("Cargo")]
     [SerializeField]
     private Transform cargoOrigin;
+    [Header("Couplers")]
+    [SerializeField]
+    public Coupler frontCoupler;
+    [SerializeField]
+    public Coupler backCoupler;
     [Header("Sway")]
     [SerializeField]
     private Transform swayParent;
@@ -130,12 +169,15 @@ public class RailCar : MonoBehaviour
         CargoInfo cargoInfo = new CargoInfo();
         cargoInfo.cargoInfo = cargoSO;
 
-        cargoInfo.cargoObject = Instantiate(cargoSO.cargoPrefab, cargoOrigin);
-        cargoInfo.cargoObject.transform.localPosition = Vector3.zero;
-        cargoInfo.cargoObject.transform.localRotation = Quaternion.identity;
+        if (cargoSO.cargoPrefab != null)
+        {
+            cargoInfo.cargoObject = Instantiate(cargoSO.cargoPrefab);
+            ParentCargo(cargoInfo.cargoObject);
+        }
 
         cargoInfo.cargoValue = cargoValue;
-        cargoInfo.cargoHealth = cargoInfo.cargoObject.GetComponent<Health>();
+        if(cargoInfo.cargoObject)
+            cargoInfo.cargoHealth = cargoInfo.cargoObject.GetComponent<Health>();
 
         cargoInfo.railCarValue = railCarValue;
         cargoInfo.railCarHealth = health;
@@ -143,6 +185,12 @@ public class RailCar : MonoBehaviour
         cargoInfo.railCarRefrence = this;
 
         currentCargo = cargoInfo;
+    }
+    public void ParentCargo(GameObject cargoObject)
+    {
+        cargoObject.transform.SetParent(cargoOrigin);
+        cargoObject.transform.localPosition = Vector3.zero;
+        cargoObject.transform.localRotation = Quaternion.identity;
     }
     public float GetWeight()
     {

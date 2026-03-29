@@ -10,6 +10,7 @@ public class DropdownSetting : Setting
     {
         dropdown.onValueChanged.AddListener((int index) =>
         {
+            Settings.PlayClick();
             onValueChanged.Invoke(index);
         });
     }
