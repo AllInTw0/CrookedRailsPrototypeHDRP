@@ -39,14 +39,15 @@ public class TerrainModifier : StructureGenerator
                 }
             }
         }
-        for (int chunkX = -exploreDist; chunkX < exploreDist; chunkX++)
-        {
-            for (int chunkY = -exploreDist; chunkY < exploreDist; chunkY++)
-            {
-                TerrainGeneration.Chunk chunk = TerrainGeneration.active.CreateOrGetChunk(new Vector2Int(chunkCoord.x + chunkX, chunkCoord.y + chunkY));
-                chunk.GenerateMesh();
-            }
-        }
+        //for (int chunkX = -exploreDist; chunkX < exploreDist; chunkX++)
+        //{
+        //    for (int chunkY = -exploreDist; chunkY < exploreDist; chunkY++)
+        //    {
+        //        TerrainGeneration.Chunk chunk = TerrainGeneration.active.CreateOrGetChunk(new Vector2Int(chunkCoord.x + chunkX, chunkCoord.y + chunkY));
+        //        chunk.GenerateMesh();
+        //    }
+        //}
+        boxCollider.enabled = false;
         yield break;
     }
 

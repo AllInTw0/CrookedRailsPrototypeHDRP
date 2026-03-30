@@ -117,16 +117,16 @@ public class TrackManager : MonoBehaviour
     {
         //Dose not automaticlly find next/previous sections
 
-        //Spline.DEBUG_DrawPointGizmos(pointA,60f);
-        //Spline.DEBUG_DrawPointGizmos(pointB,60f);
+        Spline.DEBUG_DrawPointGizmos(pointA,60f);
+        Spline.DEBUG_DrawPointGizmos(pointB,60f);
         
         CalculatePath(pointA,pointB,Spline.CalculateSplineLenght(pointA, pointB),out List<PathPoint> path);
-        CalculatePath(path,out List<PathPoint> newPath);
+        CalculatePath(path,out List<PathPoint> newPath,1,true);
+        Debug.Log("OldPathLenght: " + path[^1].distance + " NewPathLenght: " + newPath[^1].distance);
+        DEBUG_DrawPath(path);
+        DEBUG_DrawPath(newPath);
         
-        //DEBUG_DrawPath(path);
-        //DEBUG_DrawPath(newPath);
-        
-        TrackSection section = new TrackSection(pointA, pointB, newPath);
+        TrackSection section = new TrackSection(pointA, pointB, path);
         
         section.AddObject(Spline.active.GenerateMeshAlongTrackSection(section)); //Track mesh
         
@@ -491,7 +491,7 @@ public class TrackManager : MonoBehaviour
         Color color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
         for (int i = 0; i < path.Count; i++)
         {
-            Debug.DrawRay(path[i].position,Vector3.up *1.5f,color,duration);
+            Debug.DrawRay(path[i].position,Vector3.up *1.5f + new Vector3(Random.Range(-0.3f, 0.3f), Random.Range(-0.3f, 0.3f), Random.Range(-0.3f, 0.3f)),color,duration);
         }
     }
 }

@@ -67,6 +67,7 @@ public class MeshData
     {
         meshObject = new GameObject("Terrain");
         meshObject.transform.SetParent(TerrainGeneration.active.transform);
+        meshObject.layer = TerrainGeneration.terrainLayer;
         MeshFilter meshFilter = meshObject.AddComponent<MeshFilter>();
         MeshRenderer meshRenderer = meshObject.AddComponent<MeshRenderer>();
         MeshCollider meshCollider = meshObject.AddComponent<MeshCollider>();

@@ -1,4 +1,3 @@
-using NUnit.Framework.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -25,38 +24,53 @@ public class TrackGeneration : MonoBehaviour
     private int minPathPointCountToCreateBridge;
     [SerializeField]
     private float waterHeight;
-    public void FindPath(Vector3 start, Vector3 end)
+    public void GenerateTrack(Vector3 start, Vector3 end, Point lastSplinePoint = null)
     {
         AStar aStar = new AStar(start, end, pathFindingSettings);
-        List<Node> path = aStar.FindPath(aStar.GetNode(start), aStar.GetNode(end));
-
-        for (int i = 1; i < path.Count; i++)
-        {
-            Debug.DrawLine(path[i - 1].worldPos, path[i].worldPos, Color.purple, pathFindingSettings.debugDrawTime);
-        }
-        CreateTrackAlongNodes(path);
-    }
-    public void CreateTrackAlongNodes(List<Node> path, Point lastSplinePoint = null)
+        NodePath nodePath = aStar.FindPath(aStar.GetNode(start), aStar.GetNode(end));
+        CreateTrackAlongNodes(nodePath, lastSplinePoint);
+    } 
+    public List<NodePath> FindPaths(Vector3 start, Vector3 end, List<int> pathSeeds, int count = 3)
     {
-        for (int i = 0; i < path.Count; i++)
+        List<NodePath> nodePathList = new List<NodePath>();
+        for (int i = 0; i < pathSeeds.Count; i++)
         {
-            if (path[i].worldPos.y < 0)
-                path[i].worldPos.y = 0;
+            LoadingScreen.active.SetProgress((i / (float)pathSeeds.Count) * 0.5f, $"Finding paths {i}/{pathSeeds.Count}");
+            pathFindingSettings.seed = pathSeeds[i];
+            AStar aStar = new AStar(start, end, pathFindingSettings);
+            nodePathList.Add(aStar.FindPath(aStar.GetNode(start), aStar.GetNode(end)));
+        }
+        LoadingScreen.active.SetProgress(0.5f, $"Finding paths {pathSeeds.Count}/{pathSeeds.Count}");
+        nodePathList.OrderBy(nodePath => nodePath.length);
+        List<NodePath> chosenPathList = new List<NodePath>();
+        float step = nodePathList.Count / (float)count;
+        for (int i = 0; i < count; i++)
+        {
+            chosenPathList.Add(nodePathList[Mathf.FloorToInt(step * i)]);
+        }
+        return chosenPathList;
+    }
+    public List<PathPoint> CreateTrackAlongNodes(NodePath nodePath, Point lastSplinePoint = null, TrackSection lastTrackSection = null)
+    {
+        for (int i = 0; i < nodePath.path.Count; i++)
+        {
+            if (nodePath.path[i].worldPos.y < 0)
+                nodePath.path[i].worldPos.y = 0;
         }
 
         if (lastSplinePoint == null) 
         {
-            lastSplinePoint = Spline.CreatePoint(path[0].worldPos, path[0].worldPos + Vector3.forward * splineHandleLength);
+            lastSplinePoint = Spline.CreatePoint(nodePath.path[0].worldPos, nodePath.path[0].worldPos + Vector3.forward * splineHandleLength);
         }
         List<PathPoint> allPathPoints = new List<PathPoint>();
-        for (int i = trackSplineNodeIncrement; i < path.Count; i+= trackSplineNodeIncrement)
+        for (int i = trackSplineNodeIncrement; i < nodePath.path.Count; i+= trackSplineNodeIncrement)
         {
-            Node currentNode = path[i];
+            Node currentNode = nodePath.path[i];
 
-            Vector3 averageDir = (currentNode.worldPos - path[i - 1].worldPos).normalized;
-            if(i + 1 < path.Count)
+            Vector3 averageDir = (currentNode.worldPos - nodePath.path[i - 1].worldPos).normalized;
+            if(i + 1 < nodePath.path.Count)
             {
-                averageDir += (path[i + 1].worldPos - currentNode.worldPos).normalized;
+                averageDir += (nodePath.path[i + 1].worldPos - currentNode.worldPos).normalized;
                 averageDir *= 0.5f;
             }
 
@@ -65,18 +79,29 @@ public class TrackGeneration : MonoBehaviour
             if (TrackManager.active)
             {
                 TrackSection trackSection = TrackManager.active.CreateTrackSection(lastSplinePoint, newPoint);
-                allPathPoints.AddRange(trackSection.path);
+                if(lastTrackSection != null)
+                {
+                    lastTrackSection.SetNextSection(trackSection);
+                    //trackSection.SetPreviousSection(lastTrackSection);
+                }
+                for (int j = 0; j < trackSection.path.Count; j++)
+                {
+                    //So the next code dose not modify the actuall tracksection's path
+                    allPathPoints.Add(new PathPoint(trackSection.path[j].position, trackSection.path[j].distance));
+                }
+                lastTrackSection = trackSection;
             }
             lastSplinePoint = newPoint;
         }
-        if (TrackManager.active)
-        {
-            TrackManager.CalculatePath(allPathPoints, out List<PathPoint> refactoredPath, 0.5f, true);
-            ModifyTerrainToFollowPath(refactoredPath);
-        }
+        return allPathPoints;
     }
-    public void ModifyTerrainToFollowPath(List<PathPoint> path)
+    public void ModifyTerrainToFollowPath(List<PathPoint> path, bool recalculateLength)
     {
+        if (recalculateLength)
+        {
+            TrackManager.CalculatePath(path, out List<PathPoint> newPath, 0.5f, true);
+            path = newPath;
+        }
         List<Vector2Int> chunksToModify = new List<Vector2Int>();
         Vector3[] offsets = {
             new Vector3(ballastInfluenceDistance,0,ballastInfluenceDistance),new Vector3(ballastInfluenceDistance,0,-ballastInfluenceDistance),
@@ -106,7 +131,7 @@ public class TrackGeneration : MonoBehaviour
                         {
                             path[j].bridge = true;
                         }
-                        Spline.active.GenerateMeshAlongPath(refactoredPath, Spline.active.splineMeshList[bridgeSplineMeshIndex]);
+                        ThreadManager.AddMainThreadJob(delegate { Spline.active.GenerateMeshAlongPath(refactoredPath, Spline.active.splineMeshList[bridgeSplineMeshIndex]); });
                     }
                     bridgeStartIndex = -1;
                 }
@@ -155,6 +180,18 @@ public class TrackGeneration : MonoBehaviour
     }
 
 }
+
+public class NodePath
+{
+    public float length;
+    public List<Node> path;
+    public NodePath(List<Node> path, float length)
+    {
+        this.path = path;
+        this.length = length;
+    }
+}
+
 public class Node
 {
     public Vector2Int gridPos;
@@ -227,13 +264,20 @@ public class AStar
         Debug.DrawRay(startPos, Vector3.up * 10f, Color.red, settings.debugDrawTime);
         Debug.DrawRay(endPos, Vector3.up * 10f, Color.green, settings.debugDrawTime);
 
+        if (endPos.z < startPos.z)
+        {
+            Vector3 temp = endPos;
+            endPos = startPos;
+            startPos = temp;
+        }
+
         settings.rng = new System.Random(settings.seed);
         this.settings = settings;
 
         width = Mathf.FloorToInt((Mathf.Abs(startPos.x - endPos.x)) / settings.nodeSpaceing) + settings.sideNodeCount * 2;
         height = Mathf.FloorToInt(Mathf.Abs(startPos.z - endPos.z) / settings.nodeSpaceing);
 
-        leftMostBottomPos = new Vector3(Mathf.Min(startPos.x, endPos.x) - settings.sideNodeCount * settings.nodeSpaceing, 0, startPos.y);
+        leftMostBottomPos = new Vector3(Mathf.Min(startPos.x, endPos.x) - settings.sideNodeCount * settings.nodeSpaceing, 0, startPos.z);
 
         nodeGrid = new Node[width, height];
 
@@ -252,7 +296,7 @@ public class AStar
         return nodeGrid[Mathf.Clamp(Mathf.FloorToInt(worldPos.x / settings.nodeSpaceing), 0, width-1), Mathf.Clamp(Mathf.FloorToInt(worldPos.z / settings.nodeSpaceing), 0, height-1)];
     }
 
-    public List<Node> FindPath(Node start, Node end)
+    public NodePath FindPath(Node start, Node end)
     {
         List<Node> openSet = new List<Node>() { start };
         HashSet<Node> closedSet = new HashSet<Node>();
@@ -272,7 +316,7 @@ public class AStar
                 if (closedSet.Contains(neighbour))
                     continue;
 
-                Debug.DrawLine(current.worldPos, neighbour.worldPos, new Color(0.5f, 0.5f, 0.5f, 0.3f), settings.debugDrawTime);
+                Debug.DrawLine(current.worldPos, neighbour.worldPos, new Color(0.5f, 0.5f, 0.5f, 0.06f), settings.debugDrawTime);
                 float gCost = current.gCost + GetCost(current, neighbour);
                 if(gCost < neighbour.gCost || openSet.Contains(neighbour) == false)
                 {
@@ -288,19 +332,26 @@ public class AStar
 
         return null;
     }
-    private List<Node> RetracePath(Node start, Node end)
+    private NodePath RetracePath(Node start, Node end)
     {
         List<Node> path = new List<Node>();
+        float length = 0;
         Node current = end;
 
-        while(current != start)
+        while (current != start)
         {
+            if (current.previous != null)
+            {
+                Debug.DrawLine(current.worldPos, current.previous.worldPos, Color.purple, settings.debugDrawTime);
+                length += Vector3.Distance(current.worldPos, current.previous.worldPos);
+            }
+
             path.Add(current);
             current = current.previous;
         }
 
         path.Reverse();
-        return path;
+        return new NodePath(path,length);
     }
     private float GetCost(Node nodeA, Node nodeB)
     {
@@ -326,17 +377,16 @@ public class AStar
         }
 
         //Max Turn Angle
-        if(nodeA.previous != null)
-        {
-            Vector3 dirA = nodeA.worldPos - nodeA.previous.worldPos;
-            dirA = new Vector3(dirA.x, 0, dirA.z);
-            Vector3 dirB = nodeB.worldPos - nodeA.worldPos;
-            dirB = new Vector3(dirB.x, 0, dirB.z);
+        Vector3 dirA = Vector3.forward;
+        if (nodeA.previous != null)
+            dirA = nodeA.worldPos - nodeA.previous.worldPos;
+        dirA = new Vector3(dirA.x, 0, dirA.z);
+        Vector3 dirB = nodeB.worldPos - nodeA.worldPos;
+        dirB = new Vector3(dirB.x, 0, dirB.z);
 
-            if(Vector3.Angle(dirA,dirB) > settings.maxTurnAngle)
-            {
-                totalCost += settings.maxTurnAnglePenalty;
-            }
+        if (Vector3.Angle(dirA, dirB) > settings.maxTurnAngle)
+        {
+            totalCost += settings.maxTurnAnglePenalty;
         }
 
         return totalCost;

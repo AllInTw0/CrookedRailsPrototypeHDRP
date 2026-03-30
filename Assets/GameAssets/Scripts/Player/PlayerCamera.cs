@@ -53,7 +53,7 @@ public class PlayerCamera : MonoBehaviour
         //First Person
         if (Cursor.lockState == CursorLockMode.Locked)
         {
-            var lookInput = lookAction.ReadValue<Vector2>();
+            var lookInput = lookAction.ReadValue<Vector2>() * Time.timeScale;
 
             rotationX -= Settings.invertedY ? -lookInput.y * Settings.sensitivity : lookInput.y * Settings.sensitivity;
             rotationX = Mathf.Clamp(rotationX, minRotX, maxRotX);

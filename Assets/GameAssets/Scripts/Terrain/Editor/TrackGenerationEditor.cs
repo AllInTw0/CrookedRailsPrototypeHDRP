@@ -15,7 +15,7 @@ public class TrackGenerationEditor : Editor
         DrawDefaultInspector();
         if (GUILayout.Button("Test Pathfinding"))
         {
-            trackGeneration.FindPath(Vector3.zero, new Vector3(50f, 0f, 500f));
+            trackGeneration.GenerateTrack(Vector3.zero, new Vector3(50f, 0f, 1000f));
         }
     }
 }

@@ -9,25 +9,23 @@ using Random = UnityEngine.Random;
 public class GenerationManager : MonoBehaviour
 {
     public static GenerationManager active;
-    
+
     //Variables
+    [Header("Scripts")]
+    [SerializeField]
+    private TerrainGeneration terrainGeneration;
+    [SerializeField]
+    private TrackGeneration trackGeneration;
+    [Header("Player Train")]
     public Train playerTrain;
-    [SerializeField]
-    private float sectionLength = 100f;
-    [SerializeField]
-    private int generatedSectionsAheadOfPlayer = 2;
-    [SerializeField]
-    private int sectionsStructureSpawnDelay = 2;
-    [SerializeField]
-    private int sectionsFoliageSpawnDelay = 2;
-    [SerializeField]
-    private int generatedSectionsBehindPlayer = 2;
-    [SerializeField]
-    private Vector2 angleClampMinMax;
-    [SerializeField]
-    private Vector2 randomRotationMinMax;
+    [Header("Navigation")]
     [SerializeField] 
     private NavMeshSurface navMeshSurface;
+    [Header("Starting Location")]
+    [SerializeField]
+    private StructureSO startingLocationSO;
+    [SerializeField]
+    private float startingLocationStructureTrackLength;
     [Header("Stations")]
     [SerializeField]
     private float stationSpawnDistance = 1500f;
@@ -38,23 +36,6 @@ public class GenerationManager : MonoBehaviour
     [SerializeField]
     private StructureSO preStationSO;
 
-    [Header("Foliage")]
-    [SerializeField]
-    private List<ProbabilityListElement<ObjectPool>> foliageProbabilityElementList = new List<ProbabilityListElement<ObjectPool>>();
-    [SerializeField]
-    private int chunkSize;
-    [SerializeField]
-    private int foliageDensity;
-    [SerializeField]
-    private AnimationCurve foliageSpawnProbability_DistanceFromTrack;
-    [SerializeField]
-    private LayerMask foliageRaycastLayerMask;
-    [SerializeField]
-    private LayerMask foliageSpawnLayerMask;
-    private List<Vector2> foliageFilledChunkList = new List<Vector2>();
-
-
-    private ProbabilityList<ObjectPool> foliageProbabilityList;
     public enum StructureDistanceType
     {
         setDistance,
@@ -118,13 +99,6 @@ public class GenerationManager : MonoBehaviour
     {
         active = this;
 
-        foreach (ProbabilityListElement<ObjectPool> entry in foliageProbabilityElementList)
-        {
-            entry.element.Init(entry.element.maxCapacity, entry.element.defaultCapacity);
-        }
-
-        foliageProbabilityList = new ProbabilityList<ObjectPool>(foliageProbabilityElementList);
-        ResetGeneration();
         GenerateStart();
     }
     private IEnumerator BuildNavMesh()
@@ -144,103 +118,42 @@ public class GenerationManager : MonoBehaviour
             StartCoroutine(BuildNavMesh());
         }
 
-        int sectionsAhead = 0;
-        TrackSection trackSection = playerTrain.GetFrontTrackSection();
-        while(trackSection.nextSection != null)
-        {
-            sectionsAhead++;
-            trackSection = trackSection.nextSection;
-        }
-
-        int sectionsBehind = 0;
-        trackSection = playerTrain.GetBackTrackSection();
-        while (trackSection.previousSection != null)
-        {
-            sectionsBehind++;
-            trackSection = trackSection.previousSection;
-        }
-
-        if (stationGenerated == false && sectionsAhead < generatedSectionsAheadOfPlayer)
-        {
-            GenerateNextSection();
-        }
-
-        if (sectionsBehind > generatedSectionsBehindPlayer)
-        {
-            Debug.Log("Destroy Section");
-            TrackManager.active.DestroyTrackSection(trackSection);
-
-            GameStateManager.isStartingLocationSpawned = false;
-        }
+        
     }
-    public void ResetGeneration()
+
+    //Generation functions
+    public void GenerateTillNextStation()
     {
-        stationGenerated = false;
-        if (GameStateManager.currentHaulingJob != null)
-            distanceLeftTillNextStation = GameStateManager.currentHaulingJob.distance;
-        else
-            distanceLeftTillNextStation = stationSpawnDistance;
-        foreach (StructureSpawnParams structureSpawnParams in strutureSpawnParamList)
+        LoadingScreen.active.Enable("Generating");
+
+        List<int> pathSeeds = new List<int>();
+        for (int i = 0; i < 9; i++)
         {
-            structureSpawnParams.ResetDistance(true);
+            pathSeeds.Add(Random.Range(0, 10000));
         }
-        currentStructureDistanceBuffer = 0f;
+        ThreadManager.AddThreadJob(() => FindPathThread(pathSeeds), OnFindPaths);
     }
-    private void GenerateNextSection()
+    public object FindPathThread(List<int> pathSeeds)
     {
-        if (distanceLeftTillNextStation > 0f)
-        {
-            //Pick random dir
-            lastAngle = Random.Range(Mathf.Max(angleClampMinMax.x, lastAngle - randomRotationMinMax.x), Mathf.Min(angleClampMinMax.y, lastAngle + randomRotationMinMax.x));
-            Vector3 dir = Quaternion.AngleAxis(lastAngle, Vector3.up) * Vector3.forward * (sectionLength * 0.5f);
-
-            Vector3 forwardPos = lastPoint.handleForward;
-            Point nextPoint = Spline.CreatePoint(forwardPos + dir, forwardPos, false);
-
-            Spline.DEBUG_DrawPointGizmos(nextPoint);
-
-            TrackSection generatedSection = TrackManager.active.CreateTrackSection(lastPoint, nextPoint);
-
-            distanceLeftTillNextStation -= generatedSection.length;
-            //Debug.Log("Distance Left: " + distanceLeftTillNextStation);
-
-            currentGeneratedDistance += generatedSection.length;
-
-            lastSection.SetNextSection(generatedSection);
-            lastSection = generatedSection;
-            lastPoint = nextPoint;
-
-            TrackSection previousSection = generatedSection;
-            for (int i = 1; i < sectionsFoliageSpawnDelay; i++)
-            {
-                if(previousSection.previousSection != null)
-                {
-                    previousSection = previousSection.previousSection;
-
-                    if (i == sectionsStructureSpawnDelay-1)
-                        UpdateStructureDistances(previousSection);
-                    if (i == sectionsFoliageSpawnDelay-1)
-                        StartCoroutine(GenerateFoliageAroundPoint(previousSection.pointA.position));
-                }
-            }
-        }
-        else
-        {
-            //Spawn rest of the foliage
-            TrackSection previousSection = lastSection;
-            for (int i = 1; i < sectionsFoliageSpawnDelay; i++)
-            {
-                if (previousSection.previousSection != null)
-                {
-                    StartCoroutine(GenerateFoliageAroundPoint(previousSection.pointA.position));
-                    previousSection = previousSection.previousSection;
-                }
-            }
-            GenerateStation();
-        }
-
-        generateNavMesh = true;
+        Vector3 targetPos = lastPoint.position + new Vector3(0, 0, stationSpawnDistance);
+        List<NodePath> nodePathList = trackGeneration.FindPaths(lastPoint.position, targetPos, pathSeeds, 1);
+        return nodePathList;
     }
+    public void OnFindPaths(object nodePathListObj)
+    {
+        LoadingScreen.active.SetProgress(0.69f, "Generating Track");
+        List<NodePath> nodePathList = (List<NodePath>)nodePathListObj;
+        List<PathPoint> path = trackGeneration.CreateTrackAlongNodes(nodePathList[0], lastPoint, lastSection);
+        LoadingScreen.active.SetProgress(0.8f, "Modifying Ground");
+        ThreadManager.AddThreadJob(delegate { trackGeneration.ModifyTerrainToFollowPath(path, true); }, delegate { OnFinishedModifyingGround(); });
+    }
+    public void OnFinishedModifyingGround()
+    {
+        terrainGeneration.SetUpdateRenderDistance(true);
+        LoadingScreen.active.Disable();
+    }
+
+    //Generation functions end
     private void UpdateStructureDistances(TrackSection generatedSection)
     {
         currentStructureDistanceBuffer -= generatedSection.length;
@@ -287,17 +200,27 @@ public class GenerationManager : MonoBehaviour
     private void GenerateStart()
     {
         GameStateManager.isStartingLocationSpawned = true;
-        
-        Point pointA = Spline.CreatePoint(Vector3.zero, Vector3.forward);
-        Point pointB = Spline.CreatePoint(Vector3.forward * (playerTrain.GetConsistLenght() + 5f), Vector3.forward * ((playerTrain.GetConsistLenght() + 5f) * 1.5f));
+
+        TerrainGeneration.Chunk chunk = terrainGeneration.FindFittingChunk(0.5f, 0.6f, 3f, -2f, Vector2Int.zero, 5);
+
+        Vector3 pos = chunk.GetWorldPos(0.5f, 1f);
+
+        Point pointA = Spline.CreatePoint(pos - Vector3.forward * startingLocationStructureTrackLength, pos - Vector3.forward * startingLocationStructureTrackLength * 0.5f);
+        Point pointB = Spline.CreatePoint(pos, pos + Vector3.forward * 15f);
 
         TrackSection section = TrackManager.active.CreateTrackSection(pointA, pointB);
-        currentGeneratedDistance += section.length;     
+        currentGeneratedDistance += section.length;
+
+        SpawnStructureNearTrack(section.length, section, startingLocationSO);
 
         playerTrain.Initialize(playerTrain.GetConsistLenght() + 2.5f, section);
 
         lastPoint = pointB;
         lastSection = section;
+
+        //Track to starting location
+        Point point = Spline.CreatePoint(pos - Vector3.forward * startingLocationStructureTrackLength, pos - Vector3.forward * startingLocationStructureTrackLength * 1.5f);
+        trackGeneration.GenerateTrack(point.position, point.position + Vector3.back * 150f, point);
 
         Spline.DEBUG_DrawPointGizmos(pointA);
         Spline.DEBUG_DrawPointGizmos(pointB);
@@ -343,77 +266,5 @@ public class GenerationManager : MonoBehaviour
 
         return generatedSection;
     }
-
-    public IEnumerator GenerateFoliageAroundPoint(Vector3 position, int radius = 5)
-    {
-        if (position.z > 100f)
-            yield return new WaitForSeconds(5f);
-
-        Vector2 pos = new Vector2(position.x, position.z);
-
-        Vector2Int chunkPos = new Vector2Int(Mathf.FloorToInt(pos.x / chunkSize), Mathf.FloorToInt(pos.y / chunkSize));
-        List<Vector2Int> chunkList = new List<Vector2Int>();
-
-        void AddChunk(Vector2Int chunk)
-        {
-            if (foliageFilledChunkList.Contains(chunk) == false)
-            {
-                chunkList.Add(chunk);
-                foliageFilledChunkList.Add(chunk);
-            }
-        }
-        for (int x = chunkPos.x - radius; x < chunkPos.x + radius; x++)
-        {
-            for (int y = chunkPos.y - radius; y < chunkPos.y + radius; y++)
-            {
-                AddChunk(new Vector2Int(x, y));
-            }
-        }
-
-
-        foreach (Vector2Int chunk in chunkList)
-        {
-            Vector3 cornerWorldPos = new Vector3(chunk.x * chunkSize, 0, chunk.y * chunkSize);
-            float increment = chunkSize / foliageDensity;
-            for (int x = 0; x < foliageDensity; x++)
-            {
-                for (int y = 0; y < foliageDensity; y++)
-                {
-                    if (position.z > 100f)
-                        yield return new WaitForSeconds(0.05f);
-                    SpawnFoliage(cornerWorldPos + new Vector3(x * increment, 0, y * increment));
-                }
-            }
-        }
-    }
-    private void SpawnFoliage(Vector3 pos)
-    {
-        ObjectPool prefabPool = foliageProbabilityList.PickNext();
-        if (prefabPool == null) return;
-
-        TrackManager.active.GetClosestTrackSection(pos, out TrackSection trackSection, out float distance);
-        float dist = TrackManager.active.GetDistanceFromPath(trackSection.path, pos);
-        if (Random.Range(0f, 1f) > foliageSpawnProbability_DistanceFromTrack.Evaluate(dist))
-            return;
-
-        Debug.DrawLine(pos, pos + Vector3.up * 20f, Color.coral, 60f);
-        Vector2 randomDir = Random.insideUnitCircle;
-        pos += new Vector3(randomDir.x * foliageDensity, 0, randomDir.y * foliageDensity);
-
-        if (Physics.SphereCast(new Vector3(pos.x, 50f, pos.z), 2.5f, Vector3.down,out RaycastHit hit, 75f, foliageRaycastLayerMask))
-        {
-            if ((foliageSpawnLayerMask & (1 << hit.transform.gameObject.layer)) != 0)
-            {
-                Transform copy = prefabPool.Get().transform;
-                copy.position = hit.point - new Vector3(0f,0.1f,0f);
-                copy.rotation = Quaternion.Euler(Random.Range(-5f, 5f), Random.Range(0f, 360f), Random.Range(-5f, 5f));
-
-                trackSection.AddObject(prefabPool, copy.gameObject);
-            }
-            else
-            {
-                Debug.DrawLine(pos, pos + Vector3.up * 20f, Color.red, 60f);
-            }
-        }
-    }
+    
 }

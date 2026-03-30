@@ -31,7 +31,10 @@ public static class Noise
             value = value / settings.octaveAmplitudeSum;
             if (settings.useHeightCurve)
             {
-                value = settings.heightCurve.Evaluate(value);
+                lock (settings.heightCurve)
+                {
+                    value = settings.heightCurve.Evaluate(value);
+                }
             }
             totalValue += value;
         }

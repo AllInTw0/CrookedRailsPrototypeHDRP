@@ -11,8 +11,8 @@ public class DistanceWaypoint : MonoBehaviour
     }
     public void SpawnFoliage()
     {
-        if (spawnFoliage)
-            StartCoroutine(GenerationManager.active.GenerateFoliageAroundPoint(transform.position));
+        //if (spawnFoliage)
+            //StartCoroutine(GenerationManager.active.GenerateFoliageAroundPoint(transform.position));
     }
     private void OnDestroy()
     {

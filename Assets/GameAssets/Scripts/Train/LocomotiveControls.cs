@@ -38,6 +38,10 @@ public class LocomotiveControls : MonoBehaviour
     public State currentState;
     [HideInInspector]
     public bool onSetOffTriggerGenerationReset;
+    private void Start()
+    {
+        onSetOffTriggerGenerationReset = true;
+    }
     private void LateUpdate()
     {
         if (currentState == State.locked)
@@ -55,11 +59,11 @@ public class LocomotiveControls : MonoBehaviour
             }
             if (throttleNotch > 0)
             {
-                if (onSetOffTriggerGenerationReset)
-                {
-                    onSetOffTriggerGenerationReset = false;
-                    GenerationManager.active.ResetGeneration();
-                }
+                //if (onSetOffTriggerGenerationReset)
+                //{
+                //    onSetOffTriggerGenerationReset = false;
+                //    GenerationManager.active.GenerateTillNextStation();
+                //}
 
                 if (throttle.actionNameOverride != "")
                 {
@@ -110,6 +114,15 @@ public class LocomotiveControls : MonoBehaviour
             UpdateThrottle();
             UpdateBreaks();
             UpdateReverser();
+        }
+
+        if (throttleNotch > 0)
+        {
+            if (onSetOffTriggerGenerationReset)
+            {
+                onSetOffTriggerGenerationReset = false;
+                GenerationManager.active.GenerateTillNextStation();
+            }
         }
     }
     public void UpdateThrottle()

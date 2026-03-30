@@ -73,7 +73,13 @@ public class Fade : MonoBehaviour
     // 1f - visible
     public void FadeTo(float targetAlpha, float duration, float delay = 0f)
     {
-        StartCoroutine(SetValues(targetAlpha, duration, delay));
+        if(delay > 0)
+            StartCoroutine(SetValues(targetAlpha, duration, delay));
+        else
+        {
+            this.speed = (targetAlpha - value) / duration;
+            this.targetAlpha = targetAlpha;
+        }
     }
     private IEnumerator SetValues(float targetAlpha, float duration, float delay)
     {

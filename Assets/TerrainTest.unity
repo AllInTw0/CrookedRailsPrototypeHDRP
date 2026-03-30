@@ -130,6 +130,7 @@ GameObject:
   - component: {fileID: 280748500}
   - component: {fileID: 280748499}
   - component: {fileID: 280748501}
+  - component: {fileID: 280748502}
   m_Layer: 0
   m_Name: Scripts
   m_TagString: Untagged
@@ -437,9 +438,27 @@ MonoBehaviour:
     - 2
     - 4
     octaveAmplitudeSum: 1.75
+  _terrainLayer: 0
+  foliageProbabilityElementList: []
+  _foliageDensity: -1
+  foliageSpawnProbability_DistanceFromTrack:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  foliageRaycastLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  foliageSpawnLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  waterHeight: 0
+  minNormalY: 0
+  player: {fileID: 0}
+  renderDistanceMeters: 6
   seed: 10
   autoUpdate: 1
-  renderDistance: 6
 --- !u!4 &280748500
 Transform:
   m_ObjectHideFlags: 0
@@ -478,12 +497,12 @@ MonoBehaviour:
     maxGrade: 20
     maxGradePenalty: 1e+16
     maxTurnAngle: 45
-    maxTurnAnglePenalty: 10000000
+    maxTurnAnglePenalty: 1e+10
     waterHeight: 0
     waterCost: 100
     seed: 6
     randomnessCostMult: 0.08
-    debugDrawTime: 5
+    debugDrawTime: 20
   trackSplineNodeIncrement: 2
   splineHandleLength: 10
   ballastInfluenceDistance: 5
@@ -524,6 +543,18 @@ MonoBehaviour:
   bridgeSplineMeshIndex: 1
   minPathPointCountToCreateBridge: 3
   waterHeight: -0.2
+--- !u!114 &280748502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 280748498}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d744f7ee387a60f48affc4599c0c9c9c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ThreadManager
 --- !u!1001 &1114903841
 PrefabInstance:
   m_ObjectHideFlags: 0

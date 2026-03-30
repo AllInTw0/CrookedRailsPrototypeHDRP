@@ -6,6 +6,7 @@ public class EnableOnStart : MonoBehaviour
 
     private void Awake()
     {
-        targetObject.SetActive(true);
+        if(this.enabled)
+            targetObject.SetActive(true);
     }
 }
