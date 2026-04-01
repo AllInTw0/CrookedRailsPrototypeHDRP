@@ -19,7 +19,7 @@ public class HaulingJobMonitorHandler : MonoBehaviour
     private List<MonitorArm> monitorArmList;
 
     private State currentState = State.Welcome;
-
+    private bool haulingJobsGenerated = false;
     public void PlayerEntered()
     {
         //Player has steped inside of the trigger

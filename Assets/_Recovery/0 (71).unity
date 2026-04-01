@@ -2144,8 +2144,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 364cc2e485c421245a48e88d9d27f6d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TerrainGeneration
-  _chunkSize: 40
-  _chunkVertBorderCount: 16
+  _chunkSize: 20
+  _chunkVertBorderCount: 14
   _terrainMaterial: {fileID: 2100000, guid: 07cc79a3a92c415498623409fdcde5ea, type: 2}
   noiseSettingsList:
   - ignore: 0
@@ -2513,10 +2513,7 @@ MonoBehaviour:
   minNormalY: 0.75
   player: {fileID: 1175676205}
   renderDistanceMeters: 160
-  navMeshLayerMask:
-    serializedVersion: 2
-    m_Bits: 524289
-  seed: 10
+  seed: 16
   autoUpdate: 0
 --- !u!1 &516447484
 GameObject:
@@ -7202,7 +7199,6 @@ GameObject:
   - component: {fileID: 944680644}
   - component: {fileID: 944680643}
   - component: {fileID: 944680642}
-  - component: {fileID: 944680645}
   m_Layer: 4
   m_Name: WaterPlane
   m_TagString: Untagged
@@ -7243,7 +7239,7 @@ MeshCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
@@ -7305,22 +7301,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 944680640}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
---- !u!208 &944680645
-NavMeshObstacle:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 944680640}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Shape: 1
-  m_Extents: {x: 5, y: 0.25, z: 5}
-  m_MoveThreshold: 0.1
-  m_Carve: 0
-  m_CarveOnlyStationary: 1
-  m_Center: {x: 0, y: -0.25, z: 0}
-  m_TimeToStationary: 0.5
 --- !u!1 &951391688
 GameObject:
   m_ObjectHideFlags: 0
@@ -9342,7 +9322,7 @@ MeshCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
@@ -9650,7 +9630,7 @@ Transform:
   m_GameObject: {fileID: 1280432292}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 4.7000003}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12587,7 +12567,7 @@ MonoBehaviour:
   navMeshSurface: {fileID: 1280432293}
   startingLocationSO: {fileID: 11400000, guid: df6925c81a569534c931bdf4587330b3, type: 2}
   startingLocationStructureTrackLength: 30
-  stationSpawnDistance: 500
+  stationSpawnDistance: 300
   stationSpeedTrackDistance: 200
   stationSO: {fileID: 11400000, guid: 90fd05ee2ae83f74f983b92f006f26e6, type: 2}
   preStationSO: {fileID: 11400000, guid: 737eb10537f91c0478967c61f4ba7b02, type: 2}
@@ -12607,7 +12587,7 @@ MonoBehaviour:
     distanceTillStructure: 0
     spawningDisabled: 1
   - structureInfoList:
-    - {fileID: 11400000, guid: 9ab9ed1f338d07c42867dc0e38021465, type: 2}
+    - {fileID: 11400000, guid: 74d7eb2e4728b69489619a067d303b48, type: 2}
     distanceType: 0
     distanceTypeValue: 250
     repeating: 0
@@ -12615,6 +12595,7 @@ MonoBehaviour:
     spawningDisabled: 1
   distanceBufferBetweenStructures: 15
   disableNavMeshGen: 0
+  generateNavMesh: 0
 --- !u!1 &1355847092
 GameObject:
   m_ObjectHideFlags: 0

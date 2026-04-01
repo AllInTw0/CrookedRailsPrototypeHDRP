@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 using UnityEngine;
 using static TerrainGeneration;
 using static Util;
@@ -23,6 +24,8 @@ public class TerrainGeneration : MonoBehaviour
     private List<NoiseSettings> noiseSettingsList;
     [SerializeField]
     private int _terrainLayer; public static int terrainLayer;
+    [SerializeField]
+    private RenderingLayerMask _terrainRenderingLayerMask; public static RenderingLayerMask terrainRenderingLayerMask;
     [Header("Foliage")]
     [SerializeField]
     private List<ProbabilityListElement<ObjectPool>> foliageProbabilityElementList = new List<ProbabilityListElement<ObjectPool>>();
@@ -47,6 +50,9 @@ public class TerrainGeneration : MonoBehaviour
     private float renderDistanceMeters;
     private bool updateRenderDistance = false;
     private Vector2Int lastUpdateCoord;
+    [Header("Navigation")]
+    public LayerMask navMeshLayerMask;
+
     [Header("Seed")]
     [SerializeField]
     private int seed;
@@ -75,6 +81,7 @@ public class TerrainGeneration : MonoBehaviour
         foliageDensity = _foliageDensity;
         terrainLayer = _terrainLayer;
         lastUpdateCoord = new Vector2Int(-1000000, -1000000);
+        terrainRenderingLayerMask = _terrainRenderingLayerMask;
 
         foreach (ProbabilityListElement<ObjectPool> entry in foliageProbabilityElementList)
         {
@@ -264,6 +271,7 @@ public class TerrainGeneration : MonoBehaviour
         public Dictionary<ObjectPool, List<GameObject>> poolDictionary;
 
         public bool threading = false;
+        public bool hasNavMesh = false;
         public Chunk(Vector2Int coord, bool threadHeightMapGen = false)
         {
             this.coord = coord;
@@ -357,7 +365,21 @@ public class TerrainGeneration : MonoBehaviour
             active.StartCoroutine(SpawnFoliage());       
             threading = false;
         }
-
+        public void GenerateNavMesh()
+        {
+            if (hasNavMesh)
+                return;
+            hasNavMesh = true;
+            ThreadManager.AddMainThreadJob(delegate {
+                NavMeshSurface navMeshSurface = meshData.meshObject.AddComponent<NavMeshSurface>();
+                navMeshSurface.collectObjects = CollectObjects.Volume;
+                navMeshSurface.size = new Vector3(chunkSize + 5f, 40, chunkSize + 5f);
+                navMeshSurface.center = new Vector3(chunkSize * 0.5f + 2.5f, 10, chunkSize * 0.5f + 2.5f);
+                navMeshSurface.useGeometry = UnityEngine.AI.NavMeshCollectGeometry.PhysicsColliders;
+                navMeshSurface.layerMask = active.navMeshLayerMask;
+                navMeshSurface.BuildNavMesh();
+            });
+        }
         public IEnumerator SpawnFoliage()
         {
             yield return new WaitForSeconds(1f);
@@ -437,6 +459,7 @@ public class TerrainGeneration : MonoBehaviour
 
             meshData.Destroy();
             meshData = null;
+            hasNavMesh = false;
 
             poolDictionary = new Dictionary<ObjectPool, List<GameObject>>();
         }

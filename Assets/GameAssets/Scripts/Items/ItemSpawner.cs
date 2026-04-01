@@ -57,7 +57,7 @@ public class ItemSpawner : StructureGenerator
                 Item spawnedItem = Item.SpawnItem(itemSpawnEntry.item, pos, Quaternion.Euler(0f, Random.Range(0f, 360f), 0f), Random.Range(itemSpawnEntry.minMaxStackCount.x, itemSpawnEntry.minMaxStackCount.y), false);
                 spawnedItem.transform.SetParent(transform);
                 chosenBounds.AddItem(spawnedItem);
-                yield return new WaitForSeconds(0.05f);
+                yield return new WaitForSecondsRealtime(0.01f);
             }
 
         }

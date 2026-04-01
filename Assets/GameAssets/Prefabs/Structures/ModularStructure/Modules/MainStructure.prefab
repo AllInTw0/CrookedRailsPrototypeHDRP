@@ -40,6 +40,98 @@ Transform:
   - {fileID: 6367510386900890592}
   m_Father: {fileID: 7997927068410350868}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &246735836479964193
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2586534804486391523}
+  - component: {fileID: 4302250958690086760}
+  - component: {fileID: 6168950303374424147}
+  m_Layer: 0
+  m_Name: TerrainModifier
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2586534804486391523
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 246735836479964193}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.2, z: 4.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7997927068410350868}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4302250958690086760
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 246735836479964193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abbb8c2125c85d14bb916a9caf68384d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TerrainModifier
+  boxCollider: {fileID: 6168950303374424147}
+  shapeBasedOnDistance:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  influenceDistance: 14
+--- !u!65 &6168950303374424147
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 246735836479964193}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 8, y: 2000, z: 11}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &412326547850901126
 GameObject:
   m_ObjectHideFlags: 0
@@ -344,6 +436,7 @@ Transform:
   - {fileID: 1177314954327252051}
   - {fileID: 7482696330605712093}
   - {fileID: 3879319098813906196}
+  - {fileID: 2586534804486391523}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &662805138916376965
@@ -358,6 +451,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ad331f5a68fffd4d8d156ddabca93c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Section
+  globalEndPrefabList: []
+  globalConnectedPrefabList: []
   connectionList:
   - connectionTransform: {fileID: 1899887746709592818}
     validConnectionNameList:
@@ -365,67 +460,95 @@ MonoBehaviour:
     endPrefabList:
     - {fileID: 6686907324306425409, guid: 10157117b14208d4e9f2b2140a48f4f9, type: 3}
     - {fileID: 1050455411013580101, guid: 7de28823f7a3dcd4b9e86b209a43118f, type: 3}
+    connectedPrefabList: []
+    useGlobalEnds: 0
     dontConnect: 0
     ignoreConnections: 0
+    section: {fileID: 0}
   - connectionTransform: {fileID: 122673502817165736}
     validConnectionNameList: []
     endPrefabList:
     - {fileID: 6686907324306425409, guid: 10157117b14208d4e9f2b2140a48f4f9, type: 3}
     - {fileID: 1050455411013580101, guid: 7de28823f7a3dcd4b9e86b209a43118f, type: 3}
+    connectedPrefabList: []
+    useGlobalEnds: 0
     dontConnect: 0
     ignoreConnections: 0
+    section: {fileID: 0}
   - connectionTransform: {fileID: 6655991436944697008}
     validConnectionNameList: []
     endPrefabList:
     - {fileID: 6686907324306425409, guid: 10157117b14208d4e9f2b2140a48f4f9, type: 3}
     - {fileID: 1050455411013580101, guid: 7de28823f7a3dcd4b9e86b209a43118f, type: 3}
+    connectedPrefabList: []
+    useGlobalEnds: 0
     dontConnect: 0
     ignoreConnections: 0
+    section: {fileID: 0}
   - connectionTransform: {fileID: 2278883920400669051}
     validConnectionNameList: []
     endPrefabList:
     - {fileID: 6686907324306425409, guid: 10157117b14208d4e9f2b2140a48f4f9, type: 3}
     - {fileID: 1050455411013580101, guid: 7de28823f7a3dcd4b9e86b209a43118f, type: 3}
+    connectedPrefabList: []
+    useGlobalEnds: 0
     dontConnect: 0
     ignoreConnections: 0
+    section: {fileID: 0}
   - connectionTransform: {fileID: 6759554826285667982}
     validConnectionNameList: []
     endPrefabList:
     - {fileID: 6686907324306425409, guid: 10157117b14208d4e9f2b2140a48f4f9, type: 3}
     - {fileID: 1050455411013580101, guid: 7de28823f7a3dcd4b9e86b209a43118f, type: 3}
+    connectedPrefabList: []
+    useGlobalEnds: 0
     dontConnect: 0
     ignoreConnections: 0
+    section: {fileID: 0}
   - connectionTransform: {fileID: 2729586627564269063}
     validConnectionNameList: []
     endPrefabList:
     - {fileID: 6686907324306425409, guid: 10157117b14208d4e9f2b2140a48f4f9, type: 3}
     - {fileID: 1050455411013580101, guid: 7de28823f7a3dcd4b9e86b209a43118f, type: 3}
+    connectedPrefabList: []
+    useGlobalEnds: 0
     dontConnect: 0
     ignoreConnections: 0
+    section: {fileID: 0}
   - connectionTransform: {fileID: 4654468156941717475}
     validConnectionNameList: []
     endPrefabList:
     - {fileID: 6686907324306425409, guid: 10157117b14208d4e9f2b2140a48f4f9, type: 3}
     - {fileID: 1050455411013580101, guid: 7de28823f7a3dcd4b9e86b209a43118f, type: 3}
+    connectedPrefabList: []
+    useGlobalEnds: 0
     dontConnect: 0
     ignoreConnections: 0
+    section: {fileID: 0}
   - connectionTransform: {fileID: 8612078050362096031}
     validConnectionNameList: []
     endPrefabList:
     - {fileID: 6686907324306425409, guid: 10157117b14208d4e9f2b2140a48f4f9, type: 3}
     - {fileID: 1050455411013580101, guid: 7de28823f7a3dcd4b9e86b209a43118f, type: 3}
+    connectedPrefabList: []
+    useGlobalEnds: 0
     dontConnect: 0
     ignoreConnections: 0
+    section: {fileID: 0}
   - connectionTransform: {fileID: 6367510386900890592}
     validConnectionNameList: []
     endPrefabList:
     - {fileID: 6686907324306425409, guid: 10157117b14208d4e9f2b2140a48f4f9, type: 3}
     - {fileID: 1050455411013580101, guid: 7de28823f7a3dcd4b9e86b209a43118f, type: 3}
+    connectedPrefabList: []
+    useGlobalEnds: 0
     dontConnect: 0
     ignoreConnections: 0
+    section: {fileID: 0}
   length: 0
   connectingConnectionList: []
   nonConnectingConnectionList: []
+  isOverlapping: 0
 --- !u!1 &3502465956921606753
 GameObject:
   m_ObjectHideFlags: 0

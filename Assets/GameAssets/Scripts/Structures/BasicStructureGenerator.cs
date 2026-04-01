@@ -54,7 +54,7 @@ public class BasicStructureGenerator : StructureGenerator
                 }
                 if (safety <= 0f) Debug.LogWarning("Safety == 0!");
             }
-            yield return new WaitForSeconds(0.4f);
+            yield return new WaitForSecondsRealtime(0.4f);
         }
         structureMaster.SpawnEndPrefabs();
 

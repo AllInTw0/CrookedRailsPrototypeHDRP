@@ -1,8 +1,8 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.AI.Navigation;
 using UnityEngine;
+using UnityEngine.AI;
 using static Util;
 using Random = UnityEngine.Random;
 
@@ -89,7 +89,6 @@ public class GenerationManager : MonoBehaviour
     private float lastAngle;
     private Point lastPoint;
     private TrackSection lastSection;
-    private bool generateNavMesh;
     //Station stuff
     private bool stationGenerated;
     private float distanceLeftTillNextStation;
@@ -100,25 +99,6 @@ public class GenerationManager : MonoBehaviour
         active = this;
 
         GenerateStart();
-    }
-    private IEnumerator BuildNavMesh()
-    {
-        yield return new WaitForEndOfFrame();
-        if (disableNavMeshGen == false)
-        {
-            navMeshSurface.BuildNavMesh();
-            Debug.Log("Building Nav Mesh");
-        }
-    }
-    private void Update()
-    {
-        if (generateNavMesh)
-        {
-            generateNavMesh = false;
-            StartCoroutine(BuildNavMesh());
-        }
-
-        
     }
 
     //Generation functions
@@ -133,24 +113,73 @@ public class GenerationManager : MonoBehaviour
         }
         ThreadManager.AddThreadJob(() => FindPathThread(pathSeeds), OnFindPaths);
     }
+    public void FindPathsRequest(int searchCount, int returnCount)
+    {
+
+    }
     public object FindPathThread(List<int> pathSeeds)
     {
         Vector3 targetPos = lastPoint.position + new Vector3(0, 0, stationSpawnDistance);
-        List<NodePath> nodePathList = trackGeneration.FindPaths(lastPoint.position, targetPos, pathSeeds, 1);
+        TerrainGeneration.Chunk chunk = terrainGeneration.FindFittingChunk(0.5f, 0.4f, 3f, -2f, terrainGeneration.GetChunkCoord(targetPos), 5);
+        List<NodePath> nodePathList = trackGeneration.FindPaths(lastPoint.position, chunk.GetWorldPos(0.5f, 0.5f), pathSeeds, 3);
         return nodePathList;
     }
     public void OnFindPaths(object nodePathListObj)
     {
-        LoadingScreen.active.SetProgress(0.69f, "Generating Track");
+        LoadingScreen.active.SetProgress(0.5f, "Generating Track");
         List<NodePath> nodePathList = (List<NodePath>)nodePathListObj;
-        List<PathPoint> path = trackGeneration.CreateTrackAlongNodes(nodePathList[0], lastPoint, lastSection);
-        LoadingScreen.active.SetProgress(0.8f, "Modifying Ground");
+        for (int i = 0; i < nodePathList.Count; i++)
+        {
+            Debug.Log("Track length" + i + ": " + nodePathList[i].length);
+        }
+        trackGeneration.CreateTrackAlongNodes(nodePathList[0], out List<PathPoint> path, out TrackSection lastTrackSectionOut, lastPoint, lastSection);
+
+        //Structures
+        foreach (StructureSpawnParams structureSpawnParams in strutureSpawnParamList)
+        {
+            structureSpawnParams.ResetDistance(true);
+        }
+        while (lastSection != lastTrackSectionOut)
+        {
+            lastSection = lastSection.nextSection;
+            UpdateStructureDistances(lastSection);
+        }
+
+        //lastSection = lastTrackSectionOut;
+        lastPoint = lastSection.pointB;
+        LoadingScreen.active.SetProgress(0.55f, "Modifying Ground");
         ThreadManager.AddThreadJob(delegate { trackGeneration.ModifyTerrainToFollowPath(path, true); }, delegate { OnFinishedModifyingGround(); });
     }
     public void OnFinishedModifyingGround()
     {
+        GenerateStation();
+        StartCoroutine(GenerateNavMeshCoroutine());
+    }
+    public IEnumerator GenerateNavMeshCoroutine()
+    {
+        while (StructureMaster.generatingStructures != StructureMaster.finnishedStructures)
+        {
+            LoadingScreen.active.SetProgress(0.6f + (StructureMaster.finnishedStructures / StructureMaster.generatingStructures) * 0.4f, $"Generating Structures {StructureMaster.finnishedStructures}/{StructureMaster.generatingStructures}");
+            yield return new WaitForSecondsRealtime(0.1f);
+        }
+        //LoadingScreen.active.SetProgress(0.9f, "Generating Navigation Mesh");
+
+        //yield return new WaitForSecondsRealtime(0.2f);
+
+        //if (disableNavMeshGen == false)
+        //{
+        //    NavMeshBuildSettings settings = new NavMeshBuildSettings();
+        //    List<NavMeshBuildSource> sourceList = new List<NavMeshBuildSource>();
+
+        //    NavMeshBuilder.BuildNavMeshData(settings,);
+        //    navMeshSurface.BuildNavMesh();
+        //    navmeh
+        //    Debug.Log("Building Nav Mesh");
+        //}
+
         terrainGeneration.SetUpdateRenderDistance(true);
         LoadingScreen.active.Disable();
+        yield break;
     }
 
     //Generation functions end
@@ -182,7 +211,7 @@ public class GenerationManager : MonoBehaviour
         GameObject structure = Instantiate(structureInfo.structurePrefab);
         
         structure.transform.position = position;
-        structure.transform.LookAt(position + dir);
+        structure.transform.LookAt(position + (structureInfo.onlyRotateY ? new Vector3(dir.x, 0, dir.z) : dir));
 
         if (structureInfo.addAutoStop)
         {
@@ -204,6 +233,8 @@ public class GenerationManager : MonoBehaviour
         TerrainGeneration.Chunk chunk = terrainGeneration.FindFittingChunk(0.5f, 0.6f, 3f, -2f, Vector2Int.zero, 5);
 
         Vector3 pos = chunk.GetWorldPos(0.5f, 1f);
+        if (pos.y < 0f)
+            pos.y = 0f;
 
         Point pointA = Spline.CreatePoint(pos - Vector3.forward * startingLocationStructureTrackLength, pos - Vector3.forward * startingLocationStructureTrackLength * 0.5f);
         Point pointB = Spline.CreatePoint(pos, pos + Vector3.forward * 15f);
@@ -213,7 +244,7 @@ public class GenerationManager : MonoBehaviour
 
         SpawnStructureNearTrack(section.length, section, startingLocationSO);
 
-        playerTrain.Initialize(playerTrain.GetConsistLenght() + 2.5f, section);
+        playerTrain.Initialize(playerTrain.GetConsistLenght() + 1.2f, section);
 
         lastPoint = pointB;
         lastSection = section;
@@ -227,6 +258,7 @@ public class GenerationManager : MonoBehaviour
     }
     private void GenerateStation()
     {
+        List<PathPoint> ListOfPathPoints = new List<PathPoint>();
         //Generate new hauling jobs
         HaulingJobManager.active.GenerateNewHaulingJobList(3);
 
@@ -237,17 +269,35 @@ public class GenerationManager : MonoBehaviour
 
         //Speed Track Enter
         generatedSection = GenerateStraightSection(stationSpeedTrackDistance);
+        ListOfPathPoints.AddRange(generatedSection.path);
 
         //Station Track
-        generatedSection = GenerateStraightSection(playerTrain.GetConsistLenght() + 10f);
+        float startionTrackLength = playerTrain.GetConsistLenght() + 10f;
+        generatedSection = GenerateStraightSection(startionTrackLength);
+        ListOfPathPoints.AddRange(generatedSection.path);
         SpawnStructureNearTrack(generatedSection.length - 2, generatedSection, stationSO);
+        Vector3 middlePos = TrackManager.GetPathPosition(generatedSection.path, generatedSection.length * 0.5f);
+        
         //generatedSection.SetAutoStop(generatedSection.length - 5f, AutoStopType.Front);
 
         //Speed Track Exit
         generatedSection = GenerateStraightSection(stationSpeedTrackDistance);
+        ListOfPathPoints.AddRange(generatedSection.path);
         generatedSection.SetAutoStop(generatedSection.length - 1f, AutoStopType.Front);
 
-        generateNavMesh = true;
+        //Modify Ground
+        float dist = startionTrackLength * 0.5f + stationSpeedTrackDistance;
+        AnimationCurve newAnimationCurve = new AnimationCurve();
+        newAnimationCurve.keys = new Keyframe[] { new Keyframe(0f, 1f), new Keyframe(dist - 30f, 1f), new Keyframe(dist, 0f) };
+        TerrainModifier.ModifyGround(new Vector3(middlePos.x, middlePos.y - 100f, middlePos.z), dist, newAnimationCurve);
+
+        dist = startionTrackLength * 0.5f + stationSpeedTrackDistance * 0.5f;
+        AnimationCurve newAnimationCurve1 = new AnimationCurve();
+        newAnimationCurve1.keys = new Keyframe[] { new Keyframe(0f, 1f), new Keyframe(dist - 30f, 1f), new Keyframe(dist, 0f) };
+        TerrainModifier.ModifyGround(new Vector3(middlePos.x, middlePos.y, middlePos.z), dist, newAnimationCurve1);
+
+        ThreadManager.AddThreadJob(delegate { trackGeneration.ModifyTerrainToFollowPath(ListOfPathPoints, true); }, delegate {  });
+        
         stationGenerated = true;
     }
     private TrackSection GenerateStraightSection(float distance, float handleLength = 10f)

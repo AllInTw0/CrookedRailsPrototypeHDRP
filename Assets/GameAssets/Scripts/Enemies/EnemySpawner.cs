@@ -238,7 +238,7 @@ public class EnemySpawner : MonoBehaviour
     private float SpawnDanger(float targetDanger, Vector2 minMaxDistance, Vector2 minMaxRot)
     {
         float spawnedDanger = 0f;
-
+        float realSpawnedDanger = 0f;
         while (spawnedDanger < targetDanger)
         {
             float freeDanger = targetDanger - spawnedDanger;
@@ -269,10 +269,12 @@ public class EnemySpawner : MonoBehaviour
             if (NavMesh.SamplePosition(spawnPos, out NavMeshHit hit, 30f, NavMesh.AllAreas)) {
 
                 EnemyManager.active.SpawnEnemy(enemy.prefab, hit.position, Quaternion.identity);
+                realSpawnedDanger += enemy.dangerValue;
             }
             else
             {
-                Debug.LogWarning("Did not spawn enemy! Couldnt sample position on nav!");
+                Debug.LogWarning("Did not spawn enemy! Couldnt sample position on nav! Generating Nav!");
+                EnemyManager.GenerateNavMesh(spawnPos);
             }
             spawnedDanger += enemy.dangerValue;
         }

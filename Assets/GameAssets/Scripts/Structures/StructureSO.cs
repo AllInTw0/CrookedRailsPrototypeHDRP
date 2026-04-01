@@ -5,6 +5,9 @@ public class StructureSO : ScriptableObject
 {
     public GameObject structurePrefab;
 
+    [Header("Spawn params")]
+    public bool onlyRotateY = true;
+
     [Header("AutoStop")]
     public bool addAutoStop;
     public AutoStopType stopType;

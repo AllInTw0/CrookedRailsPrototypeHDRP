@@ -122,7 +122,7 @@ public class PropSpawner : StructureGenerator
 
                 if (DoesPropOverlap(propCopy.GetComponent<BoxCollider>()))
                 {
-                    yield return new WaitForSeconds(0.01f);
+                    yield return new WaitForSecondsRealtime(0.001f);
                     DestroyImmediate(propCopy);
                 }
                 else
@@ -135,7 +135,7 @@ public class PropSpawner : StructureGenerator
             }
 
             spawnTries++;
-            yield return new WaitForSeconds(0.01f);
+            yield return new WaitForSecondsRealtime(0.001f);
         }
 
         yield break;

@@ -129,7 +129,9 @@ public class PlayerMovement : MonoBehaviour
             Vector3 movementVector = PlayerCamera.active.transform.forward * moveInput.y +
                                      PlayerCamera.active.transform.right * moveInput.x;
             movementVector = movementVector.normalized * (noclipSpeed * Time.deltaTime);
-            
+
+            if (InputManager.sprintAction.IsPressed())
+                movementVector *= 3f;
             rb.MovePosition(transform.position + movementVector);
         }
         else

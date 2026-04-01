@@ -46,7 +46,7 @@ public class HaulingJobManager : MonoBehaviour
         active = this;
         GenerateNewHaulingJobList(3);
     }
-    public void GenerateNewHaulingJobList(int count)
+    public void GenerateNewHaulingJobList(int count, List<NodePath> nodePathList = null)
     {
         List<HaulingJob> haulingJobList = new List<HaulingJob>();
 
@@ -58,7 +58,7 @@ public class HaulingJobManager : MonoBehaviour
         generatedHaulingJobList = haulingJobList;
 
     }
-    public HaulingJob GenerateHaulingJob(float maxCargoDangerLevel, float targetDangerLevel, float mixedLevel, int maxCargoCount, int currentLevel)
+    public HaulingJob GenerateHaulingJob(float maxCargoDangerLevel, float targetDangerLevel, float mixedLevel, int maxCargoCount, int currentLevel, float travelDistance = -1f)
     {
         //Pick first cargo
         CargoSO firstCargo;
@@ -128,7 +128,10 @@ public class HaulingJobManager : MonoBehaviour
         HaulingJob haulingJob = new HaulingJob();
         haulingJob.haulingJobEntryList = haulingJobEntryList;
 
-        haulingJob.distance = Random.Range(1250, 2500);
+        if(travelDistance < 0f)
+            haulingJob.distance = Random.Range(1250, 2500);
+        else
+            haulingJob.distance = travelDistance;
 
         return haulingJob;
         

@@ -111,22 +111,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ad331f5a68fffd4d8d156ddabca93c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Section
+  globalEndPrefabList: []
+  globalConnectedPrefabList: []
   connectionList:
   - connectionTransform: {fileID: 5548230130780212575}
     validConnectionNameList:
     - start
     - pathE*
     endPrefabList: []
+    connectedPrefabList: []
+    useGlobalEnds: 0
     dontConnect: 0
     ignoreConnections: 0
+    section: {fileID: 0}
   - connectionTransform: {fileID: 7434563118498122379}
     validConnectionNameList: []
     endPrefabList: []
+    connectedPrefabList: []
+    useGlobalEnds: 0
     dontConnect: 0
     ignoreConnections: 0
+    section: {fileID: 0}
   length: 0
   connectingConnectionList: []
   nonConnectingConnectionList: []
+  isOverlapping: 0
 --- !u!114 &2586798870824138108
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -193,11 +202,18 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   noiseFrequency: 1
-  noiseStepBasedOnDistance: 0.001
   minMaxTargetOffset: {x: 0, y: 0}
   minMaxDistanceForward: {x: 25, y: 40}
   minMaxDistanceRight: {x: -8, y: 8}
   minMaxRotOffset: {x: -40, y: 40}
+  sphereCheckRadius: -1
+  sphereCheckOffset: {x: 0, y: 0, z: 0}
+  followTerrain: 1
+  checkForTerrainHeight: 1
+  terrainHeightTargetAverage: 3
+  terrainHeightMaxOffset: 3
+  terrainHeightCheckRadius: 1
+  minLength: -1
 --- !u!114 &8239861066302214513
 MonoBehaviour:
   m_ObjectHideFlags: 0

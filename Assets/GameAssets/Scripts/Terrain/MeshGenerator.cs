@@ -70,6 +70,7 @@ public class MeshData
         meshObject.layer = TerrainGeneration.terrainLayer;
         MeshFilter meshFilter = meshObject.AddComponent<MeshFilter>();
         MeshRenderer meshRenderer = meshObject.AddComponent<MeshRenderer>();
+        meshRenderer.renderingLayerMask = TerrainGeneration.terrainRenderingLayerMask;
         MeshCollider meshCollider = meshObject.AddComponent<MeshCollider>();
         meshFilter.sharedMesh = mesh;
         meshCollider.sharedMesh = mesh;

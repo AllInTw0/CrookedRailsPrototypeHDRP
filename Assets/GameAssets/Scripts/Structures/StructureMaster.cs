@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -61,6 +62,9 @@ public class StructureMaster : MonoBehaviour
     public Connection startConnection;
     public LayerMask overlapCheckLayerMask;
 
+    public static int generatingStructures;
+    public static int finnishedStructures;
+
     [HideInInspector]
     public List<Connection> structureConnectionList;
     [HideInInspector]
@@ -70,6 +74,11 @@ public class StructureMaster : MonoBehaviour
     [HideInInspector]
     public UnityEvent<Section> onSectionAdded;
     public void Generate()
+    {
+        generatingStructures++;
+        GenerateStructure();
+    }
+    private void GenerateStructure()
     {
         structureConnectionList = new List<Connection>();
         startConnection.connectedConnection = null;
@@ -81,18 +90,26 @@ public class StructureMaster : MonoBehaviour
 
         StartCoroutine(GenerateIEnumerable());
 
-        if(structureType == StructureType.Station)
+        if (structureType == StructureType.Station)
         {
             GameStateManager.isStationSpawned = true;
         }
     }
     public IEnumerator GenerateIEnumerable()
     {
-        Debug.Log("Running!");
+        //Debug.Log("Running!");
+        bool added = false;
         foreach (StructureGenerator structure in structureList)
         {
             yield return StartCoroutine(structure.Generate(this));
+            if (structure is BasicStructureGenerator && added == false)
+            {
+                finnishedStructures++;
+                added = true;
+            }
         }
+        if(added == false)
+            finnishedStructures++;
         yield break;
     }
     public void OnDestroy()
@@ -112,8 +129,9 @@ public class StructureMaster : MonoBehaviour
     public void RestartGeneration()
     {
         Debug.LogWarning("Restarting Generation: " + transform.name);
+        StopCoroutine(GenerateIEnumerable());
         DestroyStructure();
-        Generate();
+        GenerateStructure();
     }
     public float GetLength(LengthType lengthType)
     {
@@ -219,9 +237,10 @@ public class StructureMaster : MonoBehaviour
             if (otherSectionConnection.dontConnect == false)
                 sectionConnection.connectedConnection = otherSectionConnection;
 
-            foreach (StructureGenerator structureGenerator in sectionScript.GetComponents<StructureGenerator>())
+            foreach (StructureGenerator structureGenerator in sectionScript.GetComponentsInChildren<StructureGenerator>())
             {
-                yield return structureGenerator.Generate(this);
+                if(structureGenerator is not TerrainModifier)
+                    yield return structureGenerator.Generate(this);
             }
 
             //Check overlap
@@ -249,6 +268,12 @@ public class StructureMaster : MonoBehaviour
             //Connect other section
             if (sectionConnection.dontConnect == false)
                 otherSectionConnection.connectedConnection = sectionConnection;
+
+            foreach (StructureGenerator structureGenerator in sectionScript.GetComponentsInChildren<TerrainModifier>())
+            {
+                //if (structureGenerator is not TerrainModifier)
+                yield return structureGenerator.Generate(this);
+            }
 
             break;
         }
@@ -303,14 +328,23 @@ public class StructureMaster : MonoBehaviour
             Collider[] overlapingColiderArray = Util.PhysicsBoxColliderOverlap(boxCollider, modifiedLayerMask);
             foreach (Collider collider in overlapingColiderArray)
             {
+                if (collider.TryGetComponent(out TerrainModifier terrainModifier)) 
+                    continue;
+
+                bool canSpawn = false;
                 foreach (BoxCollider sectionBoxCollider in boxColliderArray)
                 {
-                    if (collider != sectionBoxCollider) 
-                    { 
-                        Debug.Log(section.gameObject.name + " overlaps " + collider.gameObject.name);
-                        Debug.DrawLine(section.transform.TransformPoint(boxCollider.center), collider.transform.position,Color.red,60f);
-                        return true; 
+                    if (collider == sectionBoxCollider) 
+                    {
+                        canSpawn = true;
+                        break;
                     }
+                }
+                if (canSpawn == false)
+                {
+                    Debug.Log(section.gameObject.name + " overlaps " + collider.gameObject.name);
+                    Debug.DrawLine(section.transform.TransformPoint(boxCollider.center), collider.transform.position, Color.red, 60f);
+                    return true;
                 }
             }
         }

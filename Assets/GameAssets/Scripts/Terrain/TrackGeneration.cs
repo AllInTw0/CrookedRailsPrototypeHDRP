@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class TrackGeneration : MonoBehaviour
@@ -28,29 +29,33 @@ public class TrackGeneration : MonoBehaviour
     {
         AStar aStar = new AStar(start, end, pathFindingSettings);
         NodePath nodePath = aStar.FindPath(aStar.GetNode(start), aStar.GetNode(end));
-        CreateTrackAlongNodes(nodePath, lastSplinePoint);
+        CreateTrackAlongNodes(nodePath, out List<PathPoint> allPathPoints, out TrackSection lastTrackSectionOut, lastSplinePoint);
     } 
     public List<NodePath> FindPaths(Vector3 start, Vector3 end, List<int> pathSeeds, int count = 3)
     {
         List<NodePath> nodePathList = new List<NodePath>();
         for (int i = 0; i < pathSeeds.Count; i++)
         {
-            LoadingScreen.active.SetProgress((i / (float)pathSeeds.Count) * 0.5f, $"Finding paths {i}/{pathSeeds.Count}");
+            LoadingScreen.active.SetProgress((i / (float)pathSeeds.Count) * 0.4f, $"Finding paths {i}/{pathSeeds.Count}");
             pathFindingSettings.seed = pathSeeds[i];
             AStar aStar = new AStar(start, end, pathFindingSettings);
             nodePathList.Add(aStar.FindPath(aStar.GetNode(start), aStar.GetNode(end)));
         }
-        LoadingScreen.active.SetProgress(0.5f, $"Finding paths {pathSeeds.Count}/{pathSeeds.Count}");
-        nodePathList.OrderBy(nodePath => nodePath.length);
-        List<NodePath> chosenPathList = new List<NodePath>();
-        float step = nodePathList.Count / (float)count;
+        LoadingScreen.active.SetProgress(0.4f, $"Finding paths {pathSeeds.Count}/{pathSeeds.Count}");
+        IOrderedEnumerable<NodePath> sortedList = nodePathList.OrderBy(nodePath => nodePath.length);
+        if (count == 1)
+            return new List<NodePath>() { sortedList.First() };
+
+        List <NodePath> chosenPathList = new List<NodePath>();
+        float step = nodePathList.Count / ((float)count);
         for (int i = 0; i < count; i++)
         {
-            chosenPathList.Add(nodePathList[Mathf.FloorToInt(step * i)]);
+
+            chosenPathList.Add(sortedList.ElementAt(Mathf.FloorToInt(step * i)));
         }
         return chosenPathList;
     }
-    public List<PathPoint> CreateTrackAlongNodes(NodePath nodePath, Point lastSplinePoint = null, TrackSection lastTrackSection = null)
+    public void CreateTrackAlongNodes(NodePath nodePath, out List<PathPoint> allPathPoints, out TrackSection lastTrackSectionOut, Point lastSplinePoint = null, TrackSection lastTrackSection = null)
     {
         for (int i = 0; i < nodePath.path.Count; i++)
         {
@@ -62,7 +67,7 @@ public class TrackGeneration : MonoBehaviour
         {
             lastSplinePoint = Spline.CreatePoint(nodePath.path[0].worldPos, nodePath.path[0].worldPos + Vector3.forward * splineHandleLength);
         }
-        List<PathPoint> allPathPoints = new List<PathPoint>();
+        allPathPoints = new List<PathPoint>();
         for (int i = trackSplineNodeIncrement; i < nodePath.path.Count; i+= trackSplineNodeIncrement)
         {
             Node currentNode = nodePath.path[i];
@@ -74,6 +79,9 @@ public class TrackGeneration : MonoBehaviour
                 averageDir *= 0.5f;
             }
 
+            if (i + trackSplineNodeIncrement >= nodePath.path.Count) //If last track point flatten it out
+                averageDir = new Vector3(averageDir.x, 0f, averageDir.z);
+
             Point newPoint = Spline.CreatePoint(currentNode.worldPos, currentNode.worldPos + averageDir * splineHandleLength);
 
             if (TrackManager.active)
@@ -84,22 +92,23 @@ public class TrackGeneration : MonoBehaviour
                     lastTrackSection.SetNextSection(trackSection);
                     //trackSection.SetPreviousSection(lastTrackSection);
                 }
-                for (int j = 0; j < trackSection.path.Count; j++)
-                {
-                    //So the next code dose not modify the actuall tracksection's path
-                    allPathPoints.Add(new PathPoint(trackSection.path[j].position, trackSection.path[j].distance));
-                }
+                allPathPoints.AddRange(trackSection.path);
                 lastTrackSection = trackSection;
             }
             lastSplinePoint = newPoint;
         }
-        return allPathPoints;
+        lastTrackSectionOut = lastTrackSection;
     }
     public void ModifyTerrainToFollowPath(List<PathPoint> path, bool recalculateLength)
     {
         if (recalculateLength)
         {
-            TrackManager.CalculatePath(path, out List<PathPoint> newPath, 0.5f, true);
+            List<PathPoint> copy = new List<PathPoint>();
+            for (int i = 0; i < path.Count; i++)
+            {
+                copy.Add(new PathPoint(path[i].position, path[i].distance));
+            }
+            TrackManager.CalculatePath(copy, out List<PathPoint> newPath, 0.5f, true);
             path = newPath;
         }
         List<Vector2Int> chunksToModify = new List<Vector2Int>();

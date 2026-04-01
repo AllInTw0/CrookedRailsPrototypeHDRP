@@ -326,7 +326,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 2097152
   maxPropCount: 100
-  maxSpawnTries: 250
+  maxSpawnTries: 200
 --- !u!114 &7267936075137670101
 MonoBehaviour:
   m_ObjectHideFlags: 0
