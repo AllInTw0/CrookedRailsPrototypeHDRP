@@ -12045,6 +12045,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SoundManager
   soundInfoSO: {fileID: 11400000, guid: 005272b8c3ca8e941a544cc7ace3bb79, type: 2}
+  groupEntryList:
+  - type: 0
+    group: {fileID: 4347476962377376121, guid: 2c22754264f133f42b192fbbf46c02db, type: 2}
+  - type: 1
+    group: {fileID: -111936726697550550, guid: 2c22754264f133f42b192fbbf46c02db, type: 2}
+  - type: 2
+    group: {fileID: -3621854985060335187, guid: 2c22754264f133f42b192fbbf46c02db, type: 2}
+  audioMixer: {fileID: 24100000, guid: 2c22754264f133f42b192fbbf46c02db, type: 2}
 --- !u!4 &1717781018 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1703336319293457875, guid: 91e0ef49ca958284dba2d0e771c74853, type: 3}

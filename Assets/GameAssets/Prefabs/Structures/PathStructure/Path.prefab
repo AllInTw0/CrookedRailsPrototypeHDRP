@@ -254,5 +254,5 @@ MonoBehaviour:
   - prefab: {fileID: 8812633826564362316, guid: 1f214589c69a6144c8399e41c86f869e, type: 3}
     rotation: {x: 0, y: -90, z: 0}
     offset: {x: -1.5, y: 0, z: 0}
-  minMaxStartDistance: {x: 15, y: 15}
+  minMaxStartDistance: {x: 5, y: 7}
   minMaxRepeatingDistance: {x: 15, y: 20}

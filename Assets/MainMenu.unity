@@ -2543,7 +2543,7 @@ AudioSource:
   m_GameObject: {fileID: 1330894494}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -3621854985060335187, guid: 2c22754264f133f42b192fbbf46c02db, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: e81a44f449b96ec4fb5b5b6f5f85ac5d, type: 3}
   m_PlayOnAwake: 0
@@ -3133,6 +3133,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SoundManager
   soundInfoSO: {fileID: 11400000, guid: 005272b8c3ca8e941a544cc7ace3bb79, type: 2}
+  groupEntryList:
+  - type: 0
+    group: {fileID: 4347476962377376121, guid: 2c22754264f133f42b192fbbf46c02db, type: 2}
+  - type: 1
+    group: {fileID: -111936726697550550, guid: 2c22754264f133f42b192fbbf46c02db, type: 2}
+  - type: 2
+    group: {fileID: -3621854985060335187, guid: 2c22754264f133f42b192fbbf46c02db, type: 2}
+  audioMixer: {fileID: 24100000, guid: 2c22754264f133f42b192fbbf46c02db, type: 2}
 --- !u!1 &1822538278
 GameObject:
   m_ObjectHideFlags: 0
@@ -3355,7 +3363,7 @@ MonoBehaviour:
   _sliderPrefab: {fileID: 5075499642963740801, guid: 6b054f50fcd682046aa6481a5684cb00, type: 3}
   _dropdownPrefab: {fileID: 3525525701124429532, guid: f1e9a53afdbd69b478f6528ed083d57c, type: 3}
   _titlePrefab: {fileID: 193019126910346518, guid: bf6bb9bda3856ae469cf321841e15c86, type: 3}
-  clickSoundString: Click
+  _clickSoundString: Click
 --- !u!114 &1824627964
 MonoBehaviour:
   m_ObjectHideFlags: 0

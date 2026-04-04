@@ -44,6 +44,7 @@ public class GameOverScreen : MonoBehaviour
     private void Awake()
     {
         onGameOver = new UnityEvent();
+        gameOver = false;
     }
     private void Start()
     {
@@ -53,14 +54,14 @@ public class GameOverScreen : MonoBehaviour
 
         retryButton.onClick.AddListener(() =>
         {
-            if (ignoreInput || timmer < 8f) return;
+            if (ignoreInput || timmer < 1f) return;
             SoundManager.active.Play(clickSoundString);
             ignoreInput = true;
             StartCoroutine(LoadScene("Game"));
         });
         quitButton.onClick.AddListener(() =>
         {
-            if (ignoreInput || timmer < 8f) return;
+            if (ignoreInput || timmer < 1f) return;
             SoundManager.active.Play(clickSoundString);
             ignoreInput = true;
             StartCoroutine(LoadScene("MainMenu"));

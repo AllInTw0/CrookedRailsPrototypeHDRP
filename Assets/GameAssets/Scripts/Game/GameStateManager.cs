@@ -38,9 +38,13 @@ public class GameStateManager : MonoBehaviour
     public static List<UnlockEntry> unlockList;
     [SerializeField]
     private List<UnlockEntry> _unlockList;
-    private void Awake()
+    private void Start()
     {
         ResetValues();
+    }
+    private void Awake()
+    {
+        gameStarted = false;
     }
     public void ResetValues()
     {

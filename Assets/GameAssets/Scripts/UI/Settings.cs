@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class Settings : MonoBehaviour
@@ -12,8 +14,11 @@ public class Settings : MonoBehaviour
     public UnityEvent onClose;
 
     //Values
+    public static float fov;
+
     public static float sensitivity;
     public static bool invertedY;
+    public static bool invertedX;
 
     [Header("Fade")]
     public Fade settingsFade;
@@ -161,6 +166,15 @@ public class Settings : MonoBehaviour
             Screen.SetResolution(currentResolution.width, currentResolution.height, fullscreen);
         });
 
+        graphicsSection.AddTitle("View");
+
+        fov = PlayerPrefs.GetFloat("fov", 60f);
+        graphicsSection.AddSlider("Camera's FOV", 10f, 160f, fov).onValueChanged.AddListener((float newValue) =>
+        {
+            fov = newValue;
+            PlayerPrefs.SetFloat("fov", sensitivity);
+        });
+
 
 
         Section controlsSection = new Section("Controls");
@@ -178,8 +192,38 @@ public class Settings : MonoBehaviour
             invertedY = newValue == 1;
             PlayerPrefs.SetInt("invertedY", Mathf.RoundToInt(newValue));
         });
+        invertedX = PlayerPrefs.GetInt("invertedX", 0) == 1;
+        controlsSection.AddCheckbox("Inverted X", invertedY).onValueChanged.AddListener((float newValue) =>
+        {
+            invertedX = newValue == 1;
+            PlayerPrefs.SetInt("invertedX", Mathf.RoundToInt(newValue));
+        });
 
 
+        Section soundsSection = new Section("Sounds");
+        void SoundSlider(string str, string visualStr)
+        {
+            float value = PlayerPrefs.GetFloat(str, 1f);
+            SetVolume(value);
+            soundsSection.AddSlider(visualStr, 0f, 2f, value).onValueChanged.AddListener((float newValue) =>
+            {
+                SetVolume(newValue);
+            });
+            void SetVolume(float value)
+            {
+                if (value <= 0f)
+                    value = 0.00001f;
+                float db = Mathf.Log10(value) * 20f;
+                SoundManager.SetMixerParam(str, db);
+                PlayerPrefs.SetFloat(str, value);
+            }
+        }
+        soundsSection.AddTitle("Main");
+        SoundSlider("MasterVolume", "Master Volume");
+        SoundSlider("MusicVolume", "Music Volume");
+        SoundSlider("EffectVolume", "SFX Volume");
+        soundsSection.AddTitle("Hit Sound Effects");
+        SoundSlider("HitSoundVolume", "HitSound Volume");
         //Other
         graphicsSection.OpenSection();
 

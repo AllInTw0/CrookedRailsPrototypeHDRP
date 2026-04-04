@@ -1,18 +1,43 @@
-using System;
-using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEngine;
-using Random = UnityEngine.Random;
 
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Audio;
+using Random = UnityEngine.Random;
+public enum AudioGroupType
+{
+    Effects,
+    HitSound,
+    Music
+}
 public class SoundManager : MonoBehaviour
 {
+
     public static SoundManager active;
     [SerializeField] 
     private SoundInfoSO soundInfoSO;
-
+    [System.Serializable]
+    private class GroupEntry
+    {
+        public AudioGroupType type;
+        public AudioMixerGroup group;
+    }
+    [SerializeField]
+    private List<GroupEntry> groupEntryList;
+    private Dictionary<AudioGroupType, AudioMixerGroup> mixerGroupDictionary;
+    [SerializeField]
+    private AudioMixer audioMixer;
     private void Awake()
     {
         active = this;
+        mixerGroupDictionary = new Dictionary<AudioGroupType, AudioMixerGroup>();
+        foreach (GroupEntry entry in groupEntryList)
+        {
+            mixerGroupDictionary.Add(entry.type, entry.group);
+        }
+    }
+    public static void SetMixerParam(string param, float value)
+    {
+        active.audioMixer.SetFloat(param, value);
     }
 
     public void PlayAtPos(Vector3 pos, string soundName, float spatialBlend = 1f)
@@ -30,6 +55,8 @@ public class SoundManager : MonoBehaviour
             source.pitch = Random.Range(soundInfo.pitch.x, soundInfo.pitch.y);
 
             source.spatialBlend = spatialBlend;
+
+            source.outputAudioMixerGroup = mixerGroupDictionary[soundInfo.groupType];
 
             source.Play();
             
@@ -54,6 +81,8 @@ public class SoundManager : MonoBehaviour
             source.pitch = Random.Range(soundInfo.pitch.x, soundInfo.pitch.y);
 
             source.spatialBlend = 0f;
+
+            source.outputAudioMixerGroup = mixerGroupDictionary[soundInfo.groupType];
 
             source.Play();
 

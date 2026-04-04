@@ -45,6 +45,8 @@ public class PlayerCamera : MonoBehaviour
     }
     private void Update()
     {
+        camera.fieldOfView = Settings.fov;
+
         if (GameOverScreen.IsGameOver()) return;
 
         if (InputManager.altAction.WasPerformedThisFrame())
@@ -59,7 +61,7 @@ public class PlayerCamera : MonoBehaviour
             rotationX = Mathf.Clamp(rotationX, minRotX, maxRotX);
             transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
 
-            player.rotation *= Quaternion.Euler(0, lookInput.x * Settings.sensitivity, 0);
+            player.rotation *= Quaternion.Euler(0, Settings.invertedX ? -lookInput.x * Settings.sensitivity : lookInput.x * Settings.sensitivity, 0);
         }
 
         CameraBob();
