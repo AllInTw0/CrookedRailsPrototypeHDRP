@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeSO
   nameOverride: Auto Stop Lvl-2
   prefab: {fileID: 1055344391986432932, guid: 55375ff1ce797734fb186b059dc60fd6, type: 3}
-  description: AutoStop
+  description: Upgrades the auto stop to detect structures.
   probabilityCurve:
     serializedVersion: 2
     m_Curve:

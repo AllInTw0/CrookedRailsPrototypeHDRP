@@ -68,7 +68,11 @@ public class PlayerMovement : MonoBehaviour
     [Header("FootSteps")]
     [SerializeField]
     private float footStepDistance = 1f;
-    
+    [Header("Water")]
+    [SerializeField]
+    private float waterHeight;
+    [SerializeField]
+    private float waterSlowDownMult;
     //Runtime References
     [NonSerialized]
     public Rigidbody rb;
@@ -111,7 +115,6 @@ public class PlayerMovement : MonoBehaviour
         colliderStandingHeight = playerCollider.height;
         cameraStandingHeight = cameraTransform.localPosition.y;
     }
-
     private void Update()
     {
         if (InputManager.debugCamAction.triggered)
@@ -164,7 +167,7 @@ public class PlayerMovement : MonoBehaviour
             targetSpeed = (InputManager.sprintAction.IsPressed() && stamina > 0f) ? sprintingSpeed : walkingSpeed;
             if (crouched)
                 targetSpeed = crouchingSpeed;
-            
+
             //Calculating Stamina
             if (InputManager.sprintAction.IsPressed() == false)
             {
@@ -192,12 +195,19 @@ public class PlayerMovement : MonoBehaviour
             jumpTimer -= Time.deltaTime;
             if (InputManager.jumpAction.IsPressed() && grounded && jumpTimer <= 0f)
             {
-                rb.AddForce(0f, crouched ? jumpForce * 0.5f : jumpForce, 0f);
+                float force = jumpForce;
+                if (IsInWater())
+                    force *= (1 - GetPercentUnderWater() * waterSlowDownMult);
+
+                rb.AddForce(0f, crouched ? force * 0.5f : force, 0f);
                 grounded = false;
                 jumpTimer = jumpCoolDown;
                 groundNormal = Vector3.up;
 
-                SoundManager.active.PlayAtPos(transform.position, "Jump");
+                if(IsInWater())
+                    SoundManager.active.PlayAtPos(transform.position, "Water - Impact");
+                else
+                    SoundManager.active.PlayAtPos(transform.position, "Jump");
             }
 
             //Distance walked statistic
@@ -212,7 +222,10 @@ public class PlayerMovement : MonoBehaviour
             if (distanceWalked > footStepDistance)
             {
                 distanceWalked -= footStepDistance;
-                SoundManager.active.PlayAtPos(transform.position, "FootStep - Stone");
+                if(IsInWater())
+                    SoundManager.active.PlayAtPos(transform.position, "FootStep - Water");
+                else
+                    SoundManager.active.PlayAtPos(transform.position, "FootStep - Stone");
             }
         }
     }
@@ -239,7 +252,7 @@ public class PlayerMovement : MonoBehaviour
                 float angle = Vector2.Angle(new Vector2(vector.x, vector.z), new Vector2(ladderDir.x, ladderDir.z));
                 if(angle < climbingAngleThreshold)
                 {
-                    forceVector += new Vector3(0f, vector.y + 0.1f, 0f); // +0.1f bias to climbing upwards
+                    forceVector += new Vector3(0f, vector.y + 0.3f, 0f); // +0.3f bias to climbing upwards
                 }
                 else
                 {
@@ -293,9 +306,14 @@ public class PlayerMovement : MonoBehaviour
 
             Debug.DrawLine(transform.position + Vector3.up, transform.position + Vector3.up + projectedVector * acceleration, grounded ? Color.beige : Color.red);
 
+            //Water slow down
+            if (IsInWater())
+                targetSpeed *= (1 - GetPercentUnderWater() * waterSlowDownMult);
+
+
 
             //Max Distance 
-            if (maxDistanceLimitEnabled && Train.playerTrain != null)
+            if (maxDistanceLimitEnabled && Train.playerTrain != null && GameStateManager.gameStarted)
             {
                 DistanceWaypoint closestWaypoint = null;
                 float distanceToWaypoint = float.MaxValue;
@@ -399,7 +417,21 @@ public class PlayerMovement : MonoBehaviour
         }
     }
     
-    
+    private bool IsInWater()
+    {
+        return transform.position.y < waterHeight;
+    }
+    public bool IsSubmergedInWater()
+    {
+        if (IsInWater())
+            return GetPercentUnderWater() >= 1f;
+        return false;
+    }
+    private float GetPercentUnderWater()
+    {
+        float precentUnderWater = Mathf.Abs(transform.position.y - waterHeight) / playerCollider.height;
+        return Mathf.Clamp01(precentUnderWater);     
+    }
     private Vector2 FindVelRelativeToLook() {
         //Not my code. From Dani
         float lookAngle = orientation.eulerAngles.y;
@@ -433,8 +465,13 @@ public class PlayerMovement : MonoBehaviour
 
             if (groundAngle <= maxAngle)
             {
-                if(grounded == false && rb.linearVelocity.y < -0.25f)
-                    SoundManager.active.PlayAtPos(transform.position,"Land");
+                if (grounded == false && rb.linearVelocity.y < -0.25f)
+                {
+                    if (IsInWater())
+                        SoundManager.active.PlayAtPos(transform.position, "Water - Impact");
+                    else
+                        SoundManager.active.PlayAtPos(transform.position, "Land");
+                }
                 grounded = true;
                 
                 if(hit.transform.CompareTag("Moving"))

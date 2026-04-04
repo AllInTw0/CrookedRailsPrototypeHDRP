@@ -81,7 +81,8 @@ public class Health : MonoBehaviour
     }
     private void OnDestroy()
     {
-        EnemyManager.active.healthTypeArray[(int)healthType].Remove(this);
+        if(EnemyManager.active)
+            EnemyManager.active.healthTypeArray[(int)healthType].Remove(this);
     }
     public GameObject SpawnRagdoll(GameObject targetObject, GameObject ragdollPrefab, Vector3 startVelocity = default, float destroyTime = -1f)
     {

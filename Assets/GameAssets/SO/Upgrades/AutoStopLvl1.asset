@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeSO
   nameOverride: Auto Stop Lvl-1
   prefab: {fileID: 1055344391986432932, guid: 55375ff1ce797734fb186b059dc60fd6, type: 3}
-  description: AutoStop
+  description: 'Adds a auto stop system to the locomotive. The system automaticlly
+    pulls the locomotive breaks at important landmarks. Comes with a filter selection
+    lever. Available Filters: Ignore All, Refill Stations'
   probabilityCurve:
     serializedVersion: 2
     m_Curve:

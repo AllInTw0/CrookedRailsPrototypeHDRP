@@ -15,7 +15,7 @@ public class GameStateManager : MonoBehaviour
 
     //Run Time
     public static HaulingJob currentHaulingJob;
-
+    public static bool gameStarted;
     //public static bool isStartingLocationSpawned;
     //public static bool isStationSpawned;
 
@@ -38,8 +38,23 @@ public class GameStateManager : MonoBehaviour
     public static List<UnlockEntry> unlockList;
     [SerializeField]
     private List<UnlockEntry> _unlockList;
-    private void Start()
+    private void Awake()
     {
+        ResetValues();
+    }
+    public void ResetValues()
+    {
+        gameStarted = false;
+        currentHaulingJob = null;
+        currentLevel = 0;
+        distanceTravelled = 0f;
+
+        waypointList = new List<DistanceWaypoint>();
+        boughtItemList = new List<ShopItemSO>();
+
+        Time.timeScale = 1f;
+        Cursor.lockState = CursorLockMode.Locked;
+
         unlockList = _unlockList;
         statisticEntryList = new List<StatisticEntry>();
         Money.SetStartingMoney();
@@ -117,4 +132,6 @@ public class GameStateManager : MonoBehaviour
         }
         statisticEntryList.Add(new StatisticEntry(name, value, type));
     }
+
+
 }

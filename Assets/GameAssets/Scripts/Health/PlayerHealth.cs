@@ -16,11 +16,21 @@ public class PlayerHealth : Health
     private PlayerCamera playerCamera;
     [SerializeField] 
     private PlayerInventory playerInventory;
+    [Header("Water")]
+    [SerializeField]
+    private float drowningDelay;
+    [SerializeField]
+    private float drowningDammageDelay;
+    [SerializeField]
+    private float drowningDammage;
     //RunTime
     [NonSerialized]
     public GameObject ragdoll;
     [NonSerialized]
     public bool isAlive = true;
+
+    private float timeUnderWater;
+    private float timeSinceDammageTick;
     private void Start()
     {
         active = this;
@@ -32,6 +42,26 @@ public class PlayerHealth : Health
     {
         StatUI.active.UpdateHealth(health,maxHealth);
         UpdateCall();
+        if (playerMovement.IsSubmergedInWater())
+        {
+            timeUnderWater += Time.deltaTime;
+
+            if(timeUnderWater >= drowningDelay)
+            {
+                timeSinceDammageTick += Time.deltaTime;
+                if(timeSinceDammageTick >= drowningDammageDelay)
+                {
+                    TakeDamage(drowningDammage, Vector3.up);
+                    SoundManager.active.PlayAtPos(transform.position, "Water - Bubbles");
+                    timeSinceDammageTick = 0f;
+                }
+            }
+        }
+        else
+        {
+            timeUnderWater = 0f;
+            timeSinceDammageTick = 0f;
+        }
     }
 
     public override void HealthReachedZero(Vector3 force = default)

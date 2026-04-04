@@ -75,7 +75,7 @@ public class RailCar : MonoBehaviour
     public List<RunningGear> railCarRunningGearList;
     [Header("Health")]
     [SerializeField]
-    private RailCarHealth health;
+    public RailCarHealth health;
     [Header("Cargo")]
     [SerializeField]
     private Transform cargoOrigin;

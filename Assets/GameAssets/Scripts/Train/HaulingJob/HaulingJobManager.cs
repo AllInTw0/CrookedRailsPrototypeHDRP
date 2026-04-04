@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.UIElements;
 
 public class HaulingJob
@@ -44,10 +46,20 @@ public class HaulingJobManager : MonoBehaviour
     public Vector2 payIncreaseFor100Meters;
     [Header("Icon rendering")]
     public LayerMask renderLayer;
+    public bool renderIconsOnstart;
+
+
+    private Camera renderCam;
+    private RenderTexture renderTexture;
     private void Awake()
     {
         active = this;
         GenerateNewHaulingJobList(3);
+    }
+    private void Start()
+    {
+        if(renderIconsOnstart)
+            GenerateIcons();
     }
     public void GenerateNewHaulingJobList(int count, List<NodePath> nodePathList = null)
     {
@@ -164,5 +176,99 @@ public class HaulingJobManager : MonoBehaviour
             }
         }
         return railCarList;
+    }
+
+
+
+
+
+    public void GenerateIcons()
+    {
+        renderCam = Util.CreateCamera(renderLayer, CameraClearFlags.Color, true);
+        renderCam.nearClipPlane = 0.1f;
+        renderCam.farClipPlane = 10f;
+
+        //Disable Post Processing
+        HDAdditionalCameraData data = renderCam.gameObject.AddComponent<HDAdditionalCameraData>();
+        data.customRenderingSettings = true;
+        data.renderingPathCustomFrameSettingsOverrideMask.mask[(int)FrameSettingsField.Postprocess] = true;
+        data.renderingPathCustomFrameSettings.SetEnabled(FrameSettingsField.Postprocess, false);
+        data.clearColorMode = HDAdditionalCameraData.ClearColorMode.Color;
+
+        //Render texture
+        renderTexture = new RenderTexture(256, 256, 32, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.sRGB);
+        renderTexture.Create();
+
+        renderCam.targetTexture = renderTexture;
+        renderCam.forceIntoRenderTexture = true;
+
+        foreach (CargoSO cargoInfo in haulingCargoInfoList)
+        {
+            GameObject cargoCopy = null;
+            Debug.Log("1");
+            if (cargoInfo.cargoPrefab)
+            {
+                cargoCopy = Instantiate(cargoInfo.cargoPrefab);
+                Util.ChangeObjectsLayer(cargoCopy, renderLayer);
+            }
+
+            cargoInfo.iconList = new List<Texture2D>();
+
+            foreach (RailCarSO railCarInfo in cargoInfo.fittingRailCars)
+            {
+                Texture2D texture = RenderIcon(railCarInfo, cargoCopy);
+#if UNITY_EDITOR
+                AssetDatabase.CreateAsset(texture, "Assets/GameAssets/SO/Icons/Cargo/" + railCarInfo.GetName() + "_" + cargoInfo.GetName() + "Icon.asset");
+#endif
+                cargoInfo.iconList.Add(texture);
+            }
+            DestroyImmediate(cargoCopy);
+        }
+        foreach (RailCarSO railCarInfo in railCarInfoList)
+        {
+            Texture2D texture = RenderIcon(railCarInfo);
+#if UNITY_EDITOR
+            AssetDatabase.CreateAsset(texture, "Assets/GameAssets/SO/Icons/RailCar/" + railCarInfo.GetName() + "Icon.asset");
+#endif
+            railCarInfo.icon = texture;
+        }
+        DestroyImmediate(renderCam.gameObject);
+    }
+
+    private Texture2D RenderIcon(RailCarSO railCarInfo, GameObject cargoCopy = null)
+    {
+        Debug.Log("2");
+        GameObject railCarCopy = Instantiate(railCarInfo.prefab, Vector3.zero, Quaternion.identity);
+        Util.ChangeObjectsLayer(railCarCopy, renderLayer);
+        railCarCopy.transform.position = Vector3.zero;
+
+        if (cargoCopy)
+        {
+            RailCar railCarScript = railCarCopy.GetComponent<RailCar>();
+            railCarScript.ParentCargo(cargoCopy);
+        }
+
+        Bounds bounds = new Bounds();
+        foreach (Renderer renderer in railCarCopy.GetComponentsInChildren<Renderer>())
+        {
+            bounds.Encapsulate(renderer.bounds.min);
+            bounds.Encapsulate(renderer.bounds.max);
+        }
+
+        //Position Camera
+        renderCam.transform.position = bounds.center + new Vector3(bounds.extents.x + 0.2f, 0, 0);
+        renderCam.transform.LookAt(bounds.center);
+        renderCam.orthographicSize = Mathf.Max(bounds.extents.y, bounds.extents.z);
+
+        Texture2D texture = new Texture2D(256, 256);
+        RenderTexture.active = renderTexture;
+        renderCam.Render();
+        texture.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
+        texture.Apply();
+
+        if (cargoCopy)
+            cargoCopy.transform.SetParent(null);
+        DestroyImmediate(railCarCopy);
+        return texture;
     }
 }

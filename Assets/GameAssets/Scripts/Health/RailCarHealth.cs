@@ -80,6 +80,10 @@ public class RailCarHealth : Health
         Rerail();
         brokenDown = false;
         health = maxHealth;
+        foreach (GameObject obj in brokenDownParticles)
+        {
+            obj.SetActive(false);
+        }
     }
     public bool IsBroken()
     {

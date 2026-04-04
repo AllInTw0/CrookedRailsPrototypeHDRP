@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 5462693948704848522}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.5499998, z: 0}
+  m_LocalPosition: {x: 0, y: 1.25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f30ecf1b13b59cb4fa796831ea755fee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemSpawnBounds
-  maxRandomOffset: {x: 0.2, y: 1, z: 0.8}
+  maxRandomOffset: {x: 0.2, y: 0.6, z: 0.8}
   itemFilter: []
   maxItemCount: 4
 --- !u!1001 &4384945075064446126
@@ -61,15 +61,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6088298997134454932, guid: 4c0909c6d993074409bbe9ca9acebe60, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 52.043285
+      value: -0.50708145
       objectReference: {fileID: 0}
     - target: {fileID: 6088298997134454932, guid: 4c0909c6d993074409bbe9ca9acebe60, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.0000006319541
+      value: -0.7499999
       objectReference: {fileID: 0}
     - target: {fileID: 6088298997134454932, guid: 4c0909c6d993074409bbe9ca9acebe60, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -31.4354
+      value: -5.1577883
       objectReference: {fileID: 0}
     - target: {fileID: 6088298997134454932, guid: 4c0909c6d993074409bbe9ca9acebe60, type: 3}
       propertyPath: m_LocalRotation.w

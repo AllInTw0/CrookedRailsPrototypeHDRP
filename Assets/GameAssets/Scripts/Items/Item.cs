@@ -50,8 +50,7 @@ public class Item : Interactable
         if (success)
         {
             falling = false;
-            DisablePhysics();
-            MovingPlatformManager.active.RemoveEntry(transform);     
+            DisablePhysics();  
         }
         Debug.Log("Item Equipped Successfully: " + success);
 

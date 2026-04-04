@@ -35,7 +35,7 @@ public class HaulingJobMonitorHandler : MonoBehaviour
         {
             LoadingScreen.active.Enable("Finding");
             //Thread for finding train track paths
-            GenerationManager.active.FindPathsRequest(16, 3, 1f, OnPathsFound);
+            GenerationManager.active.FindPathsRequest(24, 3, 1f, OnPathsFound);
         }
         else if (currentState != State.HaullingJobChosen)
             SetupMonitors();
@@ -96,6 +96,7 @@ public class HaulingJobMonitorHandler : MonoBehaviour
                     Money.AddMoney(Mathf.RoundToInt(sum));
 
                     Train.playerTrain.RemoveNonPlayerRailCars();
+                    Train.playerTrain.HeallAllRailCars();
 
                     SetupMonitors();
                 });

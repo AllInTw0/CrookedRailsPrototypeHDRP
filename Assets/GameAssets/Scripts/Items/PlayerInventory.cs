@@ -48,13 +48,15 @@ public class PlayerInventory : MonoBehaviour
                 Item toolRefrence = tool == null ? null : UnEquipTool();
                 Item newTool = UnEquipItem(selectIndex - 1);
 
-                newTool.Interact();
-                toolRefrence.Interact();
+                if (newTool != null)
+                    newTool.Interact();
+                if(toolRefrence != null)
+                    toolRefrence.Interact();
 
                 //TryEquipping(newTool);
                 //TryEquipping(toolRefrence);
 
-                selectIndex = 0;
+                selectIndex = items.Count;
                 UpdateSelectIndexInterval();
             }
         }
@@ -97,7 +99,8 @@ public class PlayerInventory : MonoBehaviour
         item.BecomeInvisible();
         PlayerAvatar.active.EquipTool(item);
         Debug.Log(item + " Equipped As Tool");
-        
+
+        MovingPlatformManager.active.RemoveEntry(item.transform);
         InventoryUI.active.UpdateToolIcon();
     }
     private void EquipAsItem(Item item)
@@ -108,7 +111,8 @@ public class PlayerInventory : MonoBehaviour
         item.transform.SetParent(null);
         item.BecomeInvisible();
         Debug.Log(item + " Equipped As Item");
-        
+
+        MovingPlatformManager.active.RemoveEntry(item.transform);
         InventoryUI.active.UpdateItemIcons();
     }
 
@@ -119,6 +123,7 @@ public class PlayerInventory : MonoBehaviour
         {
             equippedItem.count = sum;
             item.count = 0;
+            MovingPlatformManager.active.RemoveEntry(item.transform);
             PlayerInteract.active.StopInteracting();
             Destroy(item.gameObject);
         }
@@ -156,6 +161,7 @@ public class PlayerInventory : MonoBehaviour
         Item refrence = tool;
 
         tool = null;
+        UpdateSelectIndexInterval();
         PlayerAvatar.active.UnEquipTool();
         InventoryUI.active.UpdateToolIcon();
 
@@ -174,6 +180,8 @@ public class PlayerInventory : MonoBehaviour
         item.transform.rotation = Quaternion.Euler(Random.Range(-90f, 90f), itemInfo.randomYRot ? Random.Range(0f, 360f) : orientation.eulerAngles.y, Random.Range(-90f, 90f));
         item.DropFromPos(transform.position + Vector3.up + orientation.forward * itemInfo.dropOffset.z + orientation.up * itemInfo.dropOffset.y + orientation.right * itemInfo.dropOffset.x);
 
+        if(selectIndex > items.Count)
+            selectIndex--;
         UpdateSelectIndexInterval();
         InventoryUI.active.UpdateItemIcons();
         Debug.Log(item + " Dropped As Item");

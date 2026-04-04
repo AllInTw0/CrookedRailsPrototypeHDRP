@@ -135,7 +135,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  neededBoughtItems: []
+  neededBoughtItems:
+  - {fileID: 11400000, guid: 1457224a86245a9478a0cd1917d563cf, type: 2}
   maxCountBought: -1
   offset: {x: -0.95, y: 0, z: 0.065}
   origin: {x: 0, y: 0, z: 0.065}

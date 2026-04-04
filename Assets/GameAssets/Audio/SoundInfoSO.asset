@@ -140,3 +140,30 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 42e96607ab7bc0147a5a438eaedda595, type: 3}
     volume: 1
     pitch: {x: 0.9, y: 1.1}
+  - name: Water - Bubbles
+    AudioClips:
+    - {fileID: 8300000, guid: 0b2d0b3876d132e4491aa1b1797dca89, type: 3}
+    - {fileID: 8300000, guid: e331e7729e2bbe44f98e118726eee286, type: 3}
+    - {fileID: 8300000, guid: d307eb4902af5c446b6aaa8b3b82a3b4, type: 3}
+    - {fileID: 8300000, guid: bbfae93c04e478749b30789992e5a688, type: 3}
+    - {fileID: 8300000, guid: e57bc2c04d20e764fac256ed6e53d787, type: 3}
+    volume: 1
+    pitch: {x: 0.9, y: 1.1}
+  - name: FootStep - Water
+    AudioClips:
+    - {fileID: 8300000, guid: 9972bf9121cb3a749a501389e2f51924, type: 3}
+    - {fileID: 8300000, guid: f321b1254e7454544b8add5c42f41549, type: 3}
+    - {fileID: 8300000, guid: 07d03fd28a97243449d15d8a605694fd, type: 3}
+    - {fileID: 8300000, guid: 84b2c335acb919444b85300382c20b15, type: 3}
+    - {fileID: 8300000, guid: 3ca7ba7f05532fd4ba032533bd385eae, type: 3}
+    volume: 1
+    pitch: {x: 0.9, y: 1.1}
+  - name: Water - Impact
+    AudioClips:
+    - {fileID: 8300000, guid: 97e4a98b0d109bc4f9cf011b6cfb3126, type: 3}
+    - {fileID: 8300000, guid: c4af81c55dc3eec4391897a251349273, type: 3}
+    - {fileID: 8300000, guid: 32954bc472c331b46a31db1deddf58a0, type: 3}
+    - {fileID: 8300000, guid: 937e6571050173a4cbac998261dded06, type: 3}
+    - {fileID: 8300000, guid: 9b6462cf832209a42a4d4d246d211aff, type: 3}
+    volume: 1
+    pitch: {x: 0.9, y: 1.1}

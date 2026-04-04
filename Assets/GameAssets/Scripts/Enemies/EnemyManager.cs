@@ -65,6 +65,8 @@ public class EnemyManager : MonoBehaviour
     public float packBaseSizeRadius; //Min value
     public float packBaseAffectRadius; //Min value
     public float packSizeMult; //increase radius based on enemy count
+    [Header("Player")]
+    public float maxDistanceFromPlayer;
 
     //Run Time
     private List<Enemy> enemyList = new List<Enemy>();
@@ -105,7 +107,16 @@ public class EnemyManager : MonoBehaviour
 
         for (int i = 0; i < enemyList.Count; i++)
         {
-            enemyList[i].UpdateCall();
+            float dist = Vector3.Distance(PlayerMovement.active.transform.position, enemyList[i].transformPos);
+            if(dist > maxDistanceFromPlayer)
+            {
+                Destroy(enemyList[i].gameObject);
+                enemyList.RemoveAt(i);
+                i--;
+                Debug.Log("Enemy To Far! Destroying");
+            }
+            else
+                enemyList[i].UpdateCall();
         }
 
         if (enemyList.Count < targetEnemyCount_Debug && j <= 0)

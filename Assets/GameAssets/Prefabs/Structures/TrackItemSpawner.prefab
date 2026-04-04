@@ -100,11 +100,20 @@ MonoBehaviour:
     connectionTransform: {fileID: 0}
     validConnectionNameList: []
     endPrefabList: []
+    connectedPrefabList: []
+    useGlobalEnds: 0
     dontConnect: 0
     ignoreConnections: 0
+    section: {fileID: 0}
   overlapCheckLayerMask:
     serializedVersion: 2
     m_Bits: 0
+  maxRetryCount: 0
+  structureConnectionList: []
+  structureSectionList: []
+  onSectionAdded:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &3023825391315765784
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -118,10 +127,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemSpawner
   itemSpawnEntryList:
-  - item: {fileID: 11400000, guid: fba5de258cb318342bb90a8d0b6bf548, type: 2}
+  - element:
+      item: {fileID: 11400000, guid: fba5de258cb318342bb90a8d0b6bf548, type: 2}
+      minMaxStackCount: {x: 1, y: 1}
     probability: 5
-    minMaxStackCount: {x: 2, y: 4}
-  - item: {fileID: 11400000, guid: 37b28eef436127340b96cf8afef5fc0a, type: 2}
+    maxCount: -1
+    pickCount: 0
+  - element:
+      item: {fileID: 11400000, guid: 37b28eef436127340b96cf8afef5fc0a, type: 2}
+      minMaxStackCount: {x: 3, y: 5}
     probability: 0.5
-    minMaxStackCount: {x: 2, y: 4}
+    maxCount: -1
+    pickCount: 0
   minMaxCount: {x: 1, y: 1}

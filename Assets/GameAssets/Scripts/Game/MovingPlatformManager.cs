@@ -37,23 +37,39 @@ public class MovingPlatformManager : MonoBehaviour
     private void LateUpdate()
     {
         //Debug.Log("Entries: " + entries.Count);
-        foreach (var entry in entries)
+        for (int i = 0; i < entries.Count; i++)
         {
-            //Position
-            Vector3 vector = entry.platform.TransformPoint(entry.lastLocalPos) - entry.lastWorldPos;
-            if (entry.rb != null)
-                entry.velocity = vector / Time.deltaTime;
-            entry.transform.position += vector;
-            
-            //Rotation
-            Quaternion diffrence = entry.platform.rotation * Quaternion.Inverse(entry.platformLastRot);
-            if(entry.onlyUpdateYRot)
-                entry.rotationTransform.Rotate(0f,diffrence.eulerAngles.y,0f);
-            else
-                entry.rotationTransform.Rotate(diffrence.eulerAngles);
-            
-            entry.UpdateValues();
+            MovingPlatformEntry entry = entries[i];
 
+            if (entry.transform == null || entry.rotationTransform == null)
+            {
+                entries.RemoveAt(i);
+                i--;
+                continue;
+            }
+
+            try
+            {
+                //Position
+                Vector3 vector = entry.platform.TransformPoint(entry.lastLocalPos) - entry.lastWorldPos;
+                if (entry.rb != null)
+                    entry.velocity = vector / Time.deltaTime;
+                entry.transform.position += vector;
+
+                //Rotation
+                Quaternion diffrence = entry.platform.rotation * Quaternion.Inverse(entry.platformLastRot);
+                if (entry.onlyUpdateYRot)
+                    entry.rotationTransform.Rotate(0f, diffrence.eulerAngles.y, 0f);
+                else
+                    entry.rotationTransform.Rotate(diffrence.eulerAngles);
+
+                entry.UpdateValues();
+            }
+            catch
+            {
+                entries.RemoveAt(i);
+                i--;
+            }
         }
     }
 

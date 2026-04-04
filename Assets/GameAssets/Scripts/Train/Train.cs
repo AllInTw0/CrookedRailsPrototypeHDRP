@@ -394,6 +394,13 @@ public class Train : MonoBehaviour
 
         Debug.Log("Removed NonPlayer RailCars");
     }
+    public void HeallAllRailCars()
+    {
+        for (int i = 0; i < consist.Count; i++)
+        {
+            consist[i].health.ResetHealth();
+        }
+    }
     public float GetClosestDistanceToPos(Vector3 pos)
     {
         int minDistIndex = 0;

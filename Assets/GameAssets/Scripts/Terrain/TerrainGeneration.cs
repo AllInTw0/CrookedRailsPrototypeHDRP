@@ -49,6 +49,8 @@ public class TerrainGeneration : MonoBehaviour
     private Transform player;
     [SerializeField]
     private float renderDistanceMeters;
+    [SerializeField]
+    private int chunkRadiusNavMeshGen;
     private bool updateRenderDistance = false;
     private Vector2Int lastUpdateCoord;
     [Header("Navigation")]
@@ -56,6 +58,8 @@ public class TerrainGeneration : MonoBehaviour
     [Header("Seed")]
     [SerializeField]
     private int seed;
+    [SerializeField]
+    private bool randomSeed;
 
     [Header("Editor Previews")]
     [SerializeField]
@@ -65,6 +69,8 @@ public class TerrainGeneration : MonoBehaviour
     
     private void Start()
     {
+        if (randomSeed)
+            seed = Random.Range(0, 10000);
         SetValues();
     }
     private void Update()
@@ -126,6 +132,14 @@ public class TerrainGeneration : MonoBehaviour
                 for (int y = -renderDistanceChunks - 1; y <= renderDistanceChunks; y++)
                 {
                     CreateOrUpdateChunk(new Vector2Int(chunk.x + x, chunk.y + y), regenerateHeightMesh, createMesh, threadHeightMapGen);
+                }
+            }
+            for (int x = -chunkRadiusNavMeshGen; x <= chunkRadiusNavMeshGen; x++)
+            {
+                for (int y = -chunkRadiusNavMeshGen; y <= chunkRadiusNavMeshGen; y++)
+                {
+                    Chunk navChunk = CreateOrGetChunk(new Vector2Int(chunk.x + x, chunk.y + y));
+                    navChunk.GenerateNavMesh();
                 }
             }
             foreach (KeyValuePair<Vector2Int,Chunk> keyValuePair in chunkDictionary)
@@ -368,7 +382,7 @@ public class TerrainGeneration : MonoBehaviour
         }
         public void GenerateNavMesh()
         {
-            if (hasNavMesh)
+            if (hasNavMesh || meshData == null || meshData.meshObject == null)
                 return;
             hasNavMesh = true;
             ThreadManager.AddMainThreadJob(delegate {

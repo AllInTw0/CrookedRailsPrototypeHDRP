@@ -28,6 +28,7 @@ public class HealthKit : Item
                     PlayerHealth.active.TakeDamage(-healAmmount);
                     Destroy(gameObject);
                     time = -99f;
+                    return;
                 }
             }
             else
@@ -43,5 +44,6 @@ public class HealthKit : Item
             if (healSoundSource.isPlaying)
                 healSoundSource.Stop();
         }
+        UpdateItem();
     }
 }

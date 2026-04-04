@@ -70,7 +70,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  influenceDistance: 7
+  influenceDistance: 8.5
 --- !u!65 &5661891818506322742
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -90,7 +90,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 4.5, y: 2000, z: 4.5}
+  m_Size: {x: 6, y: 2000, z: 6}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2636634606818126311
 GameObject:

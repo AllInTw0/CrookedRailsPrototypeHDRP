@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: PreStationBuilding
   m_EditorClassIdentifier: Assembly-CSharp::StructureSO
   structurePrefab: {fileID: 1973478150675759637, guid: 9746d532279fb0d4b960494b93e2a0a1, type: 3}
+  onlyRotateY: 1
   addAutoStop: 1
   stopType: 2
-  stopOffset: -2.5
+  stopOffset: -3.75

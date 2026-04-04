@@ -1,10 +1,8 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEngine;
 
 public static class Money
 {
-    private const int startingMoney = 150;
+    private const int startingMoney = 250;
 
     private static int money;
     
