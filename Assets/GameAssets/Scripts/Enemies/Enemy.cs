@@ -39,6 +39,14 @@ public class Enemy : MonoBehaviour
     public Animator animator;
     public float spawnFreezeTime;
     public float walkCycleSpeedMult;
+    //Step Detection
+    [Header("Step Detection")]
+    [SerializeField]
+    private float stepCheckLow;
+    [SerializeField]
+    private float stepCheckHigh;
+    [SerializeField]
+    private float stepCheckDistance;
 
     //Path
     private NavMeshPath navPath;
@@ -122,7 +130,7 @@ public class Enemy : MonoBehaviour
         //Calculate Nav Path
         if (IsNavigatingByPath() && NavMesh.SamplePosition(transformPos,out NavMeshHit hitStart, 10f, NavMesh.AllAreas) && NavMesh.SamplePosition(GetTargetPosition(), out NavMeshHit hitEnd, 10f, NavMesh.AllAreas))
         {
-            NavMesh.CalculatePath(hitStart.position, hitEnd.position, NavMesh.AllAreas, navPath);
+            NavMesh.CalculatePath(hitStart.position, hitEnd.position, 1 << NavMesh.GetAreaFromName("Walkable"), navPath);
             pathIndex = 1;
         }
 
@@ -187,6 +195,21 @@ public class Enemy : MonoBehaviour
             animator.SetFloat("Velocity", velocity);
             animator.SetFloat("SpeedMult", velocity * walkCycleSpeedMult);
         }
+
+        //Step detection
+        if ((targetDirVector.x > 0 || targetDirVector.z > 0) && rb.linearVelocity.y < 0.1f)
+        {
+            if (Physics.Raycast(transform.position + new Vector3(0, stepCheckHigh, 0), projectedDirVector, stepCheckDistance, EnemyManager.active.groundLayer) == false)
+            {
+                if (Physics.Raycast(transform.position + new Vector3(0, stepCheckLow, 0), projectedDirVector, out RaycastHit hit, stepCheckDistance, EnemyManager.active.groundLayer))
+                {
+                    transform.position += projectedDirVector * hit.distance + new Vector3(0, stepCheckHigh, 0);
+                    Debug.Log("Preformed step!");
+                }
+            }
+            Debug.DrawRay(transform.position + new Vector3(0, stepCheckLow, 0), projectedDirVector * stepCheckDistance, Color.red);
+            Debug.DrawRay(transform.position + new Vector3(0, stepCheckHigh, 0), projectedDirVector * stepCheckDistance, Color.red);
+        }
     }
 
     private void Rotate()
@@ -197,8 +220,8 @@ public class Enemy : MonoBehaviour
 
     private void UpdateGroundNormal()
     {
-        //Debug.DrawRay(transform.position + new Vector3(0, 0.1f, 0) + targetDir * 0.25f,Vector3.down);
-        if (Physics.Raycast(transformPos + new Vector3(0, 0.1f, 0) + targetDirVector * 0.25f, Vector3.down, out RaycastHit  hit ,0.2f, EnemyManager.active.groundLayer))
+        Debug.DrawRay(transform.position + new Vector3(0, 0.2f, 0) + targetDirVector * 0.25f,Vector3.down);
+        if (Physics.Raycast(transformPos + new Vector3(0, 0.2f, 0) + targetDirVector * 0.25f, Vector3.down, out RaycastHit  hit ,0.5f, EnemyManager.active.groundLayer))
         {
             groundNormal = hit.normal;
             

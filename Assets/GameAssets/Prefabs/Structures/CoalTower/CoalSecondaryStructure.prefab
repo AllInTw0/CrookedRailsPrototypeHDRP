@@ -852,6 +852,7 @@ GameObject:
   m_Component:
   - component: {fileID: 620450893678286453}
   - component: {fileID: 3297624205004776373}
+  - component: {fileID: 8451065190748059644}
   m_Layer: 0
   m_Name: TerrainModifier
   m_TagString: Untagged
@@ -868,7 +869,7 @@ Transform:
   m_GameObject: {fileID: 6224736436259692364}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 4.5}
+  m_LocalPosition: {x: 0, y: -0.1, z: 4.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -886,33 +887,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abbb8c2125c85d14bb916a9caf68384d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TerrainModifier
-  boxCollider: {fileID: 0}
+  boxCollider: {fileID: 8451065190748059644}
   shapeBasedOnDistance:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
       value: 1
-      inSlope: 0.0010124122
-      outSlope: 0.0010124122
+      inSlope: 0.00018400485
+      outSlope: 0.00018400485
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 4.8754644
-      value: 1.004936
-      inSlope: 0.0010124122
+      time: 6.0108404
+      value: 1.001106
+      inSlope: 0.00018400485
       outSlope: -0.42668313
       tangentMode: 5
       weightedMode: 0
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 5.9970136
-      value: 0.0009739399
-      inSlope: -0.89515656
-      outSlope: -0.89515656
+      time: 7.132389
+      value: -0.0028560162
+      inSlope: -0.8951569
+      outSlope: -0.8951569
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -920,7 +921,28 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  influenceDistance: 6
+  influenceDistance: 7.5
+--- !u!65 &8451065190748059644
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6224736436259692364}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 9, y: 200, z: 12}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6748053188446208930
 GameObject:
   m_ObjectHideFlags: 0

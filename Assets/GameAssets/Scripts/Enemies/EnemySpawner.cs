@@ -53,6 +53,10 @@ public class EnemySpawner : MonoBehaviour
     private float travelDirMeasureDelay = 1f;
     [SerializeField]
     private int maxDirRecordCount = 10;
+    [SerializeField]
+    private int minTrainSectionCountAhead;
+    [SerializeField]
+    private int minTrainSectionCountBehind;
     [Header("Debug")]
     [SerializeField]
     private bool enemiesSpawnAllways;
@@ -128,7 +132,7 @@ public class EnemySpawner : MonoBehaviour
         Vector3 start = PlayerMovement.active.transform.position + Vector3.up;
         Debug.DrawLine(start, start + new Vector3(averageTravelDir.x, 0, averageTravelDir.y) * 6f, Color.yellow);
 
-        if ((GameStateManager.canEnemiesSpawn == false && enemiesSpawnAllways == false) || disableEnemySpawning)
+        if ((CanEnemiesSpawn() == false && enemiesSpawnAllways == false) || disableEnemySpawning)
         {
             SetUpdateCoolDown(2f);
             return;
@@ -139,6 +143,33 @@ public class EnemySpawner : MonoBehaviour
         {
             UpdateEnemySpawning(lastCoolDownLength);
         }
+    }
+    private bool CanEnemiesSpawn()
+    {
+        if (Train.playerTrain.controlls.currentState == LocomotiveControls.State.supersonic)
+            return false;
+
+        int sectionsForward = 0;
+        TrackSection section = Train.playerTrain.frontTrackSection;
+        while(section != null)
+        {
+            sectionsForward++;
+            section = section.nextSection;
+        }
+        if (sectionsForward < minTrainSectionCountAhead)
+            return false;
+
+        int sectionsBackwards = 0;
+        section = Train.playerTrain.frontTrackSection;
+        while (section != null)
+        {
+            sectionsBackwards++;
+            section = section.previousSection;
+        }
+        if (sectionsBackwards < minTrainSectionCountBehind)
+            return false;
+
+        return true;
     }
     private void UpdateEnemySpawning(float deltaTime)
     {
@@ -266,16 +297,17 @@ public class EnemySpawner : MonoBehaviour
             Vector3 spawnDir = Quaternion.AngleAxis(Random.Range(minMaxRot.x, minMaxRot.y), Vector3.up) * new Vector3(averageTravelDir.x, 0f, averageTravelDir.y);
             Vector3 spawnPos = startPos + spawnDir.normalized * Random.Range(minMaxDistance.x, minMaxDistance.y);
 
-            if (NavMesh.SamplePosition(spawnPos, out NavMeshHit hit, 30f, NavMesh.AllAreas)) {
+            if (NavMesh.SamplePosition(spawnPos, out NavMeshHit hit, 10f, 1 << NavMesh.GetAreaFromName("Walkable"))) {
 
                 EnemyManager.active.SpawnEnemy(enemy.prefab, hit.position, Quaternion.identity);
                 realSpawnedDanger += enemy.dangerValue;
             }
             else
             {
-                Debug.LogWarning("Did not spawn enemy! Couldnt sample position on nav! Generating Nav!");
-                EnemyManager.GenerateNavMesh(spawnPos);
+                Debug.LogWarning("Did not spawn enemy! Couldnt sample position on nav!");
             }
+            EnemyManager.GenerateNavMesh(spawnPos);
+
             spawnedDanger += enemy.dangerValue;
         }
 

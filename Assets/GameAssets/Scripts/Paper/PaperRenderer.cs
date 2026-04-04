@@ -121,7 +121,7 @@ public class PaperRenderer : MonoBehaviour
                     }
 
                     OverrideEntry infoOverride = paper.FindOverrideEntry("Info");
-                    infoOverride.objectRefrence.GetComponent<TMP_Text>().text = "Dist.: " + overrideInfo.haulingJobOverride.distance + "m, Sum: " + sum + "$";
+                    infoOverride.objectRefrence.GetComponent<TMP_Text>().text = "Dist.: " + Mathf.Round(overrideInfo.haulingJobOverride.distance / 10f) * 10f + "m, Sum: " + sum + "$";
 
                     for (int i = 0; i < overrideEntry.objectRefrence.childCount; i++)
                     {

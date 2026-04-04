@@ -45,7 +45,13 @@ public class ShopItemSO : ScriptableObject
 
         probability = probabilityCurve.Evaluate(value) * (Random.value * randomness + 1f);
         price = Mathf.RoundToInt(Mathf.Clamp(priceCurve.Evaluate(value) + (Random.value * randomness * 20f), 1f, float.MaxValue));
+        if (price > 20f)
+        {
+            price = Mathf.RoundToInt(price / 5f) * 5;
+        }
         stock = Mathf.RoundToInt(Mathf.Clamp(stockCurve.Evaluate(value) * (Random.value * randomness * 1f + 1f), 1f, float.MaxValue));
+        if (stock < 1)
+            stock = 1;
         sell = Mathf.RoundToInt(Mathf.Clamp(sellCurve.Evaluate(value) + (Random.value * randomness * 5f), 1f, price));
         lastEvaluation = value;
     }

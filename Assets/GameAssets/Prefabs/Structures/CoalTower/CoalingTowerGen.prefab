@@ -96,6 +96,7 @@ MonoBehaviour:
   overlapCheckLayerMask:
     serializedVersion: 2
     m_Bits: 5259264
+  maxRetryCount: 10
   structureConnectionList: []
   structureSectionList: []
   onSectionAdded:
@@ -344,18 +345,30 @@ MonoBehaviour:
       item: {fileID: 11400000, guid: fba5de258cb318342bb90a8d0b6bf548, type: 2}
       minMaxStackCount: {x: 1, y: 3}
     probability: 0.65
-    maxCount: 20
-    pickCount: 20
+    maxCount: 16
+    pickCount: 8
   - element:
       item: {fileID: 11400000, guid: 37b28eef436127340b96cf8afef5fc0a, type: 2}
       minMaxStackCount: {x: 3, y: 6}
     probability: 0.3
     maxCount: -1
-    pickCount: 8
+    pickCount: 7
   - element:
       item: {fileID: 11400000, guid: eace34aab063c944ab7933acb4427aa0, type: 2}
       minMaxStackCount: {x: 3, y: 6}
-    probability: 0.3
+    probability: 0.25
     maxCount: -1
     pickCount: 5
-  minMaxCount: {x: 30, y: 40}
+  - element:
+      item: {fileID: 11400000, guid: 517ca367be1565a4294aa7684a1e17ae, type: 2}
+      minMaxStackCount: {x: 1, y: 1}
+    probability: 0.04
+    maxCount: 2
+    pickCount: 5
+  - element:
+      item: {fileID: 11400000, guid: 277c7caad7a7f2447a65933adf1a7c17, type: 2}
+      minMaxStackCount: {x: 1, y: 1}
+    probability: 0.01
+    maxCount: 1
+    pickCount: 5
+  minMaxCount: {x: 35, y: 50}

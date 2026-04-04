@@ -18,8 +18,9 @@ MonoBehaviour:
   fittingCargo:
   - {fileID: 11400000, guid: 36180025d90ba1348894d6caa4892d4f, type: 2}
   - {fileID: 11400000, guid: 23169256550ddcd4fb51b0cb1ec03721, type: 2}
-  - {fileID: 11400000, guid: 9903dda945ce66346aaf791a2aa9a97e, type: 2}
   - {fileID: 11400000}
   dangerLevel: 0.01
   fittingRailCars:
   - {fileID: 11400000, guid: 0b9737e8447e9f34a8d8cf8704479988, type: 2}
+  payRange: {x: 40, y: 60}
+  iconList: []

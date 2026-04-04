@@ -86,7 +86,7 @@ public class LoadingScreen : MonoBehaviour
     }
     public void SetProgress(float time, string description = "Who knows whats the code is doing")
     {
-        Debug.Log("Time set to: " + time);
+        //Debug.Log("Time set to: " + time);
         targetProgress = time;
         descriptionText = description;
     }

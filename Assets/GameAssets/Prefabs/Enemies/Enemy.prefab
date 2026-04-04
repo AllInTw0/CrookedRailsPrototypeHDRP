@@ -384,7 +384,6 @@ GameObject:
   - component: {fileID: 4171352187836740491}
   - component: {fileID: 7106498880292165457}
   - component: {fileID: 2535033255997809392}
-  - component: {fileID: -5811559044544727051}
   m_Layer: 11
   m_Name: Enemy
   m_TagString: Untagged
@@ -429,10 +428,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.3
-  m_Height: 1.4
+  m_Radius: 0.25
+  m_Height: 1.2
   m_Direction: 1
-  m_Center: {x: 0, y: 0.7, z: 0}
+  m_Center: {x: 0, y: 0.6, z: 0}
 --- !u!54 &4171352187836740491
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -504,24 +503,11 @@ MonoBehaviour:
   animator: {fileID: 8239933683754249275}
   spawnFreezeTime: 3.5
   walkCycleSpeedMult: 0.5
+  stepCheckLow: 0.025
+  stepCheckHigh: 0.26
+  stepCheckDistance: 0.35
   transformPos: {x: 0, y: 0, z: 0}
   playerDistFromTrainToAttackTrain: 15
---- !u!208 &-5811559044544727051
-NavMeshObstacle:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6631932380828592750}
-  m_Enabled: 0
-  serializedVersion: 3
-  m_Shape: 1
-  m_Extents: {x: 0.5, y: 1.25, z: 0.5}
-  m_MoveThreshold: 0.1
-  m_Carve: 1
-  m_CarveOnlyStationary: 0
-  m_Center: {x: 0, y: 1, z: 0}
-  m_TimeToStationary: 0.5
 --- !u!1 &6770462441480761055
 GameObject:
   m_ObjectHideFlags: 0

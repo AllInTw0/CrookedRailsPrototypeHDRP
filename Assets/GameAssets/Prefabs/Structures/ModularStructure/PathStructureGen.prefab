@@ -88,11 +88,20 @@ MonoBehaviour:
     connectionTransform: {fileID: 7337750444291004079}
     validConnectionNameList: []
     endPrefabList: []
+    connectedPrefabList: []
+    useGlobalEnds: 0
     dontConnect: 0
     ignoreConnections: 0
+    section: {fileID: 0}
   overlapCheckLayerMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 16384
+  maxRetryCount: 10
+  structureConnectionList: []
+  structureSectionList: []
+  onSectionAdded:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &3678465640613875052
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -118,6 +127,7 @@ MonoBehaviour:
       m_PreInfinity: 0
       m_PostInfinity: 0
       m_RotationOrder: 0
+    obligatory: 0
   - sectionPrefabList:
     - {fileID: 3211963792748113132, guid: 15b1c0813cc511141b046b11651b41a7, type: 3}
     countType: 0
@@ -130,6 +140,7 @@ MonoBehaviour:
       m_PreInfinity: 0
       m_PostInfinity: 0
       m_RotationOrder: 0
+    obligatory: 1
   - sectionPrefabList:
     - {fileID: 2636634606818126311, guid: be77bb7d079811d47810827521e4a76d, type: 3}
     countType: 0
@@ -142,6 +153,7 @@ MonoBehaviour:
       m_PreInfinity: 0
       m_PostInfinity: 0
       m_RotationOrder: 0
+    obligatory: 0
   - sectionPrefabList:
     - {fileID: 6871242722575679383, guid: a64c8835ac33b064eabfb0b29017ef01, type: 3}
     countType: 0
@@ -154,6 +166,7 @@ MonoBehaviour:
       m_PreInfinity: 0
       m_PostInfinity: 0
       m_RotationOrder: 0
+    obligatory: 0
   - sectionPrefabList:
     - {fileID: 3211963792748113132, guid: f9231a3cae873de44847cbd45b1ec47b, type: 3}
     countType: 0
@@ -166,6 +179,7 @@ MonoBehaviour:
       m_PreInfinity: 0
       m_PostInfinity: 0
       m_RotationOrder: 0
+    obligatory: 1
 --- !u!114 &4777892336995982985
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -228,7 +242,19 @@ MonoBehaviour:
   - element:
       item: {fileID: 11400000, guid: eace34aab063c944ab7933acb4427aa0, type: 2}
       minMaxStackCount: {x: 3, y: 6}
-    probability: 0.3
+    probability: 0.25
     maxCount: -1
+    pickCount: 5
+  - element:
+      item: {fileID: 11400000, guid: 517ca367be1565a4294aa7684a1e17ae, type: 2}
+      minMaxStackCount: {x: 1, y: 1}
+    probability: 0.04
+    maxCount: 2
+    pickCount: 5
+  - element:
+      item: {fileID: 11400000, guid: 277c7caad7a7f2447a65933adf1a7c17, type: 2}
+      minMaxStackCount: {x: 1, y: 1}
+    probability: 0.01
+    maxCount: 1
     pickCount: 5
   minMaxCount: {x: 20, y: 30}

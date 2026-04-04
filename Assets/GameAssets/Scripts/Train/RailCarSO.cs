@@ -16,6 +16,7 @@ public class RailCarSO : ScriptableObject
     [Header("HaulingJobParams")]
     public int minLevel;
     public int maxLevel;
+    public Vector2 payRange;
 
     public string GetName()
     {

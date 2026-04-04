@@ -217,6 +217,14 @@ MonoBehaviour:
   minMaxRotOffset: {x: -75, y: 75}
   sphereCheckRadius: 3
   sphereCheckOffset: {x: 0, y: 1, z: 0}
+  followTerrain: 0
+  checkForTerrainHeight: 0
+  chunkAverageHeigthMinMax: {x: 0, y: 0}
+  heightMinMax: {x: 0, y: 0}
+  modifyGround: 1
+  allowedHeightInterval: {x: -9.2, y: -0.5}
+  checkDistanceToTrack: 0
+  minDistanceFromTrack: 0
   minLength: 4
 --- !u!114 &7595224050321251200
 MonoBehaviour:

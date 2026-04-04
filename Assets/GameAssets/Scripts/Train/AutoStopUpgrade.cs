@@ -66,7 +66,7 @@ public class AutoStopUpgrade : MonoBehaviour
             if (distanceToAutoStop <= distanceToStop)
             {
                 Debug.Log("Engaging breaks! Detected autostop");
-                if (nearestAutoStop.stopType == AutoStopType.Supersonic || nearestAutoStop.stopType == AutoStopType.Station)
+                if (nearestAutoStop.stopType == AutoStopType.Supersonic || nearestAutoStop.stopType == AutoStopType.Station || nearestAutoStop.stopType == AutoStopType.SlowDown)
                 {
                     targetTrain.controlls.LockControlls();
                 }
@@ -78,9 +78,17 @@ public class AutoStopUpgrade : MonoBehaviour
                 nearestAutoStop.ignore = true;
             }
         }
-        if (Mathf.Abs(targetTrain.speed) < 0.01f)
+
+        if (currentAutoBreakingStop != null)
         {
-            if (currentAutoBreakingStop != null)
+            if (Mathf.Abs(targetTrain.speed) < TrainUpgradeHandler.active.GetStatValue(TrainStatType.Speed) && currentAutoBreakingStop.stopType == AutoStopType.SlowDown)
+            {
+                targetTrain.controlls.Unlock();
+                targetTrain.controlls.SetFullThrottle();
+                currentAutoBreakingStop = null;
+                PlayerMovement.active.UnFreeze();
+            }
+            else if (Mathf.Abs(targetTrain.speed) < 0.01f)
             {
                 if (currentAutoBreakingStop.stopType == AutoStopType.Supersonic || currentAutoBreakingStop.stopType == AutoStopType.Station)
                 {

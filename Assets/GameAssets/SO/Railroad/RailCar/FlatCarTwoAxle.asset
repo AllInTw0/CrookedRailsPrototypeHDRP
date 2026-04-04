@@ -18,3 +18,4 @@ MonoBehaviour:
   weight: 50
   minLevel: 0
   maxLevel: 4
+  payRange: {x: 40, y: 60}

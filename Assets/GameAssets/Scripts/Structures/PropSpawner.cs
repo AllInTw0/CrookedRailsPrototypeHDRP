@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static ItemSpawner;
 using static Util;
 
 public class PropSpawner : StructureGenerator
@@ -122,7 +121,7 @@ public class PropSpawner : StructureGenerator
 
                 if (DoesPropOverlap(propCopy.GetComponent<BoxCollider>()))
                 {
-                    yield return new WaitForSecondsRealtime(0.001f);
+                    yield return new WaitForFixedUpdate();
                     DestroyImmediate(propCopy);
                 }
                 else
@@ -135,7 +134,7 @@ public class PropSpawner : StructureGenerator
             }
 
             spawnTries++;
-            yield return new WaitForSecondsRealtime(0.001f);
+            yield return new WaitForFixedUpdate();
         }
 
         yield break;

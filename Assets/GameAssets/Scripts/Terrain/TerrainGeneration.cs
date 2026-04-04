@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.AI.Navigation;
 using UnityEngine;
+using UnityEngine.AI;
 using static TerrainGeneration;
 using static Util;
 
@@ -52,7 +53,6 @@ public class TerrainGeneration : MonoBehaviour
     private Vector2Int lastUpdateCoord;
     [Header("Navigation")]
     public LayerMask navMeshLayerMask;
-
     [Header("Seed")]
     [SerializeField]
     private int seed;
@@ -221,7 +221,8 @@ public class TerrainGeneration : MonoBehaviour
             {
                 if(TestChunk(new Vector2Int(coord.x + chunkX, coord.y + chunkY), out Chunk chunk))
                 {
-                    return chunk;
+                    //experiment
+                    //return chunk;
                 }
             }
         }
@@ -372,11 +373,22 @@ public class TerrainGeneration : MonoBehaviour
             hasNavMesh = true;
             ThreadManager.AddMainThreadJob(delegate {
                 NavMeshSurface navMeshSurface = meshData.meshObject.AddComponent<NavMeshSurface>();
+
+                navMeshSurface.agentTypeID = NavMesh.GetSettingsByIndex(1).agentTypeID;//enemy
+
                 navMeshSurface.collectObjects = CollectObjects.Volume;
                 navMeshSurface.size = new Vector3(chunkSize + 5f, 40, chunkSize + 5f);
                 navMeshSurface.center = new Vector3(chunkSize * 0.5f + 2.5f, 10, chunkSize * 0.5f + 2.5f);
                 navMeshSurface.useGeometry = UnityEngine.AI.NavMeshCollectGeometry.PhysicsColliders;
                 navMeshSurface.layerMask = active.navMeshLayerMask;
+                navMeshSurface.defaultArea = NavMesh.GetAreaFromName("Walkable");
+
+                navMeshSurface.overrideTileSize = true;
+                navMeshSurface.tileSize = 32;
+
+                navMeshSurface.overrideVoxelSize = true;
+                navMeshSurface.voxelSize = 0.15f;
+
                 navMeshSurface.BuildNavMesh();
             });
         }
@@ -436,6 +448,14 @@ public class TerrainGeneration : MonoBehaviour
             }
         }
 
+        public Vector2Int GetVertex(Vector3 pos)
+        {
+            return new Vector2Int(Mathf.FloorToInt((pos.x - worldPos.x) / vertSpacing), Mathf.FloorToInt((pos.z - worldPos.y) / vertSpacing));
+        }
+        //public Vector3 GetNormal()
+        //{
+        //
+        //}
         public Vector3 GetVertexWorldPos(int x, int y)
         {
             return new Vector3(x * vertSpacing + worldPos.x, heightMap[Mathf.Clamp(x,0, heightMap.GetLength(0) - 1), Mathf.Clamp(y, 0, heightMap.GetLength(1) - 1)], y * vertSpacing + worldPos.y);

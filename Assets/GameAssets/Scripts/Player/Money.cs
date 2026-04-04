@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class Money
 {
-    private const int startingMoney = 50;
+    private const int startingMoney = 150;
 
     private static int money;
     

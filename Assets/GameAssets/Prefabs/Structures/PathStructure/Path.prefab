@@ -210,9 +210,12 @@ MonoBehaviour:
   sphereCheckOffset: {x: 0, y: 0, z: 0}
   followTerrain: 1
   checkForTerrainHeight: 1
-  terrainHeightTargetAverage: 3
-  terrainHeightMaxOffset: 3
-  terrainHeightCheckRadius: 1
+  chunkAverageHeigthMinMax: {x: -100, y: 3}
+  heightMinMax: {x: 0, y: 3}
+  modifyGround: 0
+  allowedHeightInterval: {x: 0, y: 0}
+  checkDistanceToTrack: 1
+  minDistanceFromTrack: 20
   minLength: -1
 --- !u!114 &8239861066302214513
 MonoBehaviour:

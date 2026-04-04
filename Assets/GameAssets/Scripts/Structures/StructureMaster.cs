@@ -62,6 +62,9 @@ public class StructureMaster : MonoBehaviour
     public Connection startConnection;
     public LayerMask overlapCheckLayerMask;
 
+    public int maxRetryCount;
+    private int retryCount = 0;
+
     public static int generatingStructures;
     public static int finnishedStructures;
 
@@ -92,7 +95,7 @@ public class StructureMaster : MonoBehaviour
 
         if (structureType == StructureType.Station)
         {
-            GameStateManager.isStationSpawned = true;
+            //GameStateManager.isStationSpawned = true;
         }
     }
     public IEnumerator GenerateIEnumerable()
@@ -116,7 +119,7 @@ public class StructureMaster : MonoBehaviour
     {
         if (structureType == StructureType.Station)
         {
-            GameStateManager.isStationSpawned = false;
+            //GameStateManager.isStationSpawned = false;
         }
     }
     public void DestroyStructure()
@@ -128,9 +131,21 @@ public class StructureMaster : MonoBehaviour
     }
     public void RestartGeneration()
     {
+        retryCount++;
         Debug.LogWarning("Restarting Generation: " + transform.name);
-        StopCoroutine(GenerateIEnumerable());
+        StopAllCoroutines();
+        foreach (StructureGenerator structure in structureList)
+        {
+            structure.StopGenerating();
+        }
         DestroyStructure();
+        if (retryCount > maxRetryCount)
+        {
+            Destroy(gameObject);
+            Debug.LogWarning("Reached max retries!");
+            finnishedStructures++;
+            return;
+        }
         GenerateStructure();
     }
     public float GetLength(LengthType lengthType)
@@ -191,7 +206,7 @@ public class StructureMaster : MonoBehaviour
         foreach (Connection connection in sectionScript.GetConnectingConnectionList())
         {
             List<Connection> connectionList = GetValidConnectionsForConnection(connection);
-            Debug.Log("c: " + connectionList.Count);
+            //Debug.Log("c: " + connectionList.Count);
 
             if (connectionList.Count > 0) 
             {

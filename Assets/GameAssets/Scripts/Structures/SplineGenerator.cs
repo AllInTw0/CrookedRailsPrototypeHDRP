@@ -38,11 +38,18 @@ public class SplineGenerator : StructureGenerator
     [SerializeField]
     private bool checkForTerrainHeight;
     [SerializeField]
-    private float terrainHeightTargetAverage;
+    private Vector2 chunkAverageHeigthMinMax;
     [SerializeField]
-    private float terrainHeightMaxOffset;
+    private Vector2 heightMinMax;
     [SerializeField]
-    private int terrainHeightCheckRadius = 1;
+    private bool modifyGround;
+    [SerializeField]
+    private Vector2 allowedHeightInterval;
+    [Header("Track")]
+    [SerializeField]
+    private bool checkDistanceToTrack;
+    [SerializeField]
+    private float minDistanceFromTrack;
     [Header("Min Length")]
     [SerializeField]
     private float minLength = -1f;
@@ -75,13 +82,53 @@ public class SplineGenerator : StructureGenerator
             else
             {
                 //Random
-                Vector3 endPos = startConnection.connectionTransform.position + - startConnection.connectionTransform.forward * Random.Range(minMaxDistanceForward.x, minMaxDistanceForward.y) + startConnection.connectionTransform.right * Random.Range(minMaxDistanceRight.x, minMaxDistanceRight.y);
-                Debug.DrawLine(startConnection.connectionTransform.position, endPos, Color.green, 30f);
-                if (checkForTerrainHeight)
+                Vector3 GetRandomOffset()
                 {
-                    TerrainGeneration.Chunk chunk = TerrainGeneration.active.FindFittingChunk(terrainHeightTargetAverage, terrainHeightMaxOffset, terrainHeightTargetAverage - terrainHeightMaxOffset, terrainHeightTargetAverage + terrainHeightMaxOffset, TerrainGeneration.active.GetChunkCoord(endPos), terrainHeightCheckRadius);
-                    endPos = chunk.GetWorldPos(0.5f, 0.5f);
+                    return startConnection.connectionTransform.position + -startConnection.connectionTransform.forward * Random.Range(minMaxDistanceForward.x, minMaxDistanceForward.y) + startConnection.connectionTransform.right * Random.Range(minMaxDistanceRight.x, minMaxDistanceRight.y);
+                }
+                Vector3 endPos = Vector3.zero;
+                int saftey = 50;
+                while (saftey > 0)
+                {
+                    bool passed = true;
+                    endPos = GetRandomOffset();
+                    Debug.DrawLine(startConnection.connectionTransform.position, endPos, Color.green, 30f);
                     Debug.DrawLine(startConnection.connectionTransform.position, endPos, Color.yellow, 30f);
+                    if (checkForTerrainHeight)
+                    {
+                        TerrainGeneration.Chunk chunk = TerrainGeneration.active.CreateOrGetChunk(TerrainGeneration.active.GetChunkCoord(endPos));
+                        if(chunkAverageHeigthMinMax.x <= chunk.heightAverage && chunkAverageHeigthMinMax.y >= chunk.heightAverage)
+                        {
+                            float pointHeight = TerrainGeneration.active.GetHeight(endPos);
+                            if (heightMinMax.x <= pointHeight && heightMinMax.y >= pointHeight)
+                            { }
+                            else
+                            {
+                                passed = false;
+                            }
+                        }
+                        else
+                        {
+                            passed = false;
+                        }
+                        
+                    }
+                    if (checkDistanceToTrack && passed)
+                    {
+                        float dist = TrackManager.active.GetDistanceFromTrack(endPos);
+                        if (dist < minDistanceFromTrack)
+                            passed = false;
+
+                    }
+                    if (passed)
+                        break;
+                    saftey--;
+                }
+                if (saftey <= 1)
+                {
+                    Debug.LogWarning("Exeded saftey! " + saftey);
+                    structureMaster.RestartGeneration();
+                    yield break;
                 }
                 endConnection.connectionTransform.position = endPos;
                 endConnection.connectionTransform.rotation = Quaternion.Euler(0f, startConnection.connectionTransform.eulerAngles.y + Random.Range(minMaxRotOffset.x, minMaxRotOffset.y) + 180f, 0f);
@@ -134,7 +181,16 @@ public class SplineGenerator : StructureGenerator
         {
             for (int i = 0; i < path.Count; i++)
             {
+                //if (Physics.Raycast(path[i].position + Vector3.up * 50f, Vector3.down, out RaycastHit hit, 100f, LayerMask.GetMask("Terrain")))
+                //{
+                //    Debug.Log("Terrai Hit!");
+                //    path[i].position = hit.point;
+                //}
+                //else
+                //{
+                //    Debug.Log("Terrai Nope!");
                 path[i].position = new Vector3(path[i].position.x, TerrainGeneration.active.GetHeight(path[i].position), path[i].position.z);
+                //}
             }
             end.connectionTransform.position = path[^1].position;
         }
@@ -148,7 +204,7 @@ public class SplineGenerator : StructureGenerator
             Debug.DrawLine(splinePath[i].position, splinePath[i + 1].position, Color.red, 30f);
         }
 
-        TrackManager.CalculatePath(path, out List<PathPoint> meshPath, 1.5f, followTerrain);
+        TrackManager.CalculatePath(path, out List<PathPoint> meshPath, 1f, followTerrain);
 
         if (DoesPathOverlap(meshPath))
         {
@@ -160,7 +216,10 @@ public class SplineGenerator : StructureGenerator
         {
             splineVisualizer.Visualize(meshPath);
         }
-
+        if (modifyGround)
+        {
+            TrackGeneration.active.ModifyTerrainToFollowPath(meshPath, false, allowedHeightInterval, false);
+        }
         //for (float i = 0; i < 1f; i+= 0.05f)
         //{
         //    Debug.DrawLine(Spline.CalculateSplinePosition(startPoint, endPoint, i), Spline.CalculateSplinePosition(startPoint, endPoint, i+ 0.05f), Color.purple,30f);

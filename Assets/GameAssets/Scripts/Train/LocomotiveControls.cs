@@ -65,6 +65,20 @@ public class LocomotiveControls : MonoBehaviour
                 //    GenerationManager.active.GenerateTillNextStation();
                 //}
 
+                if(onSetOffTriggerGenerationReset && (HaulingJobMonitorHandler.active != null && HaulingJobMonitorHandler.haulingJobPicked == false))
+                {
+                    //throttle.SetActionNameOverride("Pick a job first!");
+                    throttle.currentNotch = throttleNotch;
+                    throttleNotch = 0;
+
+                    locoBreaks.currentNotch = 0;
+                    locoBreaksNotch = 0;
+
+                    reverser.currentNotch = 0;
+                    reverserNotch = 0;
+                    return;
+                }
+
                 if (throttle.actionNameOverride != "")
                 {
                     //Freeze the players to the train
@@ -83,7 +97,6 @@ public class LocomotiveControls : MonoBehaviour
                 train.SetAcceleration(supersonicAcceleration);
                 train.SetDeceleration(0f);
             }
-            return;
         }
         else if (currentState == State.depletedFuel)
         {
@@ -225,6 +238,14 @@ public class LocomotiveControls : MonoBehaviour
         throttle.SetLocked(false);
         locoBreaks.SetLocked(false);
         reverser.SetLocked(false);
+    }
+    public void SetFullThrottle()
+    {
+        throttle.currentNotch = throttle.notches;
+        UpdateThrottle();
+
+        locoBreaks.currentNotch = 0;
+        UpdateBreaks();
     }
 
     public float GetDeceleration()

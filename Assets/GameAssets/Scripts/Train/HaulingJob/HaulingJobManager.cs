@@ -6,6 +6,7 @@ public class HaulingJob
 {
     public List<HaulingJobEntry> haulingJobEntryList;
     public float distance;
+    public NodePath linkedTrainTrackPath;
     public float GetConsistLength()
     {
         float sum = 0f;
@@ -39,6 +40,8 @@ public class HaulingJobManager : MonoBehaviour
     [Header("Railcar List")]
     [SerializeField]
     public List<RailCarSO> railCarInfoList = new List<RailCarSO>();
+    [Header("Pay params")]
+    public Vector2 payIncreaseFor100Meters;
     [Header("Icon rendering")]
     public LayerMask renderLayer;
     private void Awake()
@@ -52,13 +55,13 @@ public class HaulingJobManager : MonoBehaviour
 
         for (int i = 0; i < count; i++)
         {
-            haulingJobList.Add(GenerateHaulingJob(i * 0.5f, i * 1f, 0.4f, 8 - i * 2, GameStateManager.currentLevel));
+            haulingJobList.Add(GenerateHaulingJob(i * 0.5f, i * 1f, 0.4f, 2 + i * 2, GameStateManager.currentLevel, nodePathList != null ? nodePathList[i] : null));
         }
 
         generatedHaulingJobList = haulingJobList;
 
     }
-    public HaulingJob GenerateHaulingJob(float maxCargoDangerLevel, float targetDangerLevel, float mixedLevel, int maxCargoCount, int currentLevel, float travelDistance = -1f)
+    public HaulingJob GenerateHaulingJob(float maxCargoDangerLevel, float targetDangerLevel, float mixedLevel, int maxCargoCount, int currentLevel, NodePath trackPath = null)
     {
         //Pick first cargo
         CargoSO firstCargo;
@@ -113,7 +116,7 @@ public class HaulingJobManager : MonoBehaviour
             entry.railCar = eligibleRailCarList[Random.Range(0, eligibleRailCarList.Count)];
 
             entry.weight = Random.Range(10, 50);
-            entry.pay = Random.Range(50, 500);
+            entry.pay = 0f;
 
             haulingJobEntryList.Add(entry);
         }
@@ -128,11 +131,24 @@ public class HaulingJobManager : MonoBehaviour
         HaulingJob haulingJob = new HaulingJob();
         haulingJob.haulingJobEntryList = haulingJobEntryList;
 
-        if(travelDistance < 0f)
+        if (trackPath == null)
             haulingJob.distance = Random.Range(1250, 2500);
         else
-            haulingJob.distance = travelDistance;
+        {
+            haulingJob.distance = trackPath.length;
+            haulingJob.linkedTrainTrackPath = trackPath;
+        }
 
+        //Calculate pay
+        float bonus = (Mathf.Floor(haulingJob.distance / 100f) * Random.Range(payIncreaseFor100Meters.x, payIncreaseFor100Meters.y)) / haulingJob.haulingJobEntryList.Count;
+        foreach (HaulingJobEntry entry in haulingJob.haulingJobEntryList)
+        {
+            float cargo = Random.Range(entry.cargo.payRange.x, entry.cargo.payRange.y);
+            float railCar = Random.Range(entry.railCar.payRange.x, entry.railCar.payRange.y);
+            float pay = Mathf.Round((bonus + cargo + railCar) / 10f) * 10f;
+
+            entry.pay = pay;
+        }
         return haulingJob;
         
     }

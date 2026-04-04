@@ -20,12 +20,12 @@ public class TrainEffects : MonoBehaviour
         rotation += rotationTravelled;
         if(rotation >= 90f)
         {
-            rotation -= 90f;
+            rotation = 0f;
             PreformChuff();
         }
         else if (rotation <= -90f)
         {
-            rotation += 90f;
+            rotation = 0f;
             PreformChuff();
         }
     }

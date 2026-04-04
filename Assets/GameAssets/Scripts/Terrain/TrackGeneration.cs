@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class TrackGeneration : MonoBehaviour
 {
+    public static TrackGeneration active;
     [Header("Pathfinding")]
     [SerializeField]
     private AStar.AStarSettings pathFindingSettings;
@@ -25,33 +25,60 @@ public class TrackGeneration : MonoBehaviour
     private int minPathPointCountToCreateBridge;
     [SerializeField]
     private float waterHeight;
+    private void Awake()
+    {
+        active = this;
+    }
     public void GenerateTrack(Vector3 start, Vector3 end, Point lastSplinePoint = null)
     {
         AStar aStar = new AStar(start, end, pathFindingSettings);
         NodePath nodePath = aStar.FindPath(aStar.GetNode(start), aStar.GetNode(end));
         CreateTrackAlongNodes(nodePath, out List<PathPoint> allPathPoints, out TrackSection lastTrackSectionOut, lastSplinePoint);
     } 
-    public List<NodePath> FindPaths(Vector3 start, Vector3 end, List<int> pathSeeds, int count = 3)
+    public List<NodePath> FindPaths(Vector3 start, Vector3 end, List<int> pathSeeds, int count = 3, float loadingBarTime = 0.4f)
     {
         List<NodePath> nodePathList = new List<NodePath>();
         for (int i = 0; i < pathSeeds.Count; i++)
         {
-            LoadingScreen.active.SetProgress((i / (float)pathSeeds.Count) * 0.4f, $"Finding paths {i}/{pathSeeds.Count}");
+            LoadingScreen.active.SetProgress((i / (float)pathSeeds.Count) * loadingBarTime, $"Finding paths {i}/{pathSeeds.Count}");
             pathFindingSettings.seed = pathSeeds[i];
             AStar aStar = new AStar(start, end, pathFindingSettings);
             nodePathList.Add(aStar.FindPath(aStar.GetNode(start), aStar.GetNode(end)));
+            //ThreadManager.AddMainThreadJob(delegate { Debug.Log("Path found! Length: " + nodePathList[^1].length); });
         }
-        LoadingScreen.active.SetProgress(0.4f, $"Finding paths {pathSeeds.Count}/{pathSeeds.Count}");
-        IOrderedEnumerable<NodePath> sortedList = nodePathList.OrderBy(nodePath => nodePath.length);
+        LoadingScreen.active.SetProgress(loadingBarTime, $"Finding paths {pathSeeds.Count}/{pathSeeds.Count}");
+        //Never again
+        //IOrderedEnumerable<NodePath> sortedList = nodePathList.OrderBy(nodePath => nodePath.length);
+        bool sorted = false;
+        while (sorted == false)
+        {
+            sorted = true;
+            for (int i = 1; i < nodePathList.Count; i++)
+            {
+                if (nodePathList[i].length < nodePathList[i - 1].length)
+                {
+                    NodePath temp = nodePathList[i];
+                    nodePathList[i] = nodePathList[i - 1];
+                    nodePathList[i - 1] = temp;
+                    sorted = false;
+                }
+            }
+        }
+        for (int i = 0; i < nodePathList.Count; i++)
+        {
+            float length = nodePathList[i].length;
+            ThreadManager.AddMainThreadJob(delegate { Debug.Log("Sorred Path Length: " + length); });
+        }
         if (count == 1)
-            return new List<NodePath>() { sortedList.First() };
+            return new List<NodePath>() { nodePathList[0] };
 
         List <NodePath> chosenPathList = new List<NodePath>();
-        float step = nodePathList.Count / ((float)count);
+        float step = nodePathList.Count / ((float)count-1f);
         for (int i = 0; i < count; i++)
         {
-
-            chosenPathList.Add(sortedList.ElementAt(Mathf.FloorToInt(step * i)));
+            int index = Mathf.Clamp(Mathf.FloorToInt(step * (float)i), 0, nodePathList.Count - 1);
+            ThreadManager.AddMainThreadJob(delegate { Debug.Log("Sorred Path Index: " + index); });
+            chosenPathList.Add(nodePathList[index]);
         }
         return chosenPathList;
     }
@@ -99,7 +126,7 @@ public class TrackGeneration : MonoBehaviour
         }
         lastTrackSectionOut = lastTrackSection;
     }
-    public void ModifyTerrainToFollowPath(List<PathPoint> path, bool recalculateLength)
+    public void ModifyTerrainToFollowPath(List<PathPoint> path, bool recalculateLength, Vector2 allowedHeightInterval = default, bool createBridges = true)
     {
         if (recalculateLength)
         {
@@ -118,31 +145,34 @@ public class TrackGeneration : MonoBehaviour
             new Vector3(0,0, 0)
         };
 
-        int bridgeStartIndex = -1;
-        for (int i = 0; i < path.Count; i++)
+        if (createBridges)
         {
-            float height = TerrainGeneration.active.GetHeight(path[i].position);
-            if((height < waterHeight || (height < path[i].position.y && path[i].position.y - height >= heightDffrenceToCreateBridge)) && i < path.Count - 1)
+            int bridgeStartIndex = -1;
+            for (int i = 0; i < path.Count; i++)
             {
-                if (bridgeStartIndex == -1)
-                    bridgeStartIndex = i;
-            }
-            else
-            {
-                if(bridgeStartIndex != -1)
+                float height = TerrainGeneration.active.GetHeight(path[i].position);
+                if ((height < waterHeight || (height < path[i].position.y && path[i].position.y - height >= heightDffrenceToCreateBridge)) && i < path.Count - 1)
                 {
-                    if (i - bridgeStartIndex >= minPathPointCountToCreateBridge)
+                    if (bridgeStartIndex == -1)
+                        bridgeStartIndex = i;
+                }
+                else
+                {
+                    if (bridgeStartIndex != -1)
                     {
-                        int start = Mathf.Clamp(bridgeStartIndex - 1, 0, path.Count - 1);
-                        int count = Mathf.Clamp(i - bridgeStartIndex + 2, 0, path.Count - 1);
-                        TrackManager.CalculatePath(path.GetRange(start, count), out List<PathPoint> refactoredPath, 0.5f, true);
-                        for (int j = start+1; j < start + count-1; j++)
+                        if (i - bridgeStartIndex >= minPathPointCountToCreateBridge)
                         {
-                            path[j].bridge = true;
+                            int start = Mathf.Clamp(bridgeStartIndex - 1, 0, path.Count - 1);
+                            int count = Mathf.Clamp(i - bridgeStartIndex + 2, 0, path.Count - 1);
+                            TrackManager.CalculatePath(path.GetRange(start, count), out List<PathPoint> refactoredPath, 0.5f, true);
+                            for (int j = start + 1; j < start + count - 1; j++)
+                            {
+                                path[j].bridge = true;
+                            }
+                            ThreadManager.AddMainThreadJob(delegate { Spline.active.GenerateMeshAlongPath(refactoredPath, Spline.active.splineMeshList[bridgeSplineMeshIndex]); });
                         }
-                        ThreadManager.AddMainThreadJob(delegate { Spline.active.GenerateMeshAlongPath(refactoredPath, Spline.active.splineMeshList[bridgeSplineMeshIndex]); });
+                        bridgeStartIndex = -1;
                     }
-                    bridgeStartIndex = -1;
                 }
             }
         }
@@ -173,12 +203,14 @@ public class TrackGeneration : MonoBehaviour
 
                     float distance = TrackManager.active.GetDistanceFromPath(path, vertWorldPos, out PathPoint pathPoint, true);
 
-                    if(distance < ballastInfluenceDistance && pathPoint.bridge == false)
+                    float targetY = Mathf.Clamp(vertWorldPos.y, pathPoint.position.y + allowedHeightInterval.x, pathPoint.position.y + allowedHeightInterval.y);
+
+                    if (vertWorldPos.y != targetY && distance < ballastInfluenceDistance && pathPoint.bridge == false)
                     {
                         float time = ballastShapeBasedOnDistance.Evaluate(distance);
-                        chunk.heightMap[x, y] = Mathf.Lerp(vertWorldPos.y, pathPoint.position.y, time);
+                        chunk.heightMap[x, y] = Mathf.Lerp(vertWorldPos.y, targetY, time);
                     }
-                    Debug.DrawRay(vertWorldPos, Vector3.up, Color.blue, 20f);
+                    //Debug.DrawRay(vertWorldPos, Vector3.up, Color.blue, 20f);
                 }
             }
         }
@@ -325,7 +357,7 @@ public class AStar
                 if (closedSet.Contains(neighbour))
                     continue;
 
-                Debug.DrawLine(current.worldPos, neighbour.worldPos, new Color(0.5f, 0.5f, 0.5f, 0.06f), settings.debugDrawTime);
+                //Debug.DrawLine(current.worldPos, neighbour.worldPos, new Color(0.5f, 0.5f, 0.5f, 0.06f), settings.debugDrawTime);
                 float gCost = current.gCost + GetCost(current, neighbour);
                 if(gCost < neighbour.gCost || openSet.Contains(neighbour) == false)
                 {

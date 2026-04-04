@@ -22,3 +22,5 @@ MonoBehaviour:
   dangerLevel: 0.01
   fittingRailCars:
   - {fileID: 11400000, guid: e1b57eeabcc8afe4482d17364ce7a8b7, type: 2}
+  payRange: {x: 30, y: 55}
+  iconList: []

@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.HighDefinition.Runtime::UnityEngine.Rendering.HighDefinition.DecalProjector
   m_Material: {fileID: 2100000, guid: fc72318e79030804cb0c56874d3037c6, type: 2}
-  m_DrawDistance: 25
+  m_DrawDistance: 40
   m_FadeScale: 0.9
   m_StartAngleFade: 180
   m_EndAngleFade: 180

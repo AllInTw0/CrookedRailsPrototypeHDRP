@@ -16,20 +16,20 @@ public class GameStateManager : MonoBehaviour
     //Run Time
     public static HaulingJob currentHaulingJob;
 
-    public static bool isStartingLocationSpawned;
-    public static bool isStationSpawned;
+    //public static bool isStartingLocationSpawned;
+    //public static bool isStationSpawned;
 
-    public static int currentLevel = 1;
+    public static int currentLevel = 0;
 
     public static float distanceTravelled = 0f;
 
-    public static bool canEnemiesSpawn
-    {
-        get
-        {
-            return !(isStartingLocationSpawned || isStationSpawned);
-        }
-    }
+    //public static bool canEnemiesSpawn
+    //{
+    //    get
+    //    {
+    //        return !(isStartingLocationSpawned || isStationSpawned);
+    //    }
+    //}
     public static List<DistanceWaypoint> waypointList = new List<DistanceWaypoint>();
 
     //Shop Stuff

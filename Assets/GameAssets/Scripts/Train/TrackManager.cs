@@ -22,7 +22,8 @@ public enum AutoStopType
     TenderHatch,
     Supersonic,
     Station,
-    Structure
+    Structure,
+    SlowDown
 }
 public class AutoStop
 {
@@ -301,13 +302,29 @@ public class TrackManager : MonoBehaviour
     }
     public static Vector3 GetPathDirectionVector(List<PathPoint> path, float progress)
     {
+        //Handle out of range progress
+        progress = Mathf.Clamp(progress, 0f, path[^1].distance);
+
         for (int i = 1; i < path.Count; i++)
         {
             if (path[i].distance >= progress)
             {
-                return (path[i].position - path[i - 1].position).normalized;
+                Vector3 dir = (path[i].position - path[i - 1].position).normalized;
+
+                //sometimes some ammount of pathpoints have the same pos. this is a crappy fix
+                if (dir == Vector3.zero)
+                {
+                    int count = 2;
+                    while(dir == Vector3.zero && i - count >= 0)
+                    {
+                        dir = (path[i].position - path[i - count].position).normalized;
+                        count++;
+                    }
+                }
+                return dir;
             }
         }
+
         Debug.LogWarning("Couldn't Get Path Direction Vector. " + progress);
         return Vector3.zero;
     }

@@ -44,21 +44,21 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 349.4641
       inSlope: 0
       outSlope: 0
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
-      outWeight: 0
+      outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
-      value: 1
+      value: 349.4641
       inSlope: 0
       outSlope: 0
       tangentMode: 34
       weightedMode: 0
-      inWeight: 0
+      inWeight: 0.33333334
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -91,22 +91,22 @@ MonoBehaviour:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0.0025976244
-      value: 0.026262105
+      time: 0
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.33333334
+      outWeight: 0
     - serializedVersion: 3
-      time: 1.0025976
-      value: 0.026262105
+      time: 1
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 34
       weightedMode: 0
-      inWeight: 0.33333334
+      inWeight: 0
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -119,6 +119,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   neededBoughtItems:
   - {fileID: 11400000, guid: 06d20398068acf749b0fe7c6451fbd07, type: 2}
+  maxCountBought: 1
   offset: {x: -0.26, y: 0.15, z: -0.26}
   origin: {x: 0, y: 0, z: 0.025}
   rotation: {x: 0, y: 0, z: 0}
