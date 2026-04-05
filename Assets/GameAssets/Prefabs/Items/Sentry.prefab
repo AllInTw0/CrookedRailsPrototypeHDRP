@@ -2084,7 +2084,7 @@ MonoBehaviour:
   rotXTransform: {fileID: 8122030509740747031}
   rotXSpeed: 240
   healthTypeFilterList: 03000000
-  maxDistance: 50
+  maxDistance: 27.5
   maxAngleDiff: 2
   angleMode: 1
   gunVisualList:

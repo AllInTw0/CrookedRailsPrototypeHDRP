@@ -172,7 +172,7 @@ public class Settings : MonoBehaviour
         graphicsSection.AddSlider("Camera's FOV", 10f, 160f, fov).onValueChanged.AddListener((float newValue) =>
         {
             fov = newValue;
-            PlayerPrefs.SetFloat("fov", sensitivity);
+            PlayerPrefs.SetFloat("fov", newValue);
         });
 
 

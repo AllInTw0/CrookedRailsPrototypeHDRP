@@ -8,6 +8,7 @@ public class Fade : MonoBehaviour
 {
     public static Fade screenFade;
     public static Fade gameFade;
+    public static Fade hitFade;
 
     [Header("Params")]
     [SerializeField]
@@ -19,6 +20,8 @@ public class Fade : MonoBehaviour
     private bool isScreenFade;
     [SerializeField]
     private bool isGameFade;
+    [SerializeField]
+    private bool isHitFade;
 
     bool fadeIn;
     private float speed;
@@ -36,6 +39,11 @@ public class Fade : MonoBehaviour
         if (isGameFade)
         {
             gameFade = this;
+            SetAlpha(0f);
+        }
+        if (isHitFade)
+        {
+            hitFade = this;
             SetAlpha(0f);
         }
         if (addChildGrpahics)

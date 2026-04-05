@@ -54,14 +54,14 @@ public class GameOverScreen : MonoBehaviour
 
         retryButton.onClick.AddListener(() =>
         {
-            if (ignoreInput || timmer < 1f) return;
+            if (ignoreInput) return;
             SoundManager.active.Play(clickSoundString);
             ignoreInput = true;
             StartCoroutine(LoadScene("Game"));
         });
         quitButton.onClick.AddListener(() =>
         {
-            if (ignoreInput || timmer < 1f) return;
+            if (ignoreInput) return;
             SoundManager.active.Play(clickSoundString);
             ignoreInput = true;
             StartCoroutine(LoadScene("MainMenu"));

@@ -134,12 +134,15 @@ public class TerrainGeneration : MonoBehaviour
                     CreateOrUpdateChunk(new Vector2Int(chunk.x + x, chunk.y + y), regenerateHeightMesh, createMesh, threadHeightMapGen);
                 }
             }
-            for (int x = -chunkRadiusNavMeshGen; x <= chunkRadiusNavMeshGen; x++)
+            if (EnemySpawner.CanEnemiesSpawn())//Dont generate nav at station
             {
-                for (int y = -chunkRadiusNavMeshGen; y <= chunkRadiusNavMeshGen; y++)
+                for (int x = -chunkRadiusNavMeshGen; x <= chunkRadiusNavMeshGen; x++)
                 {
-                    Chunk navChunk = CreateOrGetChunk(new Vector2Int(chunk.x + x, chunk.y + y));
-                    navChunk.GenerateNavMesh();
+                    for (int y = -chunkRadiusNavMeshGen; y <= chunkRadiusNavMeshGen; y++)
+                    {
+                        Chunk navChunk = CreateOrGetChunk(new Vector2Int(chunk.x + x, chunk.y + y));
+                        navChunk.GenerateNavMesh();
+                    }
                 }
             }
             foreach (KeyValuePair<Vector2Int,Chunk> keyValuePair in chunkDictionary)

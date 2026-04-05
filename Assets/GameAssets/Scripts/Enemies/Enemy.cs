@@ -9,10 +9,15 @@ public class Enemy : MonoBehaviour
     public EnemySO enemyInfo;
     public Transform centerTransform;
     public Health health;
-
+    [Header("FootSteps")]
+    [SerializeField]
+    private float footStepDistance = 1f;
+    [SerializeField]
+    private string footStepString;
     //Runtime References
     private Rigidbody rb;
-    
+    private float distanceWalked;
+
     //Enemy Movement
     public enum NavigationType
     {
@@ -97,7 +102,15 @@ public class Enemy : MonoBehaviour
                 //Stop navigating by path
                 currentNavigationType = NavigationType.StraightLine;
             }
-        }    
+        }
+
+        //Footsteps
+        distanceWalked += rb.linearVelocity.magnitude * Time.deltaTime;
+        if (distanceWalked > footStepDistance)
+        {
+            distanceWalked -= footStepDistance;
+            SoundManager.active.PlayAtPos(transform.position, footStepString);
+        }
     }
     public virtual void UpdateBehaviour() // Called in intervals
     {

@@ -190,3 +190,13 @@ MonoBehaviour:
     volume: 1
     pitch: {x: 0.9, y: 1.1}
     groupType: 0
+  - name: Enemy - Footstep
+    AudioClips:
+    - {fileID: 8300000, guid: 72a0c4a4d54b4ed418cb21a2e3d66905, type: 3}
+    - {fileID: 8300000, guid: b2644c332e191c24fa3429a55fb0ebc4, type: 3}
+    - {fileID: 8300000, guid: 0835ef1ef1dc6174bb9a1d2788a42deb, type: 3}
+    - {fileID: 8300000, guid: a1d84e7780a4c634c9a5af9e15e324c1, type: 3}
+    - {fileID: 8300000, guid: 4303fe404e00357418da40883ea8853b, type: 3}
+    volume: 0.7
+    pitch: {x: 0.9, y: 1.1}
+    groupType: 0

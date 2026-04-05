@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public static class Util
 {
@@ -73,7 +72,9 @@ public static class Util
 
         public ProbabilityListElement(T element, float probability, int maxCount)
         {
-            
+            this.element = element;
+            this.probability = probability;
+            this.maxCount = maxCount;
         }
 
         [HideInInspector]

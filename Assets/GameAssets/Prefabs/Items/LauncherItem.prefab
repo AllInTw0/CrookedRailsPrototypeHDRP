@@ -249,10 +249,10 @@ MonoBehaviour:
   clipSize: 1
   ammoItem: {fileID: 11400000, guid: eace34aab063c944ab7933acb4427aa0, type: 2}
   bulletCount: 1
-  bulletDamage: 1
+  bulletDamage: 25
   spread: 0.02
-  reloadCoolDown: 0.5
-  shootCoolDown: 0.5
+  reloadCoolDown: 1
+  shootCoolDown: 1
   reloadSound: Shotgun Reload
   shootSound: Launcher Shot
   failedSound: Shotgun Failed

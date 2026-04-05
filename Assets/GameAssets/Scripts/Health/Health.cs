@@ -22,10 +22,10 @@ public class Health : MonoBehaviour
 
     private Vector3 forceSum;
 
-    public UnityEvent onTakeDamage;
+    public UnityEvent<float> onTakeDamage;
     private void Awake()
     {
-        onTakeDamage = new UnityEvent();
+        onTakeDamage = new UnityEvent<float>();
     }
     private void Start()
     {
@@ -59,19 +59,19 @@ public class Health : MonoBehaviour
             HealthReachedZero(forceSum);
             damage += health;
             health = 0;
-            onTakeDamage.Invoke();
+            onTakeDamage.Invoke(damage);
             return damage;
         }
         else if (health > maxHealth)
         {
             damage = damage + health - maxHealth;
             health = maxHealth;
-            onTakeDamage.Invoke();
+            onTakeDamage.Invoke(damage);
             return damage;
         }
         else
         {
-            onTakeDamage.Invoke();
+            onTakeDamage.Invoke(damage);
             return damage;
         }
     }

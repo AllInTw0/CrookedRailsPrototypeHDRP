@@ -131,7 +131,7 @@ public class Sentry : Item
             }
         });
 
-        sentryHealth.onTakeDamage.AddListener(() =>
+        sentryHealth.onTakeDamage.AddListener((float dammage) =>
         {
             if (sentryHealth.health == 0)
             {
@@ -249,6 +249,7 @@ public class Sentry : Item
                     }
                     else
                     {
+                        //Produce SFX
                         equipedGun.Shoot(false, equipedGunVisual.bulletSpawn, ShooterType.Sentry);
                     }
                 }

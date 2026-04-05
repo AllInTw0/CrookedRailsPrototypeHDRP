@@ -7,6 +7,8 @@ public class PlayerMovement : MonoBehaviour
     public static PlayerMovement active;
     //Variables
     [SerializeField]
+    private bool canNoclip;
+    [SerializeField]
     public Transform orientation;
     [Header("Walking")]
     [SerializeField]
@@ -117,7 +119,7 @@ public class PlayerMovement : MonoBehaviour
     }
     private void Update()
     {
-        if (InputManager.debugCamAction.triggered)
+        if (InputManager.debugCamAction.triggered && canNoclip)
         {
             if(noclip)
                 DisableNoclip();
@@ -457,8 +459,8 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        Debug.DrawRay(transform.position + new Vector3(0, 0.05f, 0),Vector3.down*0.175f);
-        if (Physics.Raycast(transform.position + new Vector3(0, 0.05f, 0), Vector3.down, out RaycastHit  hit ,0.175f, groundLayer))
+        Debug.DrawRay(transform.position + new Vector3(0, playerCollider.radius, 0),Vector3.down* playerCollider.radius * 2f);
+        if (Physics.SphereCast(transform.position + new Vector3(0, playerCollider.radius, 0), playerCollider.radius - 0.01f, Vector3.down, out RaycastHit  hit , playerCollider.radius * 1.5f, groundLayer))
         {
             groundNormal = hit.normal;
             groundAngle = Vector3.Angle(Vector3.up, groundNormal);

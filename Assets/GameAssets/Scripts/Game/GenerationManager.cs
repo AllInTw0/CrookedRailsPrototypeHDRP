@@ -111,7 +111,6 @@ public class GenerationManager : MonoBehaviour
 
         if (GameStateManager.currentHaulingJob == null)
         {
-            GameStateManager.gameStarted = true;
             FindPathsRequest(9, 3, 0.4f, OnFindPaths);
         }
         else
@@ -200,6 +199,8 @@ public class GenerationManager : MonoBehaviour
     }
     public void OnFinishedModifyingGround()
     {
+        GameStateManager.gameStarted = true;
+        EnemySpawner.ResetWaveValues(2.5f);
         terrainGeneration.SetUpdateRenderDistance(true);
         LoadingScreen.active.Disable();
     }
@@ -244,17 +245,12 @@ public class GenerationManager : MonoBehaviour
         structure.transform.position = position;
         structure.transform.LookAt(position + (structureInfo.onlyRotateY ? new Vector3(dir.x, 0, dir.z) : dir));
 
-        if (structureInfo.addAutoStop)
-        {
-            section.SetAutoStop(sectionProgress, structureInfo.stopType);
-        }
-
         section.AddObject(structure); //Adds it for deletion when track section is deleted
 
         //Initialize structure generation
         if(structure.TryGetComponent(out StructureMaster structureMaster))
         {
-            structureMaster.Generate();
+            structureMaster.Generate(sectionProgress, section, structureInfo);
         }
     }
     private void GenerateStart()
@@ -291,6 +287,7 @@ public class GenerationManager : MonoBehaviour
     private void GenerateStation()
     {
         GameStateManager.currentLevel++;
+
         List<PathPoint> ListOfPathPoints = new List<PathPoint>();
 
         //MOVED TO HaulinJobMonitorHandler.cs

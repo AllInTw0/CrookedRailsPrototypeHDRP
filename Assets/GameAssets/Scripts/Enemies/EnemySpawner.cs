@@ -144,7 +144,19 @@ public class EnemySpawner : MonoBehaviour
             UpdateEnemySpawning(lastCoolDownLength);
         }
     }
-    private bool CanEnemiesSpawn()
+    public static void ResetWaveValues(float cooldown)
+    {
+        active.nextWave = null;
+        active.currentWave = null;
+        active.waveCooldown = cooldown;
+        active.travelDistanceCooldown = 0f;
+        active.lastWaves = new List<WaveEntry>();
+        foreach (WaveEntry wave in active.waveEntryList)
+        {
+            wave.ResetValues(0f);
+        }
+    }
+    public static bool CanEnemiesSpawn()
     {
         if (Train.playerTrain.controlls.currentState == LocomotiveControls.State.supersonic)
             return false;
@@ -156,7 +168,7 @@ public class EnemySpawner : MonoBehaviour
             sectionsForward++;
             section = section.nextSection;
         }
-        if (sectionsForward < minTrainSectionCountAhead)
+        if (sectionsForward < active.minTrainSectionCountAhead)
             return false;
 
         int sectionsBackwards = 0;
@@ -166,7 +178,7 @@ public class EnemySpawner : MonoBehaviour
             sectionsBackwards++;
             section = section.previousSection;
         }
-        if (sectionsBackwards < minTrainSectionCountBehind)
+        if (sectionsBackwards < active.minTrainSectionCountBehind)
             return false;
 
         return true;

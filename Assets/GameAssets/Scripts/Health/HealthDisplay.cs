@@ -32,7 +32,7 @@ public class HealthDisplay : MonoBehaviour
 
     private void Start()
     {
-        healthTarget.onTakeDamage.AddListener(() =>
+        healthTarget.onTakeDamage.AddListener((float dammage) =>
         {
             UpdateTransform();
         });

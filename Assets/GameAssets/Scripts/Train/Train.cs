@@ -81,7 +81,7 @@ public class Train : MonoBehaviour
         }
 
         //Player dist
-        if (PlayerMovement.active != null)
+        if (PlayerMovement.active != null && GameStateManager.gameStarted)
         {
             playerDistFromTrain = GetClosestDistanceToPos(PlayerMovement.active.transform.position);
             if (autoStopPlayerDist > 0 && playerDistFromTrain >= autoStopPlayerDist && deceleration == 0)

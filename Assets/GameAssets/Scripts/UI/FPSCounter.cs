@@ -14,7 +14,7 @@ public class FPSCounter : MonoBehaviour
     private float fps = 0;
     private void Update()
     {
-        fpsSamples.Add((int)(1f / Time.deltaTime));
+        fpsSamples.Add((int)(1f / Time.unscaledDeltaTime));
         time += Time.deltaTime;
 
         if (time >= updateInterval)

@@ -10110,7 +10110,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  stationSpeedTrackDistance: 280
+  stationSpeedTrackDistance: 200
   stationSO: {fileID: 11400000, guid: 90fd05ee2ae83f74f983b92f006f26e6, type: 2}
   preStationSO: {fileID: 11400000, guid: 737eb10537f91c0478967c61f4ba7b02, type: 2}
   strutureSpawnParamList:

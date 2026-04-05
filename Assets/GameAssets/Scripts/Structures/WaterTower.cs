@@ -105,8 +105,8 @@ public class WaterTower : MonoBehaviour
                 float change = fillSpeed * Time.deltaTime;
                 change = Mathf.Clamp(change, 0f, Mathf.Min(Tender.active.waterLevel.maxHealth - Tender.active.waterLevel.health, waterLevel.health));
 
-                Tender.active.waterLevel.health += change;
-                waterLevel.health -= change;
+                Tender.active.waterLevel.TakeDamage(-change);
+                waterLevel.TakeDamage(change);
             }
         }
         else

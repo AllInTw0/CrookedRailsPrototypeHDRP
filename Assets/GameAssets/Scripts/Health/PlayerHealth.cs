@@ -23,6 +23,13 @@ public class PlayerHealth : Health
     private float drowningDammageDelay;
     [SerializeField]
     private float drowningDammage;
+    [Header("HitEffect")]
+    [SerializeField]
+    private float targetAlpha;
+    [SerializeField]
+    private float fadeInDuration;
+    [SerializeField]
+    private float fadeOutDuration;
     //RunTime
     [NonSerialized]
     public GameObject ragdoll;
@@ -36,6 +43,13 @@ public class PlayerHealth : Health
         active = this;
         isAlive = true;
         AddHealthToGlobalList();
+        onTakeDamage.AddListener((float dammage) => {
+            if(dammage > 0)
+            {
+                Fade.hitFade.FadeTo(targetAlpha, fadeInDuration, 0);
+                Fade.hitFade.FadeTo(0f, fadeOutDuration, fadeInDuration);
+            }
+        });
     }
 
     private void Update()

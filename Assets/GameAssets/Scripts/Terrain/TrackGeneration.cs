@@ -162,8 +162,8 @@ public class TrackGeneration : MonoBehaviour
                     {
                         if (i - bridgeStartIndex >= minPathPointCountToCreateBridge)
                         {
-                            int start = Mathf.Clamp(bridgeStartIndex - 1, 0, path.Count - 1);
-                            int count = Mathf.Clamp(i - bridgeStartIndex + 2, 0, path.Count - 1);
+                            int start = Mathf.Clamp(bridgeStartIndex - 3, 0, path.Count - 1);
+                            int count = Mathf.Clamp(i - bridgeStartIndex + 6, 0, path.Count - 1);
                             TrackManager.CalculatePath(path.GetRange(start, count), out List<PathPoint> refactoredPath, 0.5f, true);
                             for (int j = start + 1; j < start + count - 1; j++)
                             {

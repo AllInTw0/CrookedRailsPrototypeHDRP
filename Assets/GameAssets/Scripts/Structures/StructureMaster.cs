@@ -76,8 +76,16 @@ public class StructureMaster : MonoBehaviour
 
     [HideInInspector]
     public UnityEvent<Section> onSectionAdded;
-    public void Generate()
+
+    private StructureSO structureSO;
+    private float sectionProgress;
+    private TrackSection section;
+    public void Generate(float sectionProgress = 0f, TrackSection section = null, StructureSO structureSO = null)
     {
+        this.sectionProgress = sectionProgress;
+        this.section = section;
+        this.structureSO = structureSO;
+
         generatingStructures++;
         GenerateStructure();
     }
@@ -107,13 +115,27 @@ public class StructureMaster : MonoBehaviour
             yield return StartCoroutine(structure.Generate(this));
             if (structure is BasicStructureGenerator && added == false)
             {
-                finnishedStructures++;
+                FinnishedGenerating();
                 added = true;
             }
         }
-        if(added == false)
-            finnishedStructures++;
+        if (added == false)
+        {
+            FinnishedGenerating();
+        }
         yield break;
+    }
+    private void FinnishedGenerating()
+    {
+        //Finnished generating!
+        finnishedStructures++;
+        if (section != null && structureSO != null)
+        {
+            if (structureSO.addAutoStop)
+            {
+                section.SetAutoStop(sectionProgress, structureSO.stopType);
+            }
+        }
     }
     public void OnDestroy()
     {

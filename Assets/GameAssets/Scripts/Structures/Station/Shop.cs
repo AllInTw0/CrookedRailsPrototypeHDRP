@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.ParticleSystem;
-
+using static Util;
 public class ShopItem
 {
     public ShopItemSO itemInfo;
@@ -87,63 +86,34 @@ public class Shop : MonoBehaviour
     {
         if (shopItemEntryList.Count == 0) return;
 
-        List<ShopItemSO> modifiedShopItemEntryList = new List<ShopItemSO>();
-
-        float probabilitySum = 0f;
+        List<ProbabilityListElement<ShopItemSO>> shopItemProbabilityList = new List<ProbabilityListElement<ShopItemSO>>();
+        
         for (int i = 0; i < shopItemEntryList.Count; i++)
         {
-            //modifiedShopItemEntryList[i].EvaluateCurves(GameStateManager.currentLevel);
+            shopItemEntryList[i].EvaluateCurves(GameStateManager.currentLevel);
 
             if (GameStateManager.IsItemUnlocked(shopItemEntryList[i]) && shopItemEntryList[i].probability > 0)
             {
-                probabilitySum += shopItemEntryList[i].probability;
-                modifiedShopItemEntryList.Add(shopItemEntryList[i]);
+                shopItemProbabilityList.Add(new ProbabilityListElement<ShopItemSO>(shopItemEntryList[i], shopItemEntryList[i].probability, 1));
             }
         }
 
-        //Sort list based on probability
-        bool sorted = false;
-        while (sorted == false)
-        {
-            sorted = true;
-
-            for (int i = 0; i < modifiedShopItemEntryList.Count-1; i++)
-            {
-                if (modifiedShopItemEntryList[i].probability < modifiedShopItemEntryList[i+1].probability)
-                {
-                    var temp = modifiedShopItemEntryList[i];
-                    modifiedShopItemEntryList[i] = modifiedShopItemEntryList[i + 1];
-                    modifiedShopItemEntryList[i + 1] = temp;
-                    sorted = false;
-                }
-            }
-        }
+        ProbabilityList<ShopItemSO> probabilityList = new ProbabilityList<ShopItemSO>(shopItemProbabilityList);
 
         //Debug
         string str = "";
-        for (int i = 0; i < modifiedShopItemEntryList.Count; i++)
+        for (int i = 0; i < shopItemProbabilityList.Count; i++)
         {
-            str += modifiedShopItemEntryList[i] + ":" + modifiedShopItemEntryList[i].probability + ", ";
+            str += shopItemProbabilityList[i].element + ":" + shopItemProbabilityList[i].probability + ", ";
         }
         Debug.Log("Shop probbability [" + GameStateManager.currentLevel +"]: " + str);
 
         //Pick Items
         for (int i = 0; i < shopStandList.Count; i++)
         {
-            float randomProbability = Random.Range(0f, probabilitySum);
-            for (int j = 0; j < modifiedShopItemEntryList.Count; j++)
-            {
-                if (modifiedShopItemEntryList[j].probability <= 0) continue;
-
-                randomProbability -= modifiedShopItemEntryList[j].probability;
-                if (randomProbability <= 0)
-                {
-                    probabilitySum -= modifiedShopItemEntryList[j].probability;
-                    AddItemToShop(modifiedShopItemEntryList[j]);
-                    modifiedShopItemEntryList.RemoveAt(j);
-                    break;
-                }
-            }
+            ShopItemSO shopItem = probabilityList.PickNext();
+            if(shopItem != null)
+                AddItemToShop(shopItem);
         }
     }
 
@@ -151,7 +121,6 @@ public class Shop : MonoBehaviour
     {
         if(shopItemList.Count < shopStandList.Count)
         {
-            shopItem.EvaluateCurves(GameStateManager.currentLevel);
             shopItemList.Add(new ShopItem(shopItem, shopItem.price, shopItem.stock, this));
             shopStandList[shopItemList.Count - 1].Intialize(shopItemList[shopItemList.Count - 1]);
         }
