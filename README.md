@@ -24,7 +24,7 @@ Crooked Rails is a planned multiplayer game where you work for a suspicious comp
 ### Inventory:
 ![inventory](https://github.com/AllInTw0/CrookedRailsPrototypeHDRP/blob/main/inventory.png?raw=true)
 
-The way the inventory works is that there are two types of items: tools and non tools. As well as two types of slots: Hand slot(Big one) and "Backpack" slot(Small ones). All non tools go into your "backpack". If you equip a tool it will go into your hand slot, but if your hands are ocupied the tool gets put into your "backpack", usually ocupuing more than one slot.
+The way the inventory works is that there are two types of items: tools and non tools. As well as two types of slots: Hand slot (Big one) and "Backpack" slot (Small ones). All non tools go into your "backpack". If you equip a tool it will go into your hand slot, but if your hands are ocupied the tool gets put into your "backpack", usually ocupuing more than one slot.
 
 To interact with your inventory you have these controls:
 - Scroll Wheel - cycle through items(The little arrow)
@@ -34,14 +34,13 @@ To interact with your inventory you have these controls:
 The little arrow shows which items you are going to drop/swap
 
 ### Mini Printer
-![minPrinter](https://github.com/AllInTw0/CrookedRailsPrototypeHDRP/blob/main/miniPrinter.png?raw=true)
-
+<img src="https://github.com/AllInTw0/CrookedRailsPrototypeHDRP/blob/main/miniPrinter.png?raw=true" width="512" height="512" />
 This little guy keeps you informed about whats the current state of the train, how much money you spend/earn and more!
 
 ## FLAVORTOWN
 
 With this project i participated in an YSWS called "Falvortown" orgnized by HackClub. I won't explain how the event works here but I'll say my thoughts.
-Before I knew about Hackclub this project was a mess. (I started working on it in 2024) I'd work on it sure, but it would usually take me hours to implement something simple. Due to it also becoming a huge clump of diffrent features, that don't go with each other, I decided about half a month before i learned about Flavortown to start from stractch. I implemented some simple features and then I learned about Flavourtown from my school's hackclub workshop. From now on Flavourtown gave me something to look forward to and it only motivated me to finally make a somewhat playable version of the game.
+Before I knew about Hackclub this project was a mess. (I started working on it in 2024) I'd work on it sure, but it would usually take me hours to implement something simple. Due to it also becoming a huge clump of diffrent features, that don't go with each other, I decided about half a month before I learned about Flavortown to start from stractch. I implemented some simple features and then I learned about Flavortown from my school's hackclub workshop. From now on Flavortown gave me something to look forward to and it only motivated me to finally make a somewhat playable version of the game.
 [Flavortown project](https://flavortown.hackclub.com/projects/10071)
 
 ## THE SOMEWHAT PLAYBLE VERSION + PLAYTHROUGH
@@ -60,5 +59,6 @@ MainMenu Music (River Foxcroft - "Chicken Got No Head")
 
 
 Thank you for reading and (hopefully) playing! :D
+
 
 ![funnyGif](https://cdn.discordapp.com/attachments/876199378115788871/1477728139852517577/SwampEnemyGif.gif?ex=69d34cd3&is=69d1fb53&hm=6c6f4fe12f0fe9eb09cc180c073369f8407262210fe711b6f8d8e1afc6dee813&)
