@@ -273,6 +273,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ad331f5a68fffd4d8d156ddabca93c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Section
+  globalEndPrefabList: []
+  globalConnectedPrefabList: []
   connectionList:
   - connectionTransform: {fileID: 4892492385327706549}
     validConnectionNameList:
@@ -281,30 +283,55 @@ MonoBehaviour:
     - {fileID: 8766261772917853548, guid: d15a244ce9280f243ab4d09586ddb046, type: 3}
     - {fileID: 2243064191022312586, guid: f0a95a96f5e3b5640b89b8a9eeb133f8, type: 3}
     - {fileID: 8430496825417803012, guid: a036704a1f519d64db2eefa617fa323e, type: 3}
+    connectedPrefabList: []
+    useGlobalEnds: 0
+    dontConnect: 0
+    ignoreConnections: 0
+    section: {fileID: 0}
   - connectionTransform: {fileID: 4871221271161406320}
     validConnectionNameList: []
     endPrefabList:
     - {fileID: 8766261772917853548, guid: d15a244ce9280f243ab4d09586ddb046, type: 3}
     - {fileID: 2243064191022312586, guid: f0a95a96f5e3b5640b89b8a9eeb133f8, type: 3}
     - {fileID: 8430496825417803012, guid: a036704a1f519d64db2eefa617fa323e, type: 3}
+    connectedPrefabList: []
+    useGlobalEnds: 0
+    dontConnect: 0
+    ignoreConnections: 0
+    section: {fileID: 0}
   - connectionTransform: {fileID: 3478663294761551918}
     validConnectionNameList: []
     endPrefabList:
     - {fileID: 8766261772917853548, guid: d15a244ce9280f243ab4d09586ddb046, type: 3}
     - {fileID: 2243064191022312586, guid: f0a95a96f5e3b5640b89b8a9eeb133f8, type: 3}
     - {fileID: 8430496825417803012, guid: a036704a1f519d64db2eefa617fa323e, type: 3}
+    connectedPrefabList: []
+    useGlobalEnds: 0
+    dontConnect: 0
+    ignoreConnections: 0
+    section: {fileID: 0}
   - connectionTransform: {fileID: 1634136157828159086}
     validConnectionNameList: []
     endPrefabList:
     - {fileID: 8766261772917853548, guid: d15a244ce9280f243ab4d09586ddb046, type: 3}
     - {fileID: 2243064191022312586, guid: f0a95a96f5e3b5640b89b8a9eeb133f8, type: 3}
     - {fileID: 8430496825417803012, guid: a036704a1f519d64db2eefa617fa323e, type: 3}
+    connectedPrefabList: []
+    useGlobalEnds: 0
+    dontConnect: 0
+    ignoreConnections: 0
+    section: {fileID: 0}
   - connectionTransform: {fileID: 8547715874279503255}
     validConnectionNameList: []
     endPrefabList:
     - {fileID: 8766261772917853548, guid: d15a244ce9280f243ab4d09586ddb046, type: 3}
     - {fileID: 2243064191022312586, guid: f0a95a96f5e3b5640b89b8a9eeb133f8, type: 3}
     - {fileID: 8430496825417803012, guid: a036704a1f519d64db2eefa617fa323e, type: 3}
+    connectedPrefabList: []
+    useGlobalEnds: 0
+    dontConnect: 0
+    ignoreConnections: 0
+    section: {fileID: 0}
   - connectionTransform: {fileID: 3852804902716980113}
     validConnectionNameList:
     - eA
@@ -312,21 +339,37 @@ MonoBehaviour:
     - {fileID: 8766261772917853548, guid: d15a244ce9280f243ab4d09586ddb046, type: 3}
     - {fileID: 2243064191022312586, guid: f0a95a96f5e3b5640b89b8a9eeb133f8, type: 3}
     - {fileID: 8430496825417803012, guid: a036704a1f519d64db2eefa617fa323e, type: 3}
+    connectedPrefabList: []
+    useGlobalEnds: 0
+    dontConnect: 0
+    ignoreConnections: 0
+    section: {fileID: 0}
   - connectionTransform: {fileID: 3678605721143555370}
     validConnectionNameList: []
     endPrefabList:
     - {fileID: 8766261772917853548, guid: d15a244ce9280f243ab4d09586ddb046, type: 3}
     - {fileID: 2243064191022312586, guid: f0a95a96f5e3b5640b89b8a9eeb133f8, type: 3}
     - {fileID: 8430496825417803012, guid: a036704a1f519d64db2eefa617fa323e, type: 3}
+    connectedPrefabList: []
+    useGlobalEnds: 0
+    dontConnect: 0
+    ignoreConnections: 0
+    section: {fileID: 0}
   - connectionTransform: {fileID: 2560897993746976790}
     validConnectionNameList: []
     endPrefabList:
     - {fileID: 8766261772917853548, guid: d15a244ce9280f243ab4d09586ddb046, type: 3}
     - {fileID: 2243064191022312586, guid: f0a95a96f5e3b5640b89b8a9eeb133f8, type: 3}
     - {fileID: 8430496825417803012, guid: a036704a1f519d64db2eefa617fa323e, type: 3}
+    connectedPrefabList: []
+    useGlobalEnds: 0
+    dontConnect: 0
+    ignoreConnections: 0
+    section: {fileID: 0}
   length: 0
   connectingConnectionList: []
   nonConnectingConnectionList: []
+  isOverlapping: 0
 --- !u!65 &4239196883930725856
 BoxCollider:
   m_ObjectHideFlags: 0

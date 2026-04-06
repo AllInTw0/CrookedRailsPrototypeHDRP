@@ -7722,7 +7722,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1023226499
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15062,6 +15062,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1593954180}
     m_Modifications:
+    - target: {fileID: 3706820567837926444, guid: 3f8d429966968834da156b31b8f28db4, type: 3}
+      propertyPath: CollisionModule.collidesWith.m_Bits
+      value: 4751361
+      objectReference: {fileID: 0}
     - target: {fileID: 5892015739518943899, guid: 3f8d429966968834da156b31b8f28db4, type: 3}
       propertyPath: targetTrain
       value: 
@@ -15069,6 +15073,10 @@ PrefabInstance:
     - target: {fileID: 6367483308797791140, guid: 3f8d429966968834da156b31b8f28db4, type: 3}
       propertyPath: m_Name
       value: Locomotive
+      objectReference: {fileID: 0}
+    - target: {fileID: 7188107575206817945, guid: 3f8d429966968834da156b31b8f28db4, type: 3}
+      propertyPath: m_Convex
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7209012441603678467, guid: 3f8d429966968834da156b31b8f28db4, type: 3}
       propertyPath: targetTrain
